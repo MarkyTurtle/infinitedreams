@@ -12,3 +12,5 @@ GFX:
 
 Maybe I'll this will trigger me do develop something new after this project...
 
+## Progress To Date
+**2025-05-06** - Started Disassembling the bootblock of Disk 1
