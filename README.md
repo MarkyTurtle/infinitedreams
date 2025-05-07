@@ -7,9 +7,9 @@ A demo that I wrote in 1992, the last one I did for 'The Lunatics UK', just befo
 I'll have to disassemble the code because the source has long gone into the great dustbin in the sky.
 
 ## Production Credits
-Code: Spongehead (myself :-) )
-Graphics: JOE, TSM
-Music: Hollywood, Subculture(Subi), Phaser, Reeal
+Code: **Spongehead**<br/>
+Graphics: **JOE, T.S.M**<br/>
+Music: **Hollywood, Subculture(Subi), Phaser, Reeal**<br/>
 
 Maybe I'll this will trigger me do develop something new after this project...
 
