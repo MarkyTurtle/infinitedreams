@@ -7,10 +7,12 @@ A demo that I wrote in 1992, the last one I did for 'The Lunatics UK', just befo
 I'll have to disassemble the code because the source has long gone into the great dustbin in the sky.
 
 ## Production Credits
-Code: Spongehead (myself :-) )
-GFX: 
+Code: **Spongehead**<br/>
+Graphics: **JOE, T.S.M**<br/>
+Music: **Hollywood, Subculture(Subi), Phaser, Reeal**<br/>
 
 Maybe I'll this will trigger me do develop something new after this project...
 
 ## Progress To Date
-**2025-05-06** - Started Disassembling the bootblock of Disk 1
+- **2025-05-07** - Completed Disassembly of the bootblock Disk 1
+- **2025-05-06** - Started Disassembling the bootblock of Disk 1
