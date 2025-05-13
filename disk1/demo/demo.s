@@ -79,7 +79,7 @@ L000200E2                       MOVE.W  D0,L00022DDC
 L000200E8                       RTS 
 
 
-
+; bitplanes for 'insert disk' message text
 L000200EA                       MOVE.L  #L00022E82,D0
 L000200F0                       MOVE.W  D0,L00022DD0
 L000200F6                       SWAP.W  D0
