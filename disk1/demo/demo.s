@@ -317,13 +317,13 @@ L000203C8                       ;BSR.W   L0002138E
 L000203CC                       ;BSR.W   L00021352
 L000203D0                       ;BSR.W   L000213D8
 L000203D4                       ;BSR.W   L00021290
-L000203D8                       ;BTST.B  #$0000,L000203AA
-L000203E0                       ;BEQ.B   L000203E6 
-L000203E2                       ;BSR.W   L000205D4
-L000203E6                       ;BTST.B  #$0001,L000203AA
-L000203EE                       ;BEQ.B   L000203F4 
-L000203F0                       ;BSR.W   L00020672
-L000203F4                       ;BSR.W   L00020746
+L000203D8                       BTST.B  #$0000,L000203AA
+L000203E0                       BEQ.B   L000203E6 
+L000203E2                       BSR.W   L000205D4                       ; bit 0 = 1 - menu routine
+L000203E6                       BTST.B  #$0001,L000203AA
+L000203EE                       BEQ.B   L000203F4                       
+L000203F0                       BSR.W   L00020672                       ; bit 1 = 1 - menu routine
+L000203F4                       BSR.W   L00020746
 L000203F8                       BTST.B  #$0001,L000203A8
 L00020400                       BNE.B   L00020406 
 L00020402                       BSR.W   update_menu_selector_position           ; L000207EA
