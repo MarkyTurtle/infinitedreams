@@ -32,63 +32,31 @@ STACK_ADDRESS   EQU     $00080000
                 ; cartidges and eithe disable the freeze of reset/crash
                 ; the computer.
                 ;
-start_demo
-L00020000                       LEA.L   STACK_ADDRESS,A7
-                        IFD TEST_BUILD
-                                JMP     no_replay_01                     ; skip old action replay detection
-                        ENDC
-                        ;------------------------------------
-                        ; action replay detection (not sure if works)
-L00020006                       MOVE.L  #$00000000,$00000004
-L0002000C                       MOVE.L  #$00000001,$00dff084
-L00020016                       MOVE.L  #$00000000,$00000060
-L0002001E                       MOVE.L  #$00000000,$0000007c
-L00020026                       CMP.L   #$c5f00006,$0000007c
-L0002002E                       BEQ.B   do_reset_crash_01
-                        ; no action replay detected
-                        ;------------------------------------
-no_replay_01
-L00020030                       BSR.W   init_system             ; L00020052
-L00020034                       BSR.W   init_display            ; L00020080
-L00020038                       BSR.W   do_fade_in_top_logo     ; L00020244
-L0002003C                       BRA.W   main_loop               ; L000202F6
-
-                        ;------------------------------
-                        ; action replay detected
-do_reset_crash_01
-L00020040                       LEA.L   reset_crash_01(PC),A0
-L00020044                       MOVE.L  A0,$00000080
-L00020048                       TRAP    #$00000000
-L0002004A                       RTS 
-                        ; action replay crash/reset action
-reset_crash_01
-L0002004C                       JMP     $00fc0002               ; dodgy ROM jump (maybe reset) - Yes, I'm disgusted with myself ;-)
-
-
+start_demo      ; original address L00020000
+                                LEA.L   STACK_ADDRESS,A7
+                                BSR.W   init_system             ; L00020052
+                                BSR.W   init_display            ; L00020080
+                                BSR.W   do_fade_in_top_logo     ; L00020244
+                                BRA.W   main_loop               ; L000202F6
 
 
                 ; ------------- Initialise System -----------------
                 ; Set up Level 3 Interrupt and kill DMA
-                ;
-init_system
-L00020052                       LEA.L   CUSTOM,A6
-L00020058                       MOVE.W  #$7fff,D0
-L0002005C                       MOVE.W  D0,DMACON(A6)                           ; disable all DMA
-L00020060                       MOVE.W  D0,INTREQ(A6)                           ; clear raised interrupt flags
-L00020064                       MOVE.W  #$3fff,INTENA(A6)                       ; disable all interrupts
-L0002006A                       LEA.L   level_3_interrupt_handler(PC),A0 
-L0002006E                       MOVE.L  A0,$0000006c                            ; level 3 interrupt autovector
-L00020072                       MOVE.W  #$8012,INTENA(A6)                       ; enable COPER & DSKBLK
-L00020078                       RTS 
-
-                        ; hidden action replay crash/reset action
-reset_crash_02
-L0002007A                       JMP     $00fc0002        ; dodgy ROM jump (maybe reset) - Yes, I'm disgusted with myself ;-)
+init_system     ; original address L00020052
+                                LEA.L   CUSTOM,A6
+                                MOVE.W  #$7fff,D0
+                                MOVE.W  D0,DMACON(A6)                           ; disable all DMA
+                                MOVE.W  D0,INTREQ(A6)                           ; clear raised interrupt flags
+                                MOVE.W  #$3fff,INTENA(A6)                       ; disable all interrupts
+                                LEA.L   level_3_interrupt_handler(PC),A0 
+                                MOVE.L  A0,$0000006c                            ; level 3 interrupt autovector
+                                MOVE.W  #$8012,INTENA(A6)                       ; enable COPER & DSKBLK
+                                RTS 
 
 
 
                 ; ------------ Initialise Display ----------------
-init_display
+init_display    ; original address L00020080
 L00020080                       BSR.W   L00020100
 L00020084                       BSR.W   L000200EA
 L00020088                       BSR.W   init_top_logo_gfx               ; L00020116
@@ -100,20 +68,7 @@ L0002009C                       MOVE.L  A0,COP1LC(A6)
 L000200A0                       MOVE.W  $00000088,D0                    ; mistake? Trap #02 vector? probably meant $dff088 (copjmp1 strobe)
 L000200A6                       MOVE.W  #$87ef,DMACON(A6)               ; BLTPRI,DMAEN,BPLEN,COPEN,BLTEN,SPREN,AUD0-3
 L000200AC                       MOVE.B  CUSTOM+JOY0DAT,mouse_y_value    ; mouse y initial value - $00dff00a,L00020882
-                        ; action replay schenanigans
-L000200B6                       ;MOVE.L  #$00000000,$00000004
-L000200BE                       ;MOVE.L  #$ffffffff,COP2LC(A6)
-                        ; action replay schenanigans
-
 L000200C6                       RTS 
-
-
-
-do_reset_crash_02
-L000200C8                       LEA.L   reset_crash_02(PC),A0
-L000200CC                       MOVE.L  A0,$00000080
-L000200D0                       TRAP    #$00000000
-L000200D2                       RTS 
 
 
 
@@ -147,22 +102,22 @@ L00020114                       RTS
                 ; 4 bitplanes / 16 colours
                 ;
 init_top_logo_gfx       ; original address L00020116
-                                MOVE.L  #top_logo_gfx,d0         ; #L000249A2,D0 
-                                MOVE.W  D0,L00022D7C
+                                MOVE.L  #top_logo_gfx,d0                ; #L000249A2,D0 
+                                MOVE.W  D0,toplogo_bpl1ptl              ; L00022D7C
                                 SWAP.W  D0
-                                MOVE.W  D0,L00022D78
+                                MOVE.W  D0,toplogo_bpl1pth              ; L00022D78
                                 MOVE.L  #top_logo_gfx+(40*57),D0
-                                MOVE.W  D0,L00022D84
+                                MOVE.W  D0,toplogo_bpl2ptl              ; L00022D84
                                 SWAP.W  D0
-                                MOVE.W  D0,L00022D80
+                                MOVE.W  D0,toplogo_bpl2pth              ; L00022D80
                                 MOVE.L  #top_logo_gfx+(80*57),D0
-                                MOVE.W  D0,L00022D8C
+                                MOVE.W  D0,toplogo_bpl3ptl              ; L00022D8C
                                 SWAP.W  D0
-                                MOVE.W  D0,L00022D88
+                                MOVE.W  D0,toplogo_bpl3pth              ; L00022D88
                                 MOVE.L  #top_logo_gfx+(120*57),D0
-                                MOVE.W  D0,L00022D94
+                                MOVE.W  D0,toplogo_bpl4ptl              ; L00022D94
                                 SWAP.W  D0
-                                MOVE.W  D0,L00022D90
+                                MOVE.W  D0,toplogo_bpl4pth              ; L00022D90
                                 RTS 
 
 
@@ -179,24 +134,24 @@ init_top_logo_gfx       ; original address L00020116
                 ; NB: the original code allocated way too much memory per bitplane,
                 ; almost twice as much. This has now been fixed here.
                 ;
-init_scroller_text_display        ; original address L00020168
-L00020168                       MOVE.L  #scroll_text_bpl_0_start+6,D0
-L0002016E                       MOVE.W  D0,L00022E5C
-L00020174                       SWAP.W  D0
-L00020176                       MOVE.W  D0,L00022E58
-L0002017C                       MOVE.L  #scroll_text_bpl_1_start+6,D0
-L00020182                       MOVE.W  D0,L00022E64
-L00020188                       SWAP.W  D0
-L0002018A                       MOVE.W  D0,L00022E60
-L00020190                       MOVE.L  #scroll_text_bpl_2_start+6,D0
-L00020196                       MOVE.W  D0,L00022E6C
-L0002019C                       SWAP.W  D0
-L0002019E                       MOVE.W  D0,L00022E68
-L000201A4                       MOVE.L  #scroll_text_bpl_3_start+6,D0
-L000201AA                       MOVE.W  D0,L00022E74
-L000201B0                       SWAP.W  D0
-L000201B2                       MOVE.W  D0,L00022E70
-L000201B8                       RTS 
+init_scroller_text_display ; original address L00020168
+                                MOVE.L  #scroll_text_bpl_0_start+6,D0
+                                MOVE.W  D0,scrolltext_bpl1ptl                   ; L00022E5C
+                                SWAP.W  D0
+                                MOVE.W  D0,scrolltext_bpl1pth                   ; L00022E58
+                                MOVE.L  #scroll_text_bpl_1_start+6,D0
+                                MOVE.W  D0,scrolltext_bpl2ptl                   ; L00022E64
+                                SWAP.W  D0
+                                MOVE.W  D0,scrolltext_bpl2pth                   ; L00022E60
+                                MOVE.L  #scroll_text_bpl_2_start+6,D0
+                                MOVE.W  D0,scrolltext_bpl3ptl                   ; L00022E6C
+                                SWAP.W  D0
+                                MOVE.W  D0,scrolltext_bpl3pth                   ; L00022E68
+                                MOVE.L  #scroll_text_bpl_3_start+6,D0
+                                MOVE.W  D0,scrolltext_bpl4ptl                   ; L00022E74
+                                SWAP.W  D0
+                                MOVE.W  D0,scrolltext_bpl4pth                   ; L00022E70
+                                RTS 
 
 
 
@@ -207,26 +162,26 @@ L000201B8                       RTS
                 ;
 init_sprites    ; original address L000201BA
                                 MOVE.L  #menu_sprite_left,D0            ; L00035FB8,D0
-                                MOVE.W  D0,L00022CF8
+                                MOVE.W  D0,sprite_0_ptl                 ; L00022CF8
                                 SWAP.W  D0
-                                MOVE.W  D0,L00022CF4
+                                MOVE.W  D0,sprite_0_pth                 ; L00022CF4
                                 MOVE.L  #menu_sprite_right,D0           ; L00035FDC,D0
-                                MOVE.W  D0,L00022D00
+                                MOVE.W  D0,sprite_1_ptl                 ; L00022D00
                                 SWAP.W  D0
-                                MOVE.W  D0,L00022CFC
+                                MOVE.W  D0,sprite_1_pth                 ; L00022CFC
                                 MOVE.L  #$00000000,D0
-                                MOVE.W  D0,L00022D08                    ; clear unused sprite ptrs.
-                                MOVE.W  D0,L00022D04
-                                MOVE.W  D0,L00022D10
-                                MOVE.W  D0,L00022D0C
-                                MOVE.W  D0,L00022D18
-                                MOVE.W  D0,L00022D14
-                                MOVE.W  D0,L00022D20
-                                MOVE.W  D0,L00022D1C
-                                MOVE.W  D0,L00022D28
-                                MOVE.W  D0,L00022D24
-                                MOVE.W  D0,L00022D30
-                                MOVE.W  D0,L00022D2C
+                                MOVE.W  D0,sprite_2_pth                 ; L00022D08 - clear unused sprite ptrs.
+                                MOVE.W  D0,sprite_2_ptl                 ; L00022D04
+                                MOVE.W  D0,sprite_3_pth                 ; L00022D10
+                                MOVE.W  D0,sprite_3_ptl                 ; L00022D0C
+                                MOVE.W  D0,sprite_4_pth                 ; L00022D18
+                                MOVE.W  D0,sprite_4_ptl                 ; L00022D14
+                                MOVE.W  D0,sprite_5_pth                 ; L00022D20
+                                MOVE.W  D0,sprite_5_ptl                 ; L00022D1C
+                                MOVE.W  D0,sprite_6_pth                 ; L00022D28
+                                MOVE.W  D0,sprite_6_ptl                 ; L00022D24
+                                MOVE.W  D0,sprite_7_pth                 ; L00022D30
+                                MOVE.W  D0,sprite_7_ptl                 ; L00022D2C
                         ; action replay shenanigans
                                 ;MOVE.L  #$00000000,$00000000
                                 ;CMP.L   #$c5f00006,$0000007c
@@ -242,13 +197,15 @@ init_sprites    ; original address L000201BA
                 ; loops 20 times.
                 ;
 do_fade_in_top_logo     ; original address L00020244
-L00020244                       CMP.B   #$f0,$0006(A6)
-                                BNE.B   L00020244
+.fade_loop              ; original address L00020244
+.wait_raster            ; original address L00020244
+                                CMP.B   #$f0,$0006(A6)
+                                BNE.B   .wait_raster                    ; L00020244
                                 CMP.W   #$0014,top_logo_fade_count      ; L000202F4
                                 BEQ.B   .exit
                                 BSR.W   fade_in_top_logo                ; L00020268
                                 ADD.W   #$0001,top_logo_fade_count      ; L000202F4
-                                BRA.W   L00020244
+                                BRA.W   .fade_loop                      ; L00020244
 .exit                           RTS 
 
 
@@ -307,7 +264,7 @@ L000202FE                       BEQ.B   L0002033A
 L00020300                       BTST.B  #$0000,L000203AB
 L00020308                       BEQ.B   L00020316 
 L0002030A                       BCLR.B  #$0000,L000203AB
-L00020312                       BSR.W   L00021C0A
+L00020312                       BSR.W   music_off                       ; L00021C0A
 L00020316                       BSR.W   L00021814
 L0002031A                       BCLR.B  #$0000,L000203A9
 L00020322                       BCLR.B  #$0000,L000203A8
@@ -315,11 +272,15 @@ L0002032A                       BCLR.B  #$0001,L000203A8
 L00020332                       BSET.B  #$0001,L000203AB
 L0002033A                       BTST.B  #$0000,L000203A8
 L00020342                       BNE.B   L00020362 
+                ; mouse clicked
+.mouse_test
 L00020344                       BTST.B  #$0006,$00bfe001
 L0002034C                       BNE.B   L00020362 
+.mouse_clicked
 L0002034E                       BSET.B  #$0000,L000203A8
 L00020356                       BSET.B  #$0001,L000203A8
 L0002035E                       BSR.W   L0002088E
+.mouse_not_clicked
 L00020362                       BTST.B  #$0007,L000203AA
 L0002036A                       BNE.B   L00020370 
 L0002036C                       BSR.W   L0002049C
@@ -329,11 +290,12 @@ L0002037A                       BSR.W   L000207B6
 L0002037E                       BTST.B  #$0001,L000203AB
 L00020386                       BEQ.B   L000203A4 
 L00020388                       BSR.W   L00021B96
-L0002038C                       BSR.W   L00021C0A
+L0002038C                       BSR.W   music_off                       ; L00021C0A
 L00020390                       BSR.W   L00021B96
 L00020394                       BCLR.B  #$0001,L000203AB
 L0002039C                       BSET.B  #$0000,L000203AB
 L000203A4                       BRA.W   main_loop                       ; L000202F6 
+
 
 ; state flags
 L000203A8                       dc.b    $00
@@ -369,47 +331,10 @@ L00020406                       ;BTST.B  #$0000,L000203AB
 L0002040E                       ;BEQ.B   L00020414 
 L00020410                       ;BSR.W   L00021C2C
 
-                        ; action replay detection
-L00020414                       ;CMP.L   #$c5f00006,$0000007c
-L0002041C                       ;BEQ.W   do_reset_crash_02               ; L000200C8 
-
-L00020420                       ;BSR.W   L0002042A
 
 L00020424                       MOVEM.L (A7)+,D0-D7/A0-A6
 L00020428                       RTE 
 
-
-
-L0002042A                       ADD.W   #$0001,L0002049A
-L00020432                       CMP.W   #$0014,L0002049A
-L0002043A                       BNE.W   L0002048E 
-L0002043E                       MOVE.W  #$0000,L0002049A
-L00020446                       MOVE.L  #$00000000,D7
-L0002044C                       MOVE.B  $00bfea01,D7
-L00020452                       LSL.L   #$00000004,D7
-L00020454                       LSL.L   #$00000004,D7
-L00020456                       MOVE.B  $00bfe901,D7
-L0002045C                       LSL.L   #$00000004,D7
-L0002045E                       LSL.L   #$00000004,D7
-L00020460                       MOVE.B  $00bfe801,D7
-L00020466                       CMP.L   L00020496,D7
-L0002046C                       BNE.W   L00020488 
-L00020470                       MOVE.L  #$ffffffff,$00af0000
-do_reset_crash_03
-L0002047A                       LEA.L   reset_crash_03,a0               ;$00020490,A0
-L00020480                       MOVE.L  A0,$00000080
-L00020484                       TRAP    #$00000000
-L00020486                       RTS 
-
-L00020488                       MOVE.L D7,L00020496
-L0002048E                       RTS 
-
-
-reset_crash_03
-L00020490                       JMP $00fc0002
-
-L00020496                       dc.l    $00000000
-L0002049A                       dc.w    $0000 
 
 
 
@@ -638,70 +563,70 @@ L000207E8                       RTS
                 ; ----------------- Update Menu Selector Position -------------------
                 ; Get mouse input and position the left/right arrows that are used
                 ; to select the menu items from the on-screen menu selections.
-                ;
-update_menu_selector_position
-L000207EA                       MOVE.L  #$00000000,D0
-L000207EC                       MOVE.L  #$00000000,D1
-L000207EE                       MOVE.B  CUSTOM+JOY0DAT,D0                       ; $00dff00a,D0
-L000207F4                       MOVE.B  mouse_y_value,d1                        ; L00020882,D1
-L000207FA                       MOVE.B  D0,mouse_y_value                        ; L00020882
-L00020800                       SUB.W   D0,D1
-L00020802                       CMP.W   #$ff80,D1                               ; compare -128
-L00020806                       BLT.B   underflow_y_wrap                        ; L00020816 
-L00020808                       CMP.W   #$007f,D1                               ; compare +127
-L0002080C                       BGT.B   overflow_y_wrap                         ; L00020810 
-L0002080E                       BRA.B   update_menu_selector_y                  ; L0002081A 
+update_menu_selector_position   ; original address L000207EA
+                                MOVE.L  #$00000000,D0
+                                MOVE.L  #$00000000,D1
+                                MOVE.B  CUSTOM+JOY0DAT,D0                       ; $00dff00a,D0
+                                MOVE.B  mouse_y_value,d1                        ; L00020882,D1
+                                MOVE.B  D0,mouse_y_value                        ; L00020882
+                                SUB.W   D0,D1
+                                CMP.W   #$ff80,D1                               ; compare -128
+                                BLT.B   underflow_y_wrap                        ; L00020816 
+                                CMP.W   #$007f,D1                               ; compare +127
+                                BGT.B   overflow_y_wrap                         ; L00020810 
+                                BRA.B   update_menu_selector_y                  ; L0002081A 
 
                         ; mouse counter overflow +ve
 overflow_y_wrap         ; original address L00020810
-L00020810                       SUB.W   #$0100,D1                               ; wrap mouse y value
-L00020814                       BRA.B   update_menu_selector_y                  ; L0002081A 
+                                SUB.W   #$0100,D1                               ; wrap mouse y value
+                                BRA.B   update_menu_selector_y                  ; L0002081A 
+
                         ; mouse counter underflow -ve
 underflow_y_wrap        ; original address L00020816
-L00020816                       ADD.W   #$0100,D1                               ; wrap mouse y value
+                                ADD.W   #$0100,D1                               ; wrap mouse y value
 
 update_menu_selector_y  ; original address L0002081A
-L0002081A                       ASR.W   #$00000001,D1
-L0002081C                       NEG.W   D1
-L0002081E                       ADD.W   D1,menu_selector_y                      ; L00020888
-L00020824                       MOVE.W  menu_selector_y,D0                      ; L00020888,D0
-L0002082A                       MOVE.W  menu_selector_min_y,D1                  ; L00020884,D1
-L00020830                       CMP.W   D1,D0
-L00020832                       BLT.W   clamp_min_y                             ; L00020850 
-L00020836                       MOVE.W  menu_selector_max_y,D1                  ; L00020886,D1
-L0002083C                       CMP.W   D1,D0
-L0002083E                       BGT.W   clamp_max_y                             ; L00020844 
-L00020842                       BRA.B   set_menu_selector_sprite_y              ; L0002085A 
+                                ASR.W   #$00000001,D1
+                                NEG.W   D1
+                                ADD.W   D1,menu_selector_y                      ; L00020888
+                                MOVE.W  menu_selector_y,D0                      ; L00020888,D0
+                                MOVE.W  menu_selector_min_y,D1                  ; L00020884,D1
+                                CMP.W   D1,D0
+                                BLT.W   clamp_min_y                             ; L00020850 
+                                MOVE.W  menu_selector_max_y,D1                  ; L00020886,D1
+                                CMP.W   D1,D0
+                                BGT.W   clamp_max_y                             ; L00020844 
+                                BRA.B   set_menu_selector_sprite_y              ; L0002085A 
 
 clamp_max_y             ; original address L00020844
-L00020844                       MOVE.W  menu_selector_max_y,menu_selector_y     ; clamp mouse y limit
-L0002084E                       BRA.B   set_menu_selector_sprite_y              ; L0002085A 
+                                MOVE.W  menu_selector_max_y,menu_selector_y     ; clamp mouse y limit
+                                BRA.B   set_menu_selector_sprite_y              ; L0002085A 
 
 clamp_min_y             ; original address L00020850
-L00020850                       MOVE.W  menu_selector_min_y,menu_selector_y     ; clamp mouse y limit
+                                MOVE.W  menu_selector_min_y,menu_selector_y     ; clamp mouse y limit
 
 set_menu_selector_sprite_y ; original address L0002085A
-L0002085A                       LEA.L   menu_sprite_left,A0                     ; left sprite
-L00020860                       LEA.L   menu_sprite_right,A1                    ; right sprite
-L00020866                       MOVE.W  menu_selector_y,D0                      ; L00020888,D0
-L0002086C                       ADD.W   #$0079,D0                               ; sprite y offset to 1st menu item
-L00020870                       MOVE.B  D0,(A0)
-L00020872                       MOVE.B  D0,(A1)
-L00020874                       ADD.B   #$07,D0
-L00020878                       MOVE.B  D0,$0002(A0)
-L0002087C                       MOVE.B  D0,$0002(A1)
-L00020880                       RTS 
+                                LEA.L   menu_sprite_left,A0                     ; left sprite
+                                LEA.L   menu_sprite_right,A1                    ; right sprite
+                                MOVE.W  menu_selector_y,D0                      ; L00020888,D0
+                                ADD.W   #$0079,D0                               ; sprite y offset to 1st menu item
+                                MOVE.B  D0,(A0)
+                                MOVE.B  D0,(A1)
+                                ADD.B   #$07,D0
+                                MOVE.B  D0,$0002(A0)
+                                MOVE.B  D0,$0002(A1)
+                                RTS 
 
                                 even
 mouse_y_value           ; original address L00020882
-L00020882                       dc.b    $00
+                                dc.b    $00
                                 even
 menu_selector_min_y     ; original address L00020884
-L00020884                       dc.w    $0020 
+                                dc.w    $0020 
 menu_selector_max_y     ; original address L00020886
-L00020886                       dc.w    $0050
+                                dc.w    $0050
 menu_selector_y         ; original address L00020888
-L00020888                       dc.w    $0000
+                                dc.w    $0000
 
 
 L0002088A                       dc.b    $6c
@@ -1353,10 +1278,10 @@ L0002154A                       RTS
 scroller_coarse_scroll
 L0002154C                       CMP.W   #$002e,L0002152A
 L00021554                       BEQ.B   reset_scroller_dbl_buffer               ; L00021590 
-L00021556                       ADD.W   #$0002,L00022E5C
-L0002155E                       ADD.W   #$0002,L00022E64
-L00021566                       ADD.W   #$0002,L00022E6C
-L0002156E                       ADD.W   #$0002,L00022E74
+L00021556                       ADD.W   #$0002,scrolltext_bpl1ptl               ; L00022E5C
+L0002155E                       ADD.W   #$0002,scrolltext_bpl2ptl               ; L00022E64
+L00021566                       ADD.W   #$0002,scrolltext_bpl3ptl               ; L00022E6C
+L0002156E                       ADD.W   #$0002,scrolltext_bpl4ptl               ; L00022E74
 L00021576                       MOVE.W  #$00ee,copper_scroller_softscroll       ; L00022E7C
 L0002157E                       ADD.W   #$0002,L0002152A
 L00021586                       ADD.W   #$0001,L0002152C
@@ -1365,21 +1290,21 @@ L0002158E                       RTS
 reset_scroller_dbl_buffer
 L00021590                       ADD.W   #$0001,L0002152C
 L00021598                       MOVE.L  #scroll_text_bpl_0_start+6,d0           ; #L0002A5BE,D0
-L0002159E                       MOVE.W  D0,L00022E5C
+L0002159E                       MOVE.W  D0,scrolltext_bpl1ptl                   ; L00022E5C
 L000215A4                       SWAP.W  D0
-L000215A6                       MOVE.W  D0,L00022E58
+L000215A6                       MOVE.W  D0,scrolltext_bpl1pth                   ; L00022E58
 L000215AC                       MOVE.L  #scroll_text_bpl_1_start+6,d0           ; #L0002BB3E,D0
-L000215B2                       MOVE.W  D0,L00022E64
+L000215B2                       MOVE.W  D0,scrolltext_bpl2ptl                   ; L00022E64
 L000215B8                       SWAP.W  D0
-L000215BA                       MOVE.W  D0,L00022E60
+L000215BA                       MOVE.W  D0,scrolltext_bpl2pth                   ; L00022E60
 L000215C0                       MOVE.L  #scroll_text_bpl_2_start+6,d0            ; #L0002D0BE,D0
-L000215C6                       MOVE.W  D0,L00022E6C
+L000215C6                       MOVE.W  D0,scrolltext_bpl3ptl                   ; L00022E6C
 L000215CC                       SWAP.W  D0
-L000215CE                       MOVE.W  D0,L00022E68
+L000215CE                       MOVE.W  D0,scrolltext_bpl3pth                   ; L00022E68
 L000215D4                       MOVE.L  #scroll_text_bpl_3_start+6,d0           ;#L0002E63E,D0
-L000215DA                       MOVE.W  D0,L00022E74
+L000215DA                       MOVE.W  D0,scrolltext_bpl4ptl                   ; L00022E74
 L000215E0                       SWAP.W  D0
-L000215E2                       MOVE.W  D0,L00022E70
+L000215E2                       MOVE.W  D0,scrolltext_bpl4pth                   ; L00022E70
 L000215E8                       MOVE.W  #$00ee,copper_scroller_softscroll       ; L00022E7C
 L000215F0                       MOVE.W  #$0000,L0002152A
 L000215F8                       RTS 
@@ -1756,6 +1681,7 @@ L00021B92                       dc.w    $0000
 L00021B94                       dc.w    $0000
 
 
+
 L00021B96                       MOVEA.L #$00040000,A0           ; external address
 L00021B9C                       MOVE.L  A0,L00022CB8
 L00021BA2                       MOVEA.L A0,A1
@@ -1785,17 +1711,19 @@ L00021BDA                       ASL.L   #$00000001,D1
 L00021BDC                       ADDA.L  D1,A2
 L00021BDE                       ADDA.L  #$0000001e,A0
 L00021BE4                       DBF.W   D0,L00021BD0 
-L00021BE8                       OR.B    #$02,$00bfe001
+L00021BE8                       OR.B    #$02,$00bfe001          ; /LED (sound filter off)
 L00021BF0                       MOVE.B  #$06,L00022CBC
 L00021BF8                       CLR.B   L00022CBD
 L00021BFE                       CLR.B   L00022CBE
 L00021C04                       CLR.W   L00022CC6
-L00021C0A                       CLR.W   $00dff0a8
-L00021C10                       CLR.W   $00dff0b8
-L00021C16                       CLR.W   $00dff0c8
-L00021C1C                       CLR.W   $00dff0d8
-L00021C22                       MOVE.W  #$000f,$00dff096
-L00021C2A                       RTS 
+
+music_off       ; original address L00021C0A
+                                CLR.W   CUSTOM+AUD0VOL          ; $00dff0a8
+                                CLR.W   CUSTOM+AUD1VOL          ; $00dff0b8
+                                CLR.W   CUSTOM+AUD2VOL          ; $00dff0c8
+                                CLR.W   CUSTOM+AUD3VOL          ; $00dff0d8
+                                MOVE.W  #$000f,CUSTOM+DMACON    ; $00dff096
+                                RTS 
 
 
 L00021C2C                       MOVEM.L D0-D4/A0-A6,-(A7)
@@ -2449,11 +2377,11 @@ L000224B2                       CMP.B   #$0f,D0
 L000224B6                       BEQ.W   L00022666 
 L000224BA                       RTS 
 
-L000224BC                       MOVE.B  $0003(A6),D0
+L000224BC                       MOVE.B  $0003(A6),D0            ; sound command e00/e01 ?
 L000224C0                       AND.B   #$01,D0
 L000224C4                       ASL.B   #$00000001,D0
-L000224C6                       AND.B   #$fd,$00bfe001
-L000224CE                       OR.B    D0,$00bfe001
+L000224C6                       AND.B   #$fd,$00bfe001          ; /LED - filter off
+L000224CE                       OR.B    D0,$00bfe001            ; set filter on/off
 L000224D4                       RTS 
 
 L000224D6                       MOVE.B  $0003(A6),D0
@@ -2749,37 +2677,37 @@ copper_list     ; original address L00022CCA
                                 dc.w    DMACON,$8020            ; enable sprite DMA
 .sprite_ptrs
                                 dc.w    SPR0PTH         ; $120
-L00022CF4                       dc.w    $0000
+sprite_0_pth                    dc.w    $0000           ; original address L00022CF4
                                 dc.w    SPR0PTL         ; $0122
-L00022CF8                       dc.w    $0000
+sprite_0_ptl                    dc.w    $0000           ; original address L00022CF8
                                 dc.w    SPR1PTH         ; $0124
-L00022CFC                       dc.w    $0000
+sprite_1_pth                    dc.w    $0000           ; original address L00022CFC
                                 dc.w    SPR1PTL         ; $0126
-L00022D00                       dc.w    $0000
+sprite_1_ptl                    dc.w    $0000           ; original address L00022D00
                                 dc.w    SPR2PTH         ; $0128
-L00022D04                       dc.w    $0000
+sprite_2_pth                    dc.w    $0000           ; original address L00022D04
                                 dc.w    SPR2PTL         ; $012A
-L00022D08                       dc.w    $0000
+sprite_2_ptl                    dc.w    $0000           ; original address L00022D08
                                 dc.w    SPR3PTH         ; $012C
-L00022D0C                       dc.w    $0000
+sprite_3_pth                    dc.w    $0000           ; original address L00022D0C
                                 dc.w    SPR3PTL         ; $012E
-L00022D10                       dc.w    $0000
+sprite_3_ptl                    dc.w    $0000           ; original address L00022D10
                                 dc.w    SPR4PTH         ; $0130
-L00022D14                       dc.w    $0000
+sprite_4_pth                    dc.w    $0000           ; original address L00022D14
                                 dc.w    SPR4PTL         ; $0132
-L00022D18                       dc.w    $0000
+sprite_4_ptl                    dc.w    $0000           ; original address L00022D18
                                 dc.w    SPR5PTH         ; $0134
-L00022D1C                       dc.w    $0000
+sprite_5_pth                    dc.w    $0000           ; original address L00022D1C
                                 dc.w    SPR5PTL         ; $0136
-L00022D20                       dc.w    $0000
+sprite_5_ptl                    dc.w    $0000           ; original address L00022D20
                                 dc.w    SPR6PTH         ; $0138
-L00022D24                       dc.w    $0000
+sprite_6_pth                    dc.w    $0000           ; original address L00022D24
                                 dc.w    SPR6PTL         ; $013A
-L00022D28                       dc.w    $0000
+sprite_6_ptl                    dc.w    $0000           ; original address L00022D28
                                 dc.w    SPR7PTH         ; $013C
-L00022D2C                       dc.w    $0000
+sprite_7_pth                    dc.w    $0000           ; original address L00022D2C
                                 dc.w    SPR7PTL         ; $013E
-L00022D30                       dc.w    $0000
+sprite_7_ptl                    dc.w    $0000           ; original address L00022D30
 
 copper_top_logo_colors  ; original address L00022D32
 L00022D32                       dc.w    $0180,$0000
@@ -2799,21 +2727,29 @@ L00022D32                       dc.w    $0180,$0000
                                 dc.w    $019C,$0000
                                 dc.w    $019E,$0000
                                 dc.w    $2C01,$FFFE     ; start display line 
-                                dc.w    $00E0
+                                dc.w    BPL1PTH         ; $00E0
+toplogo_bpl1pth
 L00022D78                       dc.w    $0000
                                 dc.w    $00E2
+toplogo_bpl1ptl
 L00022D7C                       dc.w    $0000
                                 dc.w    $00E4
+toplogo_bpl2pth
 L00022D80                       dc.w    $0000
                                 dc.w    $00E6
+toplogo_bpl2ptl
 L00022D84                       dc.w    $0000
                                 dc.w    $00E8
+toplogo_bpl3pth
 L00022D88                       dc.w    $0000
                                 dc.w    $00EA
+toplogo_bpl3ptl
 L00022D8C                       dc.w    $0000
                                 dc.w    $00EC
+toplogo_bpl4pth
 L00022D90                       dc.w    $0000
                                 dc.w    $00EE
+toplogo_bpl4ptl
 L00022D94                       dc.w    $0000
                                 dc.w    $0100,$4200     ; 4 bitplanes (320x57) 2280 bytes per plane
                                 dc.w    $6501,$FFFE     ; end display line
@@ -2844,7 +2780,7 @@ L00022DE2                       dc.w    $0100,$2200
                                 dc.w    $0100,$0000
                                 dc.w    $0096,$0020
 
-                 ; start of scroll text                             
+                 ; start of scroll text display                            
                                 dc.w    $0001,$FFFE
                                 dc.w    DDFSTRT,$0028           ; start 32 pixels to left of boarder (char = 32 pixels wide) (display = 44 bytes wide * 2)
                                 dc.w    DDFSTOP,$00D0
@@ -2867,47 +2803,51 @@ L00022DE2                       dc.w    $0100,$2200
                                 dc.w    $019C,$0777
                                 dc.w    $019E,$0FFF
                                 dc.w    $0101,$FFFE             ; start of scroll display
-                                dc.w    $00E0
-L00022E58                       dc.w    $0000
-                                dc.w    $00E2 
-L00022E5C                       dc.w    $0000
-                                dc.w    $00E4
-L00022E60                       dc.w    $0000
-                                dc.w    $00E6
-L00022E64                       dc.w    $0000
-                                dc.w    $00E8
-L00022E68                       dc.w    $0000
-                                dc.w    $00EA 
-L00022E6C                       dc.w    $0000
-                                dc.w    $00EC
-L00022E70                       dc.w    $0000
-                                dc.w    $00EE
-L00022E74                       dc.w    $0000
-                                dc.w    $0100,$4200     ; 4 bitplanes scroller
-                                dc.w    $0102
-copper_scroller_softscroll      ; original address L00022E7C
-L00022E7C                       dc.w    $00EE           ; soft scroll value
+                                dc.w    BPL1PTH                 ; $00E0
+scrolltext_bpl1pth              dc.w    $0000                   ; original address L00022E58
+                                dc.w    BPL1PTL                 ;  $00E2 
+scrolltext_bpl1ptl              dc.w    $0000                   ; original address L00022E5C
+                                dc.w    BPL2PTH                 ; $00E4
+scrolltext_bpl2pth              dc.w    $0000                   ; original address L00022E60
+                                dc.w    BPL2PTL                 ; $00E6
+scrolltext_bpl2ptl              dc.w    $0000                   ; original address L00022E64
+                                dc.w    BPL3PTH                 ; $00E8
+scrolltext_bpl3pth              dc.w    $0000                   ; original address L00022E68
+                                dc.w    BPL3PTL                 ; $00EA 
+scrolltext_bpl3ptl              dc.w    $0000                   ; original address L00022E6C
+                                dc.w    BPL4PTH                 ; $00EC
+scrolltext_bpl4pth              dc.w    $0000                   ; original address L00022E70
+                                dc.w    BPL4PTL                 ; $00EE
+scrolltext_bpl4ptl              dc.w    $0000                   ; original address L00022E74
+                                dc.w    BPLCON0,$4200           ; 4 bitplanes scroller
+                                dc.w    BPLCON1
+copper_scroller_softscroll      dc.w    $00EE                   ; soft scroll value ; original address L00022E7C
+
                                 dc.w    $1f01,$fffe
-                                dc.w    $0180,$0008
-                                dc.w    $0108,-(132)       ; $002C
-                                dc.w    $010A,-(132)     ;$002C 
-                                dc.w    $0180,$0000
-                                dc.w    $0182,$0555
-                                dc.w    $0184,$0853
-                                dc.w    $0186,$0864
-                                dc.w    $0188,$0865
-                                dc.w    $018A,$0856
-                                dc.w    $018C,$0777
-                                dc.w    $018E,$0752
-                                dc.w    $0190,$0641
-                                dc.w    $0192,$0530
-                                dc.w    $0194,$0420
-                                dc.w    $0196,$0221
-                                dc.w    $0198,$0210
-                                dc.w    $019A,$0222
-                                dc.w    $019C,$0333
-                                dc.w    $019E,$0888
+                                dc.w    COLOR00,$0008
+                                dc.w    BPL1MOD,-(132)           ; modulo for mirror effect
+                                dc.w    BPL2MOD,-(132)           ; modulo for mirror effect 
+                                dc.w    COLOR00,$0000
+                                dc.w    COLOR01,$0555
+                                dc.w    COLOR02,$0853
+                                dc.w    COLOR03,$0864
+                                dc.w    COLOR04,$0865
+                                dc.w    COLOR05,$0856
+                                dc.w    COLOR06,$0777
+                                dc.w    COLOR07,$0752
+                                dc.w    COLOR08,$0641
+                                dc.w    COLOR09,$0530
+                                dc.w    COLOR10,$0420
+                                dc.w    COLOR11,$0221
+                                dc.w    COLOR12,$0210
+                                dc.w    COLOR13,$0222
+                                dc.w    COLOR14,$0333
+                                dc.w    COLOR15,$0888
                                 dc.w    $FFFF,$FFFE
+
+
+
+                                
 
 L00022E82                       dc.w    $0000,$0000,$0000,$0000,$0000         ;................
 L00022E8C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
