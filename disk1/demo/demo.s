@@ -369,7 +369,7 @@ L000204F4                               MOVE.W  #$0008,D2
 L000204F8                               BRA.W   L00020500 
 L000204FC                               MOVE.W  #$0000,D2
 L00020500                               LEA.L   $00(A0,D1.W),A1
-L00020504                               MOVE.W  $000205d2,D1
+L00020504                               MOVE.W  L000205D2,D1
 L0002050A                               LEA.L   $00(A1,D1.W),A1
 L0002050E                               MOVE.L  $0000(A4),D0
 L00020512                               AND.L   #$ffff0000,D0
