@@ -6542,6 +6542,7 @@ addresses_6_menu        ; original address L0003CBED
 
 pd_message_menu        ; original address L0003CEEA 
                                 ;        123456789012345678901234567890123456789012345
+                                dc.b    '                                             ' 
                                 dc.b    '  THIS PAGE ORIGINALLY CONTAINED A MESSAGE   '  
                                 dc.b    '  TO P.D. COMPANIES AKSING THEM TO RESPECT   '  
                                 dc.b    '  THE AUTHORS COPYRIGHT.....                 '  
@@ -6558,7 +6559,7 @@ pd_message_menu        ; original address L0003CEEA
                                 dc.b    '                                             '  
                                 dc.b    '                                             '  
                                 dc.b    '  ..........RETURN TO MAIN MENU ...........  '  
-                                dc.b    '                                             ' 
+ 
 
                                 ; spare screen template for text typer/menu 45 x 17 characters
                                 ;        123456789012345678901234567890123456789012345
