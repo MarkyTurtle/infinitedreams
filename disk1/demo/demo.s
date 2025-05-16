@@ -57,42 +57,48 @@ init_system     ; original address L00020052
 
                 ; ------------ Initialise Display ----------------
 init_display    ; original address L00020080
-L00020080                       BSR.W   L00020100
-L00020084                       BSR.W   L000200EA
-L00020088                       BSR.W   init_top_logo_gfx               ; L00020116
-L0002008C                       BSR.W   init_scroller_text_display        ; L00020168
-L00020090                       BSR.W   init_sprites                    ; L000201BA
-L00020094                       BSR.W   L000200D4
-L00020098                       LEA.L   copper_list(pc),a0              ; L00022CCA(PC),A0
-L0002009C                       MOVE.L  A0,COP1LC(A6)
-L000200A0                       MOVE.W  $00000088,D0                    ; mistake? Trap #02 vector? probably meant $dff088 (copjmp1 strobe)
-L000200A6                       MOVE.W  #$87ef,DMACON(A6)               ; BLTPRI,DMAEN,BPLEN,COPEN,BLTEN,SPREN,AUD0-3
-L000200AC                       MOVE.B  CUSTOM+JOY0DAT,mouse_y_value    ; mouse y initial value - $00dff00a,L00020882
-L000200C6                       RTS 
+                                BSR.W   init_vectorlogo_bitplanes       ; L00020100
+                                BSR.W   init_menu_typer_bitplanes       ; L000200EA
+                                BSR.W   init_top_logo_gfx               ; L00020116
+                                BSR.W   init_scroller_text_display      ; L00020168
+                                BSR.W   init_sprites                    ; L000201BA
+                                BSR.W   init_insert_disk_bitplanes      ; L000200D4
+                                LEA.L   copper_list(pc),a0              ; L00022CCA(PC),A0
+                                MOVE.L  A0,COP1LC(A6)
+                                MOVE.W  $00000088,D0                    ; mistake? Trap #02 vector? probably meant $dff088 (copjmp1 strobe)
+                                MOVE.W  #$87ef,DMACON(A6)               ; BLTPRI,DMAEN,BPLEN,COPEN,BLTEN,SPREN,AUD0-3
+                                MOVE.B  CUSTOM+JOY0DAT,mouse_y_value    ; mouse y initial value - $00dff00a,L00020882
+                                RTS 
+
+
+                ; ---------------- initialise insert disk bitplanes ------------------
+                ; set a blank 'insert disk x' message at the bottom of the typer
+init_insert_disk_bitplanes      ; original address L000200D4
+                                MOVE.L  #insert_disk_blank_message,d0   ; #L00036348,D0
+                                MOVE.W  D0,insertdisk_bplptl            ; L00022DE0
+                                SWAP.W  D0
+                                MOVE.W  D0,insertdisk_bplpth            ; L00022DDC
+                                RTS 
 
 
 
-L000200D4                       MOVE.L  #L00036348,D0
-L000200DA                       MOVE.W  D0,L00022DE0
-L000200E0                       SWAP.W  D0
-L000200E2                       MOVE.W  D0,L00022DDC
-L000200E8                       RTS 
+                ; ------------------ initialise menu typer bitplanes ------------------
+                ; set the copper bitplane ptrs for the menu screen typer text routine.
+init_menu_typer_bitplanes       ; original address L000200EA
+                                MOVE.L  #menu_typer_bitplane,d0         ; #L00022E82,D0
+                                MOVE.W  D0,menu_bplptl                  ; L00022DD0
+                                SWAP.W  D0
+                                MOVE.W  D0,menu_bpltpth                 ; L00022DCC
+                                RTS 
 
 
-; bitplanes for 'insert disk' message text
-L000200EA                       MOVE.L  #L00022E82,D0
-L000200F0                       MOVE.W  D0,L00022DD0
-L000200F6                       SWAP.W  D0
-L000200F8                       MOVE.W  D0,L00022DCC
-L000200FE                       RTS 
-
-
-
-L00020100                       MOVE.L  #L000365CE,D0
-L00020106                       MOVE.W  D0,L00022DC8
-L0002010C                       SWAP.W  D0
-L0002010E                       MOVE.W  D0,L00022DC4
-L00020114                       RTS 
+                ; ----------------- initialise vector logo bitplanes -----------------
+init_vectorlogo_bitplanes       ; original address L00020100
+                                MOVE.L  #L000365CE,D0
+                                MOVE.W  D0,vector_bplptl                ; L00022DC8
+                                SWAP.W  D0
+                                MOVE.W  D0,vector_bplpth                ; L00022DC4
+                                RTS 
 
 
 
@@ -337,8 +343,14 @@ L00020428                       RTE
 
 
 
+                ; ------------------------ display menu -------------------------
+                ; Routine to display menu text on the screen. The menu is 
+                ; displayed in a 1 bitplane screen, overlayed on a vector
+                ; spinning logo.
+                ; The text is displaed using the processor (which is odd for me)
+                ; i'd normally use the blitter for gfx operations.
 display_menu    ; original address L0002049C
-L0002049C                       LEA.L   L00022E82,A0
+L0002049C                       LEA.L   menu_typer_bitplane,a0          ; L00022E82,A0
 L000204A2                       LEA.L   L000245F2,A2
 L000204A8                       LEA.L   menu_ptrs,a3                    ; L0003A7AC,A3
 L000204AE                       MOVE.W  L000203AC,D0
@@ -545,7 +557,7 @@ L000207B4                       RTS
 
 
 
-L000207B6                       LEA.L   L00022E82,A0
+L000207B6                       LEA.L   menu_typer_bitplane,a0          ; L00022E82,A0
 L000207BC                       MOVE.W  #$0009,D7
 L000207C0                       MOVE.W  #$0086,D6
 L000207C4                       MOVE.L  #$00000000,D0
@@ -877,161 +889,161 @@ L00020E2C                       BSET.B  #$0000,L000203A9
 L00020E34                       MOVE.W  #$008e,L00021B86
 L00020E3C                       MOVE.W  #$0011,L00021B88
 L00020E44                       MOVE.L  #$00040000,L00021B8A            ; address?
-L00020E4E                       MOVE.L  #$00000001,$00021B92
+L00020E4E                       MOVE.L  #$00000001,disk_number          ; L00021B92             ; disk number
 L00020E58                       RTS 
 
 L00020E5A                       BSET.B  #$0000,L000203A9
 L00020E62                       MOVE.W  #$005c,L00021B86
 L00020E6A                       MOVE.W  #$0015,L00021B88
 L00020E72                       MOVE.L  #$00040000,L00021B8A
-L00020E7C                       MOVE.L  #$00000001,L00021B92
+L00020E7C                       MOVE.L  #$00000001,disk_number          ; L00021B92            ; disk number
 L00020E86                       RTS 
 
 L00020E88                       BSET.B  #$0000,L000203A9
 L00020E90                       MOVE.W  #$003b,L00021B86
 L00020E98                       MOVE.W  #$001f,L00021B88
 L00020EA0                       MOVE.L  #$00040000,L00021B8A
-L00020EAA                       MOVE.L  #$00000001,L00021B92
+L00020EAA                       MOVE.L  #$00000001,disk_number          ; L00021B92            ; disk number
 L00020EB4                       RTS 
 
 L00020EB6                       BSET.B  #$0000,L000203A9
 L00020EBE                       MOVE.W  #$0073,L00021B86
 L00020EC6                       MOVE.W  #$0019,L00021B88
 L00020ECE                       MOVE.L  #$00040000,L00021B8A
-L00020ED8                       MOVE.L  #$00000001,L00021B92
+L00020ED8                       MOVE.L  #$00000001,disk_number          ; L00021B92            ; disk number
 L00020EE2                       RTS 
 
 L00020EE4                       BSET.B  #$0000,L000203A9
 L00020EEC                       MOVE.W  #$001b,L00021B86
 L00020EF4                       MOVE.W  #$001e,L00021B88
 L00020EFC                       MOVE.L  #$00040000,L00021B8A
-L00020F06                       MOVE.L  #$00000001,L00021B92
+L00020F06                       MOVE.L  #$00000001,disk_number          ; L00021B92            ; disk number
 L00020F10                       RTS 
 
 L00020F12                       BSET.B  #$0000,L000203A9
 L00020F1A                       MOVE.W  #$0001,L00021B86
 L00020F22                       MOVE.W  #$0009,L00021B88
 L00020F2A                       MOVE.L  #$00040000,L00021B8A
-L00020F34                       MOVE.L  #$00000002,L00021B92
+L00020F34                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
 L00020F3E                       RTS 
 
 L00020F40                       BSET.B  #$0000,L000203A9
 L00020F48                       MOVE.W  #$007e,L00021B86
 L00020F50                       MOVE.W  #$000e,L00021B88
 L00020F58                       MOVE.L  #$00040000,L00021B8A
-L00020F62                       MOVE.L  #$00000002,L00021B92
+L00020F62                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number 
 L00020F6C                       RTS 
 
 L00020F6E                       BSET.B  #$0000,L000203A9
 L00020F76                       MOVE.W  #$0070,L00021B86
 L00020F7E                       MOVE.W  #$000c,L00021B88
 L00020F86                       MOVE.L  #$00040000,L00021B8A
-L00020F90                       MOVE.L  #$00000002,L00021B92
+L00020F90                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
 L00020F9A                       RTS 
 
 L00020F9C                       BSET.B  #$0000,L000203A9
 L00020FA4                       MOVE.W  #$000c,L00021B86
 L00020FAC                       MOVE.W  #$000d,L00021B88
 L00020FB4                       MOVE.L  #$00040000,L00021B8A
-L00020FBE                       MOVE.L  #$00000002,L00021B92
+L00020FBE                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
 L00020FC8                       RTS 
 
 L00020FCA                       BSET.B  #$0000,L000203A9
 L00020FD2                       MOVE.W  #$0055,L00021B86
 L00020FDA                       MOVE.W  #$0019,L00021B88
 L00020FE2                       MOVE.L  #$00040000,L00021B8A
-L00020FEC                       MOVE.L  #$00000002,L00021B92
+L00020FEC                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
 L00020FF6                       RTS 
 
 L00020FF8                       BSET.B  #$0000,L000203A9
 L00021000                       MOVE.W  #$0040,L00021B86
 L00021008                       MOVE.W  #$0013,L00021B88
 L00021010                       MOVE.L  #$00040000,L00021B8A
-L0002101A                       MOVE.L  #$00000002,L00021B92
+L0002101A                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
 L00021024                       RTS 
 
 L00021026                       BSET.B  #$0000,L000203A9
 L0002102E                       MOVE.W  #$001b,L00021B86
 L00021036                       MOVE.W  #$0010,L00021B88
 L0002103E                       MOVE.L  #$00040000,L00021B8A
-L00021048                       MOVE.L  #$00000002,L00021B92
+L00021048                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
 L00021052                       RTS 
 
 L00021054                       BSET.B  #$0000,L000203A9
 L0002105C                       MOVE.W  #$002d,L00021B86
 L00021064                       MOVE.W  #$0011,L00021B88
 L0002106C                       MOVE.L  #$00040000,L00021B8A
-L00021076                       MOVE.L  #$00000002,L00021B92
+L00021076                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
 L00021080                       RTS 
 
 L00021082                       BSET.B  #$0000,L000203A9
 L0002108A                       MOVE.W  #$008e,L00021B86
 L00021092                       MOVE.W  #$0011,L00021B88
 L0002109A                       MOVE.L  #$00040000,L00021B8A
-L000210A4                       MOVE.L  #$00000002,L00021B92
+L000210A4                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
 L000210AE                       RTS 
 
 L000210B0                       BSET.B  #$0000,L000203A9
 L000210B8                       MOVE.W  #$008d,L00021B86
 L000210C0                       MOVE.W  #$0012,L00021B88
 L000210C8                       MOVE.L  #$00040000,L00021B8A
-L000210D2                       MOVE.L  #$00000003,L00021B92
+L000210D2                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
 L000210DC                       RTS 
 
 L000210DE                       BSET.B  #$0000,L000203A9
 L000210E6                       MOVE.W  #$0002,L00021B86
 L000210EE                       MOVE.W  #$0011,L00021B88
 L000210F6                       MOVE.L  #$00040000,L00021B8A
-L00021100                       MOVE.L  #$00000003,L00021B92
+L00021100                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
 L0002110A                       RTS 
 
 L0002110C                       BSET.B  #$0000,L000203A9
 L00021114                       MOVE.W  #$007d,L00021B86
 L0002111C                       MOVE.W  #$000e,L00021B88
 L00021124                       MOVE.L  #$00040000,L00021B8A
-L0002112E                       MOVE.L  #$00000003,L00021B92
+L0002112E                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
 L00021138                       RTS 
 
 L0002113A                       BSET.B  #$0000,L000203A9
 L00021142                       MOVE.W  #$006f,L00021B86
 L0002114A                       MOVE.W  #$000c,L00021B88
 L00021152                       MOVE.L  #$00040000,L00021B8A
-L0002115C                       MOVE.L  #$00000003,L00021B92
+L0002115C                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
 L00021166                       RTS 
 
 L00021168                       BSET.B  #$0000,L000203A9
 L00021170                       MOVE.W  #$0052,L00021B86
 L00021178                       MOVE.W  #$001b,L00021B88
 L00021180                       MOVE.L  #$00040000,L00021B8A
-L0002118A                       MOVE.L  #$00000003,L00021B92
+L0002118A                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
 L00021194                       RTS 
 
 L00021196                       BSET.B  #$0000,L000203A9
 L0002119E                       MOVE.W  #$0043,L00021B86
 L000211A6                       MOVE.W  #$000d,L00021B88
 L000211AE                       MOVE.L  #$00040000,L00021B8A
-L000211B8                       MOVE.L  #$00000003,L00021B92
+L000211B8                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
 L000211C2                       RTS 
 
 L000211C4                       BSET.B  #$0000,L000203A9
 L000211CC                       MOVE.W  #$0015,L00021B86
 L000211D4                       MOVE.W  #$000d,L00021B88
 L000211DC                       MOVE.L  #$00040000,L00021B8A
-L000211E6                       MOVE.L  #$00000003,L00021B92
+L000211E6                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
 L000211F0                       RTS 
 
 L000211F2                       BSET.B  #$0000,L000203A9
 L000211FA                       MOVE.W  #$0035,L00021B86
 L00021202                       MOVE.W  #$000c,L00021B88
 L0002120A                       MOVE.L  #$00040000,L00021B8A
-L00021214                       MOVE.L  #$00000003,L00021B92
+L00021214                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
 L0002121E                       RTS 
 
 L00021220                       BSET.B  #$0000,L000203A9
 L00021228                       MOVE.W  #$0024,L00021B86
 L00021230                       MOVE.W  #$000f,L00021B88
 L00021238                       MOVE.L  #$00040000,L00021B8A
-L00021242                       MOVE.L  #$00000003,L00021B92
+L00021242                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
 L0002124C                       RTS 
 
 
@@ -1070,21 +1082,21 @@ L000212F0                       MOVE.W  #$1e54,$0058(A6)
 L000212F6                       RTS 
 
 
+swap_vector_logo_buffers
 L000212F8                       CMP.W   #$0000,L000365C8
 L00021300                       BNE.B   L0002132A 
 L00021302                       MOVE.L  #L000365CE,D0
-L00021308                       MOVE.W  D0,L00022DC8
+L00021308                       MOVE.W  D0,vector_bplptl                ; L00022DC8
 L0002130E                       SWAP.W  D0
-L00021310                       MOVE.W  D0,L00022DC4
+L00021310                       MOVE.W  D0,vector_bplpth                ; L00022DC4
 L00021316                       MOVE.W  #$0001,L000365C8
 L0002131E                       MOVE.L  #L00037D3E,L000365CA
 L00021328                       RTS 
 
-
 L0002132A                       MOVE.L  #L00037D3E,D0
-L00021330                       MOVE.W  D0,L00022DC8
+L00021330                       MOVE.W  D0,vector_bplptl                ; L00022DC8
 L00021336                       SWAP.W  D0
-L00021338                       MOVE.W  D0,L00022DC4
+L00021338                       MOVE.W  D0,vector_bplpth                ; L00022DC4
 L0002133E                       MOVE.W  #$0000,L000365C8
 L00021346                       MOVE.L  #L000365CE,L000365CA
 L00021350                       RTS 
@@ -1597,35 +1609,41 @@ L00021A3C                       BSR.W   L0002181E
 L00021A40                       BSR.W   L000218F8
 L00021A44                       MOVE.W  #$0000,D0
 L00021A48                       MOVE.W  #$0000,D1
-L00021A4C                       LEA.L   $00040000,A4            ; external address?
+L00021A4C                       LEA.L   $00040000,A4            ; Load buffer address
 L00021A52                       BSR.W   L0002185C
 L00021A56                       BSR.W   L000219BE
-L00021A5A                       MOVE.L  L00021B92,D0
-L00021A60                       CMP.L   $00040008,D0            ; external address?
-L00021A66                       BEQ.W   L00021AF4 
+L00021A5A                       MOVE.L  disk_number,d0          ; required disk number        
+L00021A60                       CMP.L   $00040008,D0            ; disk number from inserted disk
+L00021A66                       BEQ.W   correct_disk_in_drive 
 L00021A6A                       CMP.L   #$00000001,D0
-L00021A70                       BEQ.W   L00021AAE 
+L00021A70                       BEQ.W   insert_disk_1           ; display 'insert disk 1'
 L00021A74                       CMP.L   #$00000002,D0
-L00021A7A                       BEQ.W   L00021A96 
-L00021A7E                       MOVE.L  #L00036230,D0
-L00021A84                       MOVE.W  D0,L00022DE0
+L00021A7A                       BEQ.W   insert_disk_2           ; display 'insert disk 2'
+
+insert_disk_3           ; original address L00021A7E
+L00021A7E                       MOVE.L  #insert_disk_3_message,d0       ; #L00036230,D0
+L00021A84                       MOVE.W  D0,insertdisk_bplptl            ; L00022DE0
 L00021A8A                       SWAP.W  D0
-L00021A8C                       MOVE.W  D0,L00022DDC
-L00021A92                       BRA.W   L00021AC2 
+L00021A8C                       MOVE.W  D0,insertdisk_bplpth            ; L00022DDC
+L00021A92                       BRA.W   detect_disk_change              ; L00021AC2 
 
-L00021A96                       MOVE.L  #L00036118,D0
-L00021A9C                       MOVE.W  D0,L00022DE0
+insert_disk_2           ; original address L00021A96
+L00021A96                       MOVE.L  #insert_disk_2_message,d0       ; #L00036118,D0
+L00021A9C                       MOVE.W  D0,insertdisk_bplptl            ; L00022DE0
 L00021AA2                       SWAP.W  D0
-L00021AA4                       MOVE.W  D0,L00022DDC
-L00021AAA                       BRA.W   L00021AC2 
+L00021AA4                       MOVE.W  D0,insertdisk_bplpth            ; L00022DDC
+L00021AAA                       BRA.W   detect_disk_change              ; L00021AC2 
 
-L00021AAE                       MOVE.L  #L00036000,D0
-L00021AB4                       MOVE.W  D0,L00022DE0
+insert_disk_1           ; original address L00021AAE
+L00021AAE                       MOVE.L  #insert_disk_1_message,d0       ; #L00036000,D0
+L00021AB4                       MOVE.W  D0,insertdisk_bplptl            ; L00022DE0
 L00021ABA                       SWAP.W  D0
-L00021ABC                       MOVE.W  D0,L00022DDC
+L00021ABC                       MOVE.W  D0,insertdisk_bplpth            ; L00022DDC
+
+detect_disk_change      ; original address L00021AC2
 L00021AC2                       BTST.B  #$0002,$00bfe001
 L00021ACA                       BEQ.B   L00021ACE 
-L00021ACC                       BRA.B   L00021AC2 
+L00021ACC                       BRA.B   detect_disk_change              ; L00021AC2 
 
 L00021ACE                       AND.B   #$fd,$00bfd100
 L00021AD6                       BSR.W   L00021B36
@@ -1635,10 +1653,12 @@ L00021AE6                       BTST.B  #$0002,$00bfe001
 L00021AEE                       BEQ.B   L00021ACE 
 L00021AF0                       BRA.W   L00021A44 
 
-L00021AF4                       MOVE.L  #L00036348,D0
-L00021AFA                       MOVE.W  D0,L00022DE0
+correct_disk_in_drive   ; original address L00021AF4
+L00021AF4                       MOVE.L  #insert_disk_blank_message,d0           ; #L00036348,D0
+L00021AFA                       MOVE.W  D0,insertdisk_bplptl                    ; L00022DE0
 L00021B00                       SWAP.W  D0
-L00021B02                       MOVE.W  D0,L00022DDC
+L00021B02                       MOVE.W  D0,insertdisk_bplpth                    ; L00022DDC
+
 L00021B08                       LEA.L   L00021B86,A0
 L00021B0E                       MOVE.W  (A0)+,D0
 L00021B10                       MOVE.W  (A0)+,D1
@@ -1677,7 +1697,8 @@ L00021B88                       dc.w    $0000
 L00021B8A                       dc.w    $0000
 L00021B8C                       dc.w    $0000,$0000
 L00021B90                       dc.w    $0000
-L00021B92                       dc.w    $0000
+disk_number     ; original address L00021B92
+                                dc.w    $0000
 L00021B94                       dc.w    $0000
 
 
@@ -2760,25 +2781,45 @@ L00022D94                       dc.w    $0000
                                 dc.w    $0182
 L00022DAC                       dc.w    $0000
 L00022DAE                       dc.w    $0184,$0002,$0186,$0002,$01A0,$00AA,$01A2         ;................
-L00022DBC                       dc.w    $00AA,$7101,$FFFE,$00E0
-.bitplane_ptrs
-L00022DC4                       dc.w    $0000,$00E2
-L00022DC8                       dc.w    $0000,$00E4
-L00022DCC                       dc.w    $0000,$00E6
-L00022DD0                       dc.w    $0000,$0100
-L00022DD4                       dc.w    $2200
-L00022DD6                       dc.w    $F901,$FFFE
-L00022DDA                       dc.w    $00E4
-L00022DDC                       dc.w    $0000,$00E6
-L00022DE0                       dc.w    $0000
-L00022DE2                       dc.w    $0100,$2200
+L00022DBC                       dc.w    $00AA
+
+                        ; start of menu & vector logo display
+                        ; 136 rasters high
+                                dc.w    $7101,$FFFE
+                                dc.w    BPL1PTH         ; $00E0
+vector_bplpth                   dc.w    $0000           ; original address L00022DC4
+                                dc.w    BPL1PTL         ; $00E2
+vector_bplptl                   dc.w    $0000           ; original address L00022DC8
+                                dc.w    BPL2PTH         ; $00E4
+menu_bpltpth                    dc.w    $0000           ; original address L00022DCC
+                                dc.w    BPL2PTL         ; $00E6
+menu_bplptl                     dc.w    $0000           ; original address L00022DD0
+                                dc.w    BPLCON0         ; $0100
+                                dc.w    $2200           ; 2 bitplane screen (spinning logo & menu)
+ 
+                        ; end of menu typer display
+                        ; start of 'insert disk x' message
+                        ; 7 rasters high
+                                dc.w    $F901,$FFFE
+                                dc.w    BPL2PTH         ; $00E4
+insertdisk_bplpth               dc.w    $0000           ; original address L00022DDC
+                                dc.w    BPL2PTL         ; $00E6
+insertdisk_bplptl               dc.w    $0000           ; original address L00022DE0
+                                dc.w    BPLCON0         ; $0100
+                                dc.w    $2200           ; 2 bitplane screen (spinning logo continues behind)
                                 dc.w    $FF01,$FFFE
-                                dc.w    $FFDD,$FFFE
-                ; end of menu display
+
+                                dc.w    $FFDD,$FFFE     ; end of NTSC Wait (allow contination in PAL area below)
                                 dc.w    $0180,$0000
                                 dc.w    $0182,$0FFF
-                                dc.w    $0100,$0000
-                                dc.w    $0096,$0020
+                                ; switch off bitplanes
+                                dc.w    BPLCON0         ; $0100
+                                dc.w    $0000           ; 0 bitplanes screen (bitplanes off)
+                                ; switch off sprite DMA
+                                dc.w    DMACON          ; $0096
+                                dc.w    $0020           ; sprite DMA off
+                        ; end of menu & vector logo display
+
 
                  ; start of scroll text display                            
                                 dc.w    $0001,$FFFE
@@ -2848,7 +2889,7 @@ copper_scroller_softscroll      dc.w    $00EE                   ; soft scroll va
 
 
                                 
-
+menu_typer_bitplane     ; original address L00022E82
 L00022E82                       dc.w    $0000,$0000,$0000,$0000,$0000         ;................
 L00022E8C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
 L00022E9C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
@@ -5042,127 +5083,150 @@ L00035F8C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$000
 L00035F9C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
 L00035FAC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000
 
-menu_sprite_left                ; 16x7 pixels
-L00035FB8                       dc.w    $796C,$8001     ; control words (sprpos(y,x),sprctl)
-L00035FBC                       dc.w    $3000,$0000     ; 0011000000000000,0000000000000000
+
+menu_sprite_left        ; original address L00035FB8 ; 16x7 pixels
+                                dc.w    $796C,$8001     ; control words (sprpos(y,x),sprctl)
+                                dc.w    $3000,$0000     ; 0011000000000000,0000000000000000
                                 dc.w    $3800,$0000     ; 0011100000000000,0000000000000000
                                 dc.w    $FC00,$0000     ; 1111110000000000,0000000000000000
                                 dc.w    $FE00,$0000     ; 1111111000000000,0000000000000000
-L00035FCC                       dc.w    $FC00,$0000     ; 1111110000000000,0000000000000000
+                                dc.w    $FC00,$0000     ; 1111110000000000,0000000000000000
                                 dc.w    $3800,$0000     ; 0011100000000000,0000000000000000
                                 dc.w    $3000,$0000     ; 0011000000000000,0000000000000000
                                 dc.w    $0000,$0000     ; end of sprite
 
-menu_sprite_right               ; 16x7 pixels
-L00035FDC                       dc.w    $79A9,$8001     ; control words (sprpos(y,x),sprctl)
+menu_sprite_right       ; original address L00035FDC ; 16x7 pixels
+                                dc.w    $79A9,$8001     ; control words (sprpos(y,x),sprctl)
                                 dc.w    $1800,$0000     ; 0001100000000000,0000000000000000
                                 dc.w    $3800,$0000     ; 0011100000000000,0000000000000000
                                 dc.w    $7E00,$0000     ; 0111111000000000,0000000000000000
-L00035FEC                       dc.w    $FE00,$0000     ; 1111111000000000,0000000000000000
+                                dc.w    $FE00,$0000     ; 1111111000000000,0000000000000000
                                 dc.w    $7E00,$0000     ; 0111111000000000,0000000000000000
                                 dc.w    $3800,$0000     ; 0011100000000000,0000000000000000
                                 dc.w    $1800,$0000     ; 0001100000000000,0000000000000000
-L00035FFC                       dc.w    $0000,$0000     ; end of sprite
+                                dc.w    $0000,$0000     ; end of sprite
 
-L00036000                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003600C                       dc.w    $0000,$01FA,$33EF,$DF3F,$00F9,$F9F6,$601E,$0000         ;....3..?....`...
-L0003601C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003602C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$360C,$198C         ;...........c6...
-L0003603C                       dc.w    $00CC,$6306,$6006,$0000,$0000,$0000,$0000,$0000         ;..c.`...........
-L0003604C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003605C                       dc.w    $0000,$0063,$B60C,$198C,$00CC,$6306,$6006,$0000         ;...c......c.`...
-L0003606C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003607C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$F3CF,$9F0C         ;...........c....
-L0003608C                       dc.w    $00CC,$61E7,$C006,$0000,$0000,$0000,$0000,$0000         ;..a.............
-L0003609C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000360AC                       dc.w    $0000,$0063,$706C,$198C,$00CC,$6036,$6006,$0000         ;...cpl....`6`...
-L000360BC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000360CC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$306C,$198C         ;...........c0l..
-L000360DC                       dc.w    $00CC,$6036,$6006,$0000,$0000,$0000,$0000,$0000         ;..`6`...........
-L000360EC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000360FC                       dc.w    $0000,$01FB,$17CF,$D98C,$00F9,$FBE6,$601F,$8000         ;............`...
-L0003610C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000
 
-L00036118                       dc.w    $0000,$0000         ;................
-L0003611C                       dc.w    $0000,$0000,$0000,$0000,$0000,$01FA,$33EF,$DF3F         ;............3..?
-L0003612C                       dc.w    $00F9,$F9F6,$601F,$0000,$0000,$0000,$0000,$0000         ;....`...........
-L0003613C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003614C                       dc.w    $0000,$0063,$360C,$198C,$00CC,$6306,$6001,$8000         ;...c6.....c.`...
-L0003615C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003616C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$B60C,$198C         ;...........c....
-L0003617C                       dc.w    $00CC,$6306,$6001,$8000,$0000,$0000,$0000,$0000         ;..c.`...........
-L0003618C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003619C                       dc.w    $0000,$0063,$F3CF,$9F0C,$00CC,$61E7,$C00F,$0000         ;...c......a.....
-L000361AC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000361BC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$706C,$198C         ;...........cpl..
-L000361CC                       dc.w    $00CC,$6036,$6018,$0000,$0000,$0000,$0000,$0000         ;..`6`...........
-L000361DC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000361EC                       dc.w    $0000,$0063,$306C,$198C,$00CC,$6036,$6018,$0000         ;...c0l....`6`...
-L000361FC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003620C                       dc.w    $0000,$0000,$0000,$0000,$0000,$01FB,$17CF,$D98C         ;................
-L0003621C                       dc.w    $00F9,$FBE6,$601F,$8000,$0000,$0000,$0000,$0000         ;....`...........
-L0003622C                       dc.w    $0000,$0000
 
-L00036230                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003623C                       dc.w    $0000,$01FA,$33EF,$DF3F,$00F9,$F9F6,$601F,$0000         ;....3..?....`...
-L0003624C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003625C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$360C,$198C         ;...........c6...
-L0003626C                       dc.w    $00CC,$6306,$6001,$8000,$0000,$0000,$0000,$0000         ;..c.`...........
-L0003627C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003628C                       dc.w    $0000,$0063,$B60C,$198C,$00CC,$6306,$6001,$8000         ;...c......c.`...
-L0003629C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000362AC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$F3CF,$9F0C         ;...........c....
-L000362BC                       dc.w    $00CC,$61E7,$C007,$0000,$0000,$0000,$0000,$0000         ;..a.............
-L000362CC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000362DC                       dc.w    $0000,$0063,$706C,$198C,$00CC,$6036,$6001,$8000         ;...cpl....`6`...
-L000362EC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000362FC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$306C,$198C         ;...........c0l..
-L0003630C                       dc.w    $00CC,$6036,$6001,$8000,$0000,$0000,$0000,$0000         ;..`6`...........
-L0003631C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003632C                       dc.w    $0000,$01FB,$17CF,$D98C,$00F9,$FBE6,$601F,$0000         ;............`...
-L0003633C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000
+                ; ---------------------- insert disk 1 message -------------------------
+                ; bitplane display for 'insert disk 1' 
+insert_disk_1_message   ; original address L00036000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000         ;................
+                                dc.w    $0000,$01FA,$33EF,$DF3F,$00F9,$F9F6,$601E,$0000         ;....3..?....`...
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$360C,$198C         ;...........c6...
+                                dc.w    $00CC,$6306,$6006,$0000,$0000,$0000,$0000,$0000         ;..c.`...........
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
+                                dc.w    $0000,$0063,$B60C,$198C,$00CC,$6306,$6006,$0000         ;...c......c.`...
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$F3CF,$9F0C         ;...........c....
+                                dc.w    $00CC,$61E7,$C006,$0000,$0000,$0000,$0000,$0000         ;..a.............
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
+                                dc.w    $0000,$0063,$706C,$198C,$00CC,$6036,$6006,$0000         ;...cpl....`6`...
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$306C,$198C         ;...........c0l..
+                                dc.w    $00CC,$6036,$6006,$0000,$0000,$0000,$0000,$0000         ;..`6`...........
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
+                                dc.w    $0000,$01FB,$17CF,$D98C,$00F9,$FBE6,$601F,$8000         ;............`...
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000
 
-L00036348                       dc.w    $0000,$0000         ;................
-L0003634C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003635C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003636C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003637C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003638C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003639C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000363AC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000363BC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000363CC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000363DC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000363EC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000363FC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003640C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003641C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003642C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003643C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003644C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003645C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003646C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003647C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003648C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003649C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000364AC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000364BC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000364CC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000364DC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000364EC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000364FC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003650C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003651C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003652C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003653C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003654C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003655C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003656C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003657C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003658C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L0003659C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000365AC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L000365BC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000
+
+
+                ; ---------------------- insert disk 2 message -------------------------
+                ; bitplane display for 'insert disk 2' 
+insert_disk_2_message   ; original address L00036118
+                                dc.w    $0000,$0000 
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$01FA,$33EF,$DF3F 
+                                dc.w    $00F9,$F9F6,$601F,$0000,$0000,$0000,$0000,$0000 
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 
+                                dc.w    $0000,$0063,$360C,$198C,$00CC,$6306,$6001,$8000 
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$B60C,$198C 
+                                dc.w    $00CC,$6306,$6001,$8000,$0000,$0000,$0000,$0000 
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 
+                                dc.w    $0000,$0063,$F3CF,$9F0C,$00CC,$61E7,$C00F,$0000 
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$706C,$198C 
+                                dc.w    $00CC,$6036,$6018,$0000,$0000,$0000,$0000,$0000 
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 
+                                dc.w    $0000,$0063,$306C,$198C,$00CC,$6036,$6018,$0000 
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$01FB,$17CF,$D98C 
+                                dc.w    $00F9,$FBE6,$601F,$8000,$0000,$0000,$0000,$0000 
+                                dc.w    $0000,$0000
+
+
+
+                ; ---------------------- insert disk 3 message -------------------------
+                ; bitplane display for 'insert disk 3' 
+insert_disk_3_message   ; original address L00036230
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$01FA,$33EF,$DF3F,$00F9,$F9F6,$601F,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$360C,$198C
+                                dc.w    $00CC,$6306,$6001,$8000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0063,$B60C,$198C,$00CC,$6306,$6001,$8000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$F3CF,$9F0C
+                                dc.w    $00CC,$61E7,$C007,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0063,$706C,$198C,$00CC,$6036,$6001,$8000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$306C,$198C
+                                dc.w    $00CC,$6036,$6001,$8000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$01FB,$17CF,$D98C,$00F9,$FBE6,$601F,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000
+
+
+
+                ; ----------------------- insert disk blank -----------------------
+                ; this is an empty message to clear the display message for
+                ; inserting the correct disk
+insert_disk_blank_message       ; original address L00036348
+                                dc.w    $0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000
+
 
 L000365C8                       dc.w    $0000
 L000365CA                       dc.w    $0003 
