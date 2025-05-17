@@ -301,13 +301,13 @@ L000202FE                       BEQ.B   L0002033A
 L00020300                       BTST.B  #$0000,L000203AB
 L00020308                       BEQ.B   L00020316 
 L0002030A                       BCLR.B  #$0000,L000203AB
-L00020312                       BSR.W   music_off                       ; L00021C0A
+L00020312                       BSR.W   music_off                               ; L00021C0A
 L00020316                       BSR.W   L00021814
 L0002031A                       BCLR.B  #$0000,L000203A9
-L00020322                       BCLR.B  #$0000,L000203A8
-L0002032A                       BCLR.B  #$0001,L000203A8
+L00020322                       BCLR.B  #$0000,menu_selection_status_bits       ; L000203A8
+L0002032A                       BCLR.B  #$0001,menu_selection_status_bits       ; L000203A8
 L00020332                       BSET.B  #$0001,L000203AB
-L0002033A                       BTST.B  #$0000,L000203A8
+L0002033A                       BTST.B  #$0000,menu_selection_status_bits       ; L000203A8
 L00020342                       BNE.B   L00020362 
                         
 .mouse_test             ; test mouse clicked
@@ -315,8 +315,8 @@ L00020344                       BTST.B  #$0006,$00bfe001
 L0002034C                       BNE.B   L00020362 
 
 .mouse_is_clicked       ; do menu item selected processing
-L0002034E                       BSET.B  #$0000,L000203A8
-L00020356                       BSET.B  #$0001,L000203A8
+L0002034E                       BSET.B  #$0000,menu_selection_status_bits               ; L000203A8
+L00020356                       BSET.B  #$0001,menu_selection_status_bits               ; L000203A8
 L0002035E                       BSR.W   do_menu_action                                  ; L0002088E
 
 .mouse_not_clicked      ; test draw new menu (if required)
@@ -343,7 +343,10 @@ L000203A4                       BRA.W   main_loop                       ; L00020
 
 
 ; state flags
+menu_selection_status_bits      ; original address L000203A8
 L000203A8                       dc.b    $00
+
+
 L000203A9                       dc.b    $00
 menu_display_status_bits        ; original address L000203AA
 L000203AA                       dc.b    $00                     ; menu status bits 
@@ -376,12 +379,14 @@ L000203E2                       BSR.W   fade_in_menu_display            ; L00020
                         ; do fade out menu display (if required)
 L000203E6                       BTST.B  #MENU_DISP_FADE_OUT,menu_display_status_bits         ; L000203AA - bit 1 = 1 - fade out menu display
 L000203EE                       BEQ.B   L000203F4                       
-L000203F0                       BSR.W   fade_out_menu_display           ; L00020672 - bit 1 = 1 - menu routine
+L000203F0                       BSR.W   fade_out_menu_display                                   ; L00020672 - bit 1 = 1 - menu routine
 
 L000203F4                       BSR.W   L00020746
-L000203F8                       BTST.B  #$0001,L000203A8
+
+L000203F8                       BTST.B  #$0001,menu_selection_status_bits                       ; L000203A8
 L00020400                       BNE.B   L00020406 
-L00020402                       BSR.W   update_menu_selector_position           ; L000207EA
+
+L00020402                       BSR.W   update_menu_selector_position                           ; L000207EA
 L00020406                       ;BTST.B  #$0000,L000203AB
 L0002040E                       ;BEQ.B   L00020414 
 L00020410                       ;BSR.W   L00021C2C
@@ -514,8 +519,8 @@ L00020634                       ADD.W   #$0111,L00020744
 L0002063C                       ADD.B   #$01,L00020742
 L00020644                       CMP.B   #$10,L00020742
 L0002064C                       BNE.B   L00020666 
-L0002064E                       BCLR.B  #MENU_DISP_FADE_IN,menu_display_status_bits                 ; set fade in completed (clear bit 0) - L000203AA
-L00020656                       BCLR.B  #$0000,L000203A8
+L0002064E                       BCLR.B  #MENU_DISP_FADE_IN,menu_display_status_bits             ; set fade in completed (clear bit 0) - L000203AA
+L00020656                       BCLR.B  #$0000,menu_selection_status_bits                       ; L000203A8
 L0002065E                       MOVE.W  #$0000,L00020742
 L00020666                       RTS 
 
@@ -553,7 +558,7 @@ L000206E8                       BNE.B   L00020736
 
 L000206EA                       BCLR.B  #MENU_DISP_FADE_OUT,menu_display_status_bits            ; set fade out completed (clear bit 1) - L000203AA
 L000206F2                       BSET.B  #MENU_DISP_CLEAR,menu_display_status_bits               ; (set bit 6) - L000203AA
-L000206FA                       BCLR.B  #$0001,L000203A8
+L000206FA                       BCLR.B  #$0001,menu_selection_status_bits                       ; L000203A8
 L00020702                       MOVE.W  #$0000,L00020742
 L0002070A                       LEA.L   menu_sprite_left,A0             ; L00035FB8,A0
 L00020710                       MOVE.B  L0002088A,$0001(A0)
@@ -904,8 +909,8 @@ L00020CD8                       MOVE.B  #$d6,L0002088C
 L00020CE0                       MOVE.B  #$01,L0002088D
 L00020CE8                       RTS 
 
-L00020CEA                       BCLR.B  #$0000,L000203A8
-L00020CF2                       BCLR.B  #$0001,L000203A8
+L00020CEA                       BCLR.B  #$0000,menu_selection_status_bits               ; L000203A8
+L00020CF2                       BCLR.B  #$0001,menu_selection_status_bits               ; L000203A8
 L00020CFA                       RTS 
 
 do_disk_1_menu_actions
@@ -2769,6 +2774,15 @@ L00022CC6                       dc.w    $0000
 L00022CC8                       dc.w    $0000
 
 
+
+                ; ---------------------- copper list ------------------------
+                ; copper list that controls the screen display,
+                ; sectioned into the following horizontal areas
+                ;       1) top logo
+                ;       2) menu typer & vector logo (main screen area)
+                ;       3) insert disk area (overlaps with bottom of vector logo)
+                ;       4) main scroll text
+                ;
 copper_list     ; original address L00022CCA
                                 dc.w    INTREQ,$8010            ; COPER Interrupt (level 3)
                                 dc.w    DDFSTRT,$0038
@@ -2780,7 +2794,6 @@ copper_list     ; original address L00022CCA
                                 dc.w    BPLCON0,$0000
                                 dc.w    BPLCON1,$0000
                                 dc.w    DMACON,$8020            ; enable sprite DMA
-.sprite_ptrs
                                 dc.w    SPR0PTH         ; $120
 sprite_0_pth                    dc.w    $0000           ; original address L00022CF4
                                 dc.w    SPR0PTL         ; $0122
@@ -2814,8 +2827,8 @@ sprite_7_pth                    dc.w    $0000           ; original address L0002
                                 dc.w    SPR7PTL         ; $013E
 sprite_7_ptl                    dc.w    $0000           ; original address L00022D30
 
-copper_top_logo_colors  ; original address L00022D32
-L00022D32                       dc.w    $0180,$0000
+                ; Top Logo Section
+copper_top_logo_colors          dc.w    $0180,$0000     ; original address L00022D32
                                 dc.w    $0182,$0000
                                 dc.w    $0184,$0000
                                 dc.w    $0186,$0000
@@ -2833,39 +2846,39 @@ L00022D32                       dc.w    $0180,$0000
                                 dc.w    $019E,$0000
                                 dc.w    $2C01,$FFFE     ; start display line 
                                 dc.w    BPL1PTH         ; $00E0
-toplogo_bpl1pth
-L00022D78                       dc.w    $0000
-                                dc.w    $00E2
-toplogo_bpl1ptl
-L00022D7C                       dc.w    $0000
-                                dc.w    $00E4
-toplogo_bpl2pth
-L00022D80                       dc.w    $0000
-                                dc.w    $00E6
-toplogo_bpl2ptl
-L00022D84                       dc.w    $0000
-                                dc.w    $00E8
-toplogo_bpl3pth
-L00022D88                       dc.w    $0000
-                                dc.w    $00EA
-toplogo_bpl3ptl
-L00022D8C                       dc.w    $0000
-                                dc.w    $00EC
-toplogo_bpl4pth
-L00022D90                       dc.w    $0000
-                                dc.w    $00EE
-toplogo_bpl4ptl
-L00022D94                       dc.w    $0000
-                                dc.w    $0100,$4200     ; 4 bitplanes (320x57) 2280 bytes per plane
+toplogo_bpl1pth                 dc.w    $0000           ; original address L00022D78
+                                dc.w    BPL1PTL         ; $00E2
+toplogo_bpl1ptl                 dc.w    $0000           ; original address L00022D7C
+                                dc.w    BPL2PTH         ; $00E4
+toplogo_bpl2pth                 dc.w    $0000           ; original address L00022D80
+                                dc.w    BPL2PTL         ; $00E6
+toplogo_bpl2ptl                 dc.w    $0000           ; original address L00022D84
+                                dc.w    BPL3PTH         ; $00E8
+toplogo_bpl3pth                 dc.w    $0000           ; original address L00022D88
+                                dc.w    BPL3PTL         ; $00EA
+toplogo_bpl3ptl                 dc.w    $0000           ; original address L00022D8C
+                                dc.w    BPL4PTH         ; $00EC
+toplogo_bpl4pth                 dc.w    $0000           ; original address L00022D90
+                                dc.w    BPL4PTL         ; $00EE
+toplogo_bpl4ptl                 dc.w    $0000           ; original addressw L00022D94
+                                dc.w    BPLCON0,$4200   ; 4 bitplanes (320x57) 2280 bytes per plane
                                 dc.w    $6501,$FFFE     ; end display line
-                                dc.w    $0100,$0000
+                                dc.w    BPLCON0,$0000   ; 0 bitplanes
 
+                ; Menu Typer and Vector Logo Section
                                 dc.w    $7001,$FFFE
-                                dc.w    $0180,$0002
+                                dc.w    $0180
+                                dc.w    $0002
                                 dc.w    $0182
 L00022DAC                       dc.w    $0000
-L00022DAE                       dc.w    $0184,$0002,$0186,$0002,$01A0,$00AA,$01A2         ;................
-L00022DBC                       dc.w    $00AA
+L00022DAE                       dc.w    $0184
+                                dc.w    $0002
+                                dc.w    $0186
+                                dc.w    $0002
+                                dc.w    $01A0
+                                dc.w    $00AA
+                                dc.w    $01A2
+                                dc.w    $00AA
 
                         ; start of menu & vector logo display
                         ; 136 rasters high
@@ -2880,10 +2893,9 @@ menu_bpltpth                    dc.w    $0000           ; original address L0002
 menu_bplptl                     dc.w    $0000           ; original address L00022DD0
                                 dc.w    BPLCON0         ; $0100
                                 dc.w    $2200           ; 2 bitplane screen (spinning logo & menu)
- 
                         ; end of menu typer display
-                        ; start of 'insert disk x' message
-                        ; 7 rasters high
+
+                ; 'insert disk x' message section - rasters high
                                 dc.w    $F901,$FFFE
                                 dc.w    BPL2PTH         ; $00E4
 insertdisk_bplpth               dc.w    $0000           ; original address L00022DDC
@@ -2905,7 +2917,7 @@ insertdisk_bplptl               dc.w    $0000           ; original address L0002
                         ; end of menu & vector logo display
 
 
-                 ; start of scroll text display                            
+                ; Scroll Text Display Section                            
                                 dc.w    $0001,$FFFE
                                 dc.w    DDFSTRT,$0028           ; start 32 pixels to left of boarder (char = 32 pixels wide) (display = 44 bytes wide * 2)
                                 dc.w    DDFSTOP,$00D0
@@ -2972,14 +2984,15 @@ copper_scroller_softscroll      dc.w    $00EE                   ; soft scroll va
 
 
 
-                                ; typer display: 320 x 136 = 5440 bytes ($1540)
-menu_typer_bitplane     ; original address L00022E82
-                                dcb.b   40*136,$f0
+
+                ; -------------------------- menu display memory buffer --------------------------
+                ; typer display: 320 x 136 = 5440 bytes ($1540)
+menu_typer_bitplane             ; original address L00022E82
+                                dcb.b   40*136,$00
+
+
 
                                 ; unused buffer memory?
-                                dc.w    $ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff,$ffff
-
-
 L000243C2                       dc.w    $0000,$0000,$0000,$0000,$0000 
 L000243CC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
 L000243DC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
@@ -3033,6 +3046,7 @@ menu_font_gfx   ; original address L000245F2
 top_logo_gfx    ; original address L000249A2
                 incdir  "gfx/"
                 include "toplogo.s"
+
 
 
 
