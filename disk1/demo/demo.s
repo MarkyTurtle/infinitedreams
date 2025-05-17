@@ -44,8 +44,10 @@ TEST_BUILD SET 1                                              ; Comment this to 
 
         IFD TEST_BUILD
 STACK_ADDRESS   EQU     start_demo                      ; test stack address (start of program)
+LOAD_BUFFER     EQU     load_buffer                     ; file load buffer
         ELSE
 STACK_ADDRESS   EQU     $00080000                       ; original stack address
+LOAD_BUFFER     EQU     $00040000                       ; file load buffer
         ENDC
 
 
@@ -396,13 +398,41 @@ L000203F8                       BTST.B  #$0001,menu_selection_status_bits       
 L00020400                       BNE.B   L00020406 
 
 L00020402                       BSR.W   update_menu_selector_position                           ; L000207EA
-L00020406                       ;BTST.B  #$0000,L000203AB
-L0002040E                       ;BEQ.B   L00020414 
-L00020410                       ;BSR.W   L00021C2C
 
+L00020406                       BTST.B  #$0000,L000203AB
+L0002040E                       BEQ.B   L00020420 
+L00020410                       BSR.W   L00021C2C
+
+L00020420                       ;BSR.W   L0002042A    
+                                NOP
 L00020424                       MOVEM.L (A7)+,D0-D7/A0-A6
 L00020428                       RTE 
 
+;L0002042a                       add.w   #$0001,L0002049a
+;L00020432                       cmp.w   #$0014,L0002049a
+;L0002043a                       bne.w   L0002048e
+;L0002043e                       move.w  #$0000,L0002049a
+;L00020446                       move.l  #$00000000,d7
+;L0002044c                       move.b  $00bfea01,d7
+;L00020452                       lsl.l   #$04,d7
+;L00020454                       lsl.l   #$04,d7
+;L00020456                       move.b  $00bfe901,d7
+;L0002045c                       lsl.l   #$04,d7
+;L0002045e                       lsl.l   #$04,d7
+;L00020460                       move.b  $00bfe801,d7
+;L00020466                       cmp.l   L00020496,d7
+;L0002046c                       bne.w   L00020488 
+;L00020470                       move.l  #$ffffffff,$00af0000
+;L0002047a                       lea.l   L00020490,a0
+;L00020480                       move.l  a0,$0080
+;L00020484                       trap    #$00
+;L00020486                       rts  
+;L00020488                       move.l  d7,L00020496
+;L0002048e                       rts 
+;L00020490                       jmp $00fc0002
+
+;00020496 0000 031b                or.b #$1b,d0
+;0002049a 000e                     illegal
 
 
                 ; ------------------------ display menu -------------------------
@@ -984,161 +1014,161 @@ L00020E28                       BRA.W   display_menu_menu               ; L00021
 L00020E2C                       BSET.B  #$0000,L000203A9
 L00020E34                       MOVE.W  #$008e,L00021B86
 L00020E3C                       MOVE.W  #$0011,L00021B88
-L00020E44                       MOVE.L  #$00040000,L00021B8A            ; address?
+L00020E44                       MOVE.L  #LOAD_BUFFER,L00021B8A            ; address?
 L00020E4E                       MOVE.L  #$00000001,disk_number          ; L00021B92             ; disk number
 L00020E58                       RTS 
 
 L00020E5A                       BSET.B  #$0000,L000203A9
 L00020E62                       MOVE.W  #$005c,L00021B86
 L00020E6A                       MOVE.W  #$0015,L00021B88
-L00020E72                       MOVE.L  #$00040000,L00021B8A
+L00020E72                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L00020E7C                       MOVE.L  #$00000001,disk_number          ; L00021B92            ; disk number
 L00020E86                       RTS 
 
 L00020E88                       BSET.B  #$0000,L000203A9
 L00020E90                       MOVE.W  #$003b,L00021B86
 L00020E98                       MOVE.W  #$001f,L00021B88
-L00020EA0                       MOVE.L  #$00040000,L00021B8A
+L00020EA0                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L00020EAA                       MOVE.L  #$00000001,disk_number          ; L00021B92            ; disk number
 L00020EB4                       RTS 
 
 L00020EB6                       BSET.B  #$0000,L000203A9
 L00020EBE                       MOVE.W  #$0073,L00021B86
 L00020EC6                       MOVE.W  #$0019,L00021B88
-L00020ECE                       MOVE.L  #$00040000,L00021B8A
+L00020ECE                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L00020ED8                       MOVE.L  #$00000001,disk_number          ; L00021B92            ; disk number
 L00020EE2                       RTS 
 
 L00020EE4                       BSET.B  #$0000,L000203A9
 L00020EEC                       MOVE.W  #$001b,L00021B86
 L00020EF4                       MOVE.W  #$001e,L00021B88
-L00020EFC                       MOVE.L  #$00040000,L00021B8A
+L00020EFC                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L00020F06                       MOVE.L  #$00000001,disk_number          ; L00021B92            ; disk number
 L00020F10                       RTS 
 
 L00020F12                       BSET.B  #$0000,L000203A9
 L00020F1A                       MOVE.W  #$0001,L00021B86
 L00020F22                       MOVE.W  #$0009,L00021B88
-L00020F2A                       MOVE.L  #$00040000,L00021B8A
+L00020F2A                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L00020F34                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
 L00020F3E                       RTS 
 
 L00020F40                       BSET.B  #$0000,L000203A9
 L00020F48                       MOVE.W  #$007e,L00021B86
 L00020F50                       MOVE.W  #$000e,L00021B88
-L00020F58                       MOVE.L  #$00040000,L00021B8A
+L00020F58                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L00020F62                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number 
 L00020F6C                       RTS 
 
 L00020F6E                       BSET.B  #$0000,L000203A9
 L00020F76                       MOVE.W  #$0070,L00021B86
 L00020F7E                       MOVE.W  #$000c,L00021B88
-L00020F86                       MOVE.L  #$00040000,L00021B8A
+L00020F86                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L00020F90                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
 L00020F9A                       RTS 
 
 L00020F9C                       BSET.B  #$0000,L000203A9
 L00020FA4                       MOVE.W  #$000c,L00021B86
 L00020FAC                       MOVE.W  #$000d,L00021B88
-L00020FB4                       MOVE.L  #$00040000,L00021B8A
+L00020FB4                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L00020FBE                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
 L00020FC8                       RTS 
 
 L00020FCA                       BSET.B  #$0000,L000203A9
 L00020FD2                       MOVE.W  #$0055,L00021B86
 L00020FDA                       MOVE.W  #$0019,L00021B88
-L00020FE2                       MOVE.L  #$00040000,L00021B8A
+L00020FE2                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L00020FEC                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
 L00020FF6                       RTS 
 
 L00020FF8                       BSET.B  #$0000,L000203A9
 L00021000                       MOVE.W  #$0040,L00021B86
 L00021008                       MOVE.W  #$0013,L00021B88
-L00021010                       MOVE.L  #$00040000,L00021B8A
+L00021010                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L0002101A                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
 L00021024                       RTS 
 
 L00021026                       BSET.B  #$0000,L000203A9
 L0002102E                       MOVE.W  #$001b,L00021B86
 L00021036                       MOVE.W  #$0010,L00021B88
-L0002103E                       MOVE.L  #$00040000,L00021B8A
+L0002103E                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L00021048                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
 L00021052                       RTS 
 
 L00021054                       BSET.B  #$0000,L000203A9
 L0002105C                       MOVE.W  #$002d,L00021B86
 L00021064                       MOVE.W  #$0011,L00021B88
-L0002106C                       MOVE.L  #$00040000,L00021B8A
+L0002106C                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L00021076                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
 L00021080                       RTS 
 
 L00021082                       BSET.B  #$0000,L000203A9
 L0002108A                       MOVE.W  #$008e,L00021B86
 L00021092                       MOVE.W  #$0011,L00021B88
-L0002109A                       MOVE.L  #$00040000,L00021B8A
+L0002109A                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L000210A4                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
 L000210AE                       RTS 
 
 L000210B0                       BSET.B  #$0000,L000203A9
 L000210B8                       MOVE.W  #$008d,L00021B86
 L000210C0                       MOVE.W  #$0012,L00021B88
-L000210C8                       MOVE.L  #$00040000,L00021B8A
+L000210C8                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L000210D2                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
 L000210DC                       RTS 
 
 L000210DE                       BSET.B  #$0000,L000203A9
 L000210E6                       MOVE.W  #$0002,L00021B86
 L000210EE                       MOVE.W  #$0011,L00021B88
-L000210F6                       MOVE.L  #$00040000,L00021B8A
+L000210F6                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L00021100                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
 L0002110A                       RTS 
 
 L0002110C                       BSET.B  #$0000,L000203A9
 L00021114                       MOVE.W  #$007d,L00021B86
 L0002111C                       MOVE.W  #$000e,L00021B88
-L00021124                       MOVE.L  #$00040000,L00021B8A
+L00021124                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L0002112E                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
 L00021138                       RTS 
 
 L0002113A                       BSET.B  #$0000,L000203A9
 L00021142                       MOVE.W  #$006f,L00021B86
 L0002114A                       MOVE.W  #$000c,L00021B88
-L00021152                       MOVE.L  #$00040000,L00021B8A
+L00021152                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L0002115C                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
 L00021166                       RTS 
 
 L00021168                       BSET.B  #$0000,L000203A9
 L00021170                       MOVE.W  #$0052,L00021B86
 L00021178                       MOVE.W  #$001b,L00021B88
-L00021180                       MOVE.L  #$00040000,L00021B8A
+L00021180                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L0002118A                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
 L00021194                       RTS 
 
 L00021196                       BSET.B  #$0000,L000203A9
 L0002119E                       MOVE.W  #$0043,L00021B86
 L000211A6                       MOVE.W  #$000d,L00021B88
-L000211AE                       MOVE.L  #$00040000,L00021B8A
+L000211AE                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L000211B8                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
 L000211C2                       RTS 
 
 L000211C4                       BSET.B  #$0000,L000203A9
 L000211CC                       MOVE.W  #$0015,L00021B86
 L000211D4                       MOVE.W  #$000d,L00021B88
-L000211DC                       MOVE.L  #$00040000,L00021B8A
+L000211DC                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L000211E6                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
 L000211F0                       RTS 
 
 L000211F2                       BSET.B  #$0000,L000203A9
 L000211FA                       MOVE.W  #$0035,L00021B86
 L00021202                       MOVE.W  #$000c,L00021B88
-L0002120A                       MOVE.L  #$00040000,L00021B8A
+L0002120A                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L00021214                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
 L0002121E                       RTS 
 
 L00021220                       BSET.B  #$0000,L000203A9
 L00021228                       MOVE.W  #$0024,L00021B86
 L00021230                       MOVE.W  #$000f,L00021B88
-L00021238                       MOVE.L  #$00040000,L00021B8A
+L00021238                       MOVE.L  #LOAD_BUFFER,L00021B8A
 L00021242                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
 L0002124C                       RTS 
 
@@ -1723,7 +1753,7 @@ L00021A3C                       BSR.W   L0002181E
 L00021A40                       BSR.W   L000218F8
 L00021A44                       MOVE.W  #$0000,D0
 L00021A48                       MOVE.W  #$0000,D1
-L00021A4C                       LEA.L   $00040000,A4            ; Load buffer address
+L00021A4C                       LEA.L   LOAD_BUFFER,A4            ; Load buffer address
 L00021A52                       BSR.W   L0002185C
 L00021A56                       BSR.W   L000219BE
 L00021A5A                       MOVE.L  disk_number,d0          ; required disk number        
@@ -1817,7 +1847,7 @@ L00021B94                       dc.w    $0000
 
 
 
-L00021B96                       MOVEA.L #$00040000,A0           ; external address
+L00021B96                       MOVEA.L #LOAD_BUFFER,A0           ; external address
 L00021B9C                       MOVE.L  A0,L00022CB8
 L00021BA2                       MOVEA.L A0,A1
 L00021BA4                       LEA.L   $03b8(A1),A1
@@ -5601,6 +5631,10 @@ pd_message_menu        ; original address L0003CEEA
                                 dc.b    '                                             '  
                                 dc.b    '                                             ' 
 
+
+        IFD TEST_BUILD
+load_buffer             dcb.b   1024*200,$00
+        ENDC
 
 
 
