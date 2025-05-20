@@ -11,7 +11,10 @@
             "emulatorType": "fs-uae",
             "emulatorArgs": [
                 "--hard_drive_0=${workspaceFolder}/uae/dh0",
-                "--automatic_input_grab=0"
+                "--automatic_input_grab=1",
+                "--floppy-image-0=${workspaceFolder}/disks/disk1.dms",
+                "--floppy-image-1=${workspaceFolder}/disks/disk2.dms",
+                "--floppy-image-2=${workspaceFolder}/disks/disk3.dms"
             ],
             "preLaunchTask": "amigaassembly: build"
         },
@@ -25,7 +28,10 @@
             "emulatorType": "fs-uae",
             "emulatorArgs": [
                 "--hard_drive_0=${workspaceFolder}/uae/dh0",
-                "--automatic_input_grab=0"
+                "--automatic_input_grab=1",
+                "--floppy-image-0=${workspaceFolder}/disks/disk1.dms",
+                "--floppy-image-1=${workspaceFolder}/disks/disk2.dms",
+                "--floppy-image-2=${workspaceFolder}/disks/disk3.dms"
             ],
             "preLaunchTask": "amigaassembly: build"
         },

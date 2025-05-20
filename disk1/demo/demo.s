@@ -295,22 +295,31 @@ top_logo_fade_count     ; original address L000202F4
 
 
 
+MENU_SELECT_DISABLED    EQU     $0000           ; bit 0 (1 = menu is disabled, 0 = menu is enabled)
+
+
+
                 ; ****************************************************************
                 ; ***********                 MAIN LOOP                 **********
                 ; ****************************************************************
 main_loop       ; original address L000202F6
-L000202F6                       BTST.B  #$0000,L000203A9
+L000202F6                       BTST.B  #$0000,L000203A9                ; check running status
 L000202FE                       BEQ.B   L0002033A
-L00020300                       BTST.B  #$0000,L000203AB
+
+L00020300                       BTST.B  #$0000,L000203AB                ; loading check?
 L00020308                       BEQ.B   L00020316 
+
 L0002030A                       BCLR.B  #$0000,L000203AB
-L00020312                       BSR.W   music_off                               ; L00021C0A
-L00020316                       BSR.W   L00021814
-L0002031A                       BCLR.B  #$0000,L000203A9
-L00020322                       BCLR.B  #$0000,menu_selection_status_bits       ; L000203A8
-L0002032A                       BCLR.B  #$0001,menu_selection_status_bits       ; L000203A8
+L00020312                       BSR.W   music_off                       ; L00021C0A
+L00020316                       BSR.W   load_music                      ; L00021814
+L0002031A                       BCLR.B  #$0000,L000203A9                ; set running status
+
+L00020322                       BCLR.B  #MENU_SELECT_DISABLED,menu_selection_status_bits        ; enable menu selection ; L000203A8
+L0002032A                       BCLR.B  #$0001,menu_selection_status_bits                       ; L000203A8
 L00020332                       BSET.B  #$0001,L000203AB
-L0002033A                       BTST.B  #$0000,menu_selection_status_bits       ; L000203A8
+
+check_menu_enabled
+L0002033A                       BTST.B  #MENU_SELECT_DISABLED,menu_selection_status_bits       ; L000203A8
 L00020342                       BNE.B   L00020362 
                         
 .mouse_test             ; test mouse clicked
@@ -318,7 +327,7 @@ L00020344                       BTST.B  #$0006,$00bfe001
 L0002034C                       BNE.B   L00020362 
 
 .mouse_is_clicked       ; do menu item selected processing
-L0002034E                       BSET.B  #$0000,menu_selection_status_bits               ; L000203A8
+L0002034E                       BSET.B  #MENU_SELECT_DISABLED,menu_selection_status_bits        ; disable menu selection ; L000203A8
 L00020356                       BSET.B  #$0001,menu_selection_status_bits               ; L000203A8
 L0002035E                       BSR.W   do_menu_action                                  ; L0002088E
 
@@ -1609,17 +1618,18 @@ L00021812                       RTS
 
 
 
-
-L00021814                       BSR.W   L000218A4
-L00021818                       BRA.W   L00021A3C 
+load_music      ; original address L00021814
+L00021814                       BSR.W   init_loader             ; L000218A4
+L00021818                       BRA.W   load_file               ; L00021A3C 
 L0002181C                       RTS 
 
 
-L0002181E                       OR.B    #$08,$00bfd100
-L00021826                       AND.B   #$7f,$00bfd100
-L0002182E                       AND.B   #$f7,$00bfd100
-L00021836                       BTST.B  #$0005,$00bfe001
-L0002183E                       BNE.B   L00021836 
+enable_drive_0  ; original address L0002181E
+L0002181E                       OR.B    #$08,$00bfd100          ; select drive 0
+L00021826                       AND.B   #$7f,$00bfd100          ; enable disk motor
+L0002182E                       AND.B   #$f7,$00bfd100          ; latch disk motor
+L00021836                       BTST.B  #$0005,$00bfe001        ; test DSKRDY disk ready signal
+L0002183E                       BNE.B   L00021836               ; wait for disk ready
 L00021840                       RTS 
 
 L00021842                       OR.B    #$88,$00bfd100
@@ -1627,7 +1637,8 @@ L0002184A                       AND.B   #$f7,$00bfd100
 L00021852                       OR.B    #$08,$00bfd100
 L0002185A                       RTS 
 
-L0002185C                       MOVE.L  L00021B80,$0020(A6)
+read_raw_track  ; original address L0002185C
+L0002185C                       MOVE.L  mfm_track_buffer_ptr,$0020(a6)      ; L00021B80,$0020(A6)
 L00021864                       MOVE.W  #$7f00,$009e(A6)
 L0002186A                       MOVE.W  #$9500,$009e(A6)
 L00021870                       MOVE.W  #$8210,$0096(A6)
@@ -1641,38 +1652,41 @@ L00021896                       MOVE.W  #$0002,$009c(A6)
 L0002189C                       MOVE.W  #$0010,$0096(A6)
 L000218A2                       RTS 
 
+init_loader
 L000218A4                       LEA.L   $00dff000,A6
-L000218AA                       MOVE.W  #$7fff,$009c(A6)
-L000218B0                       MOVE.W  #$3fff,$009a(A6)
-L000218B6                       MOVE.W  #$8010,$009a(A6)
-L000218BC                       MOVE.W  #$4489,$007e(A6)
+L000218AA                       MOVE.W  #$7fff,INTREQ(A6)       ; clear raised interrupt bits
+L000218B0                       MOVE.W  #$3fff,INTENA(A6)       ; disable interrupts
+L000218B6                       MOVE.W  #$8010,INTENA(A6)       ; enable copper interrupt
+L000218BC                       MOVE.W  #$4489,$007e(A6)        ; set disk sync
 L000218C2                       RTS 
 
-L000218C4                       MOVE.B  #$00,$00bfde00
-L000218CC                       MOVE.B  #$7f,$00bfdd00
-L000218D4                       MOVE.B  #$00,$00bfd400
-L000218DC                       MOVE.B  #$20,$00bfd500
-L000218E4                       MOVE.B  #$09,$00bfde00
-L000218EC                       BTST.B  #$0000,$00bfdd00
-L000218F4                       BEQ.B   L000218EC 
+timer_delay_2ms ; original address L000218C4
+L000218C4                       MOVE.B  #$00,$00bfde00          ; stop timer A CIAB
+L000218CC                       MOVE.B  #$7f,$00bfdd00          ; clear CIAB ICR
+L000218D4                       MOVE.B  #$00,$00bfd400          ; set timerA Low byte
+L000218DC                       MOVE.B  #$20,$00bfd500          ; set timerA high byte
+L000218E4                       MOVE.B  #$09,$00bfde00          ; start timerA one-shot
+L000218EC                       BTST.B  #$0000,$00bfdd00        ; test timeA underflow
+L000218F4                       BEQ.B   L000218EC               ; wait timerA underflow
 L000218F6                       RTS 
 
-
-L000218F8                       BTST.B  #$0004,$00bfe001
-L00021900                       BEQ.W   L00021920 
-L00021904                       OR.B    #$03,$00bfd100
-L0002190C                       AND.B   #$fe,$00bfd100
-L00021914                       OR.B    #$01,$00bfd100
-L0002191C                       BSR.B   L000218C4
-L0002191E                       BRA.B   L000218F8 
-L00021920                       OR.B    #$04,$00bfd100
-L00021928                       MOVE.W  #$0000,L00021B84
+heads_to_track_0 ; original address L000218F8
+L000218F8                       BTST.B  #$0004,$00bfe001        ; test track 0 bit
+L00021900                       BEQ.W   at_track_0              ; L00021920 
+L00021904                       OR.B    #$03,$00bfd100          ; select drive 0
+L0002190C                       AND.B   #$fe,$00bfd100          ; toggle step heads
+L00021914                       OR.B    #$01,$00bfd100          ; toggle step heads
+L0002191C                       BSR.B   timer_delay_2ms         ; L000218C4               ; 
+L0002191E                       BRA.B   heads_to_track_0        ; L000218F8 
+at_track_0
+L00021920                       OR.B    #$04,$00bfd100          ; set disk side (lower head)
+L00021928                       MOVE.W  #$0000,current_track    ; L00021B84
 L00021930                       RTS 
 
 
 L00021932                       TST.W   D0
 L00021934                       BEQ.W   L0002199E 
-L00021938                       MOVE.W  L00021B84,D3
+L00021938                       MOVE.W  current_track,D3        ; L00021B84,D3
 L0002193E                       CMP.W   D3,D0
 L00021940                       BEQ.W   L00021996 
 L00021944                       MOVE.W  D0,D2
@@ -1688,27 +1702,29 @@ L00021966                       BEQ.B   L00021996
 L00021968                       BGT.B   L00021980 
 L0002196A                       MOVE.B  #$02,$00bfd100
 L00021972                       BSR.W   L000219A4
-L00021976                       BSR.W   L000218C4
+L00021976                       BSR.W   timer_delay_2ms                 ; L000218C4
 L0002197A                       SUB.W   #$00000001,D3
 L0002197C                       BRA.W   L00021964 
 L00021980                       AND.B   #$fd,$00bfd100
 L00021988                       BSR.W   L000219A4
-L0002198C                       BSR.W   L000218C4
+L0002198C                       BSR.W   timer_delay_2ms                 ; L000218C4
 L00021990                       ADD.W   #$00000001,D3
 L00021992                       BRA.W   L00021964 
-L00021996                       MOVE.W  D0,L00021B84
+L00021996                       MOVE.W  D0,current_track                ; L00021B84
 L0002199C                       RTS 
 
 
-L0002199E                       BSR.W   L000218F8
+L0002199E                       BSR.W   heads_to_track_0                ; L000218F8
 L000219A2                       BRA.B   L00021996 
 L000219A4                       OR.B    #$01,$00bfd100
 L000219AC                       AND.B   #$fe,$00bfd100
 L000219B4                       OR.B    #$01,$00bfd100
 L000219BC                       RTS 
 
-
-L000219BE                       MOVEA.l L00021B80,A0
+                ; IN:
+                ;       a4.l    - dest buffer address
+decode_raw_track        ; original address L000219BE
+L000219BE                       MOVEA.l mfm_track_buffer_ptr,a0             ; L00021B80,A0
 L000219C4                       MOVE.W  #$000a,D6
 L000219C8                       MOVE.W  (A0)+,D5
 L000219CA                       CMP.W   #$4489,D5
@@ -1749,15 +1765,16 @@ L00021A30                       MOVE.B  $0006(A6),$00dff180
 L00021A38                       BRA.W   L00021A30 
 
 
-L00021A3C                       BSR.W   L0002181E
-L00021A40                       BSR.W   L000218F8
+load_file       ; original address L00021A3C
+L00021A3C                       BSR.W   enable_drive_0          ; L0002181E
+L00021A40                       BSR.W   heads_to_track_0        ; L000218F8
 L00021A44                       MOVE.W  #$0000,D0
 L00021A48                       MOVE.W  #$0000,D1
-L00021A4C                       LEA.L   LOAD_BUFFER,A4            ; Load buffer address
-L00021A52                       BSR.W   L0002185C
-L00021A56                       BSR.W   L000219BE
+L00021A4C                       LEA.L   LOAD_BUFFER,A4          ; Load buffer address
+L00021A52                       BSR.W   read_raw_track          ; L0002185C
+L00021A56                       BSR.W   decode_raw_track        ; L000219BE
 L00021A5A                       MOVE.L  disk_number,d0          ; required disk number        
-L00021A60                       CMP.L   $00040008,D0            ; disk number from inserted disk
+L00021A60                       CMP.L   LOAD_BUFFER+8,D0        ; disk number from inserted disk
 L00021A66                       BEQ.W   correct_disk_in_drive 
 L00021A6A                       CMP.L   #$00000001,D0
 L00021A70                       BEQ.W   insert_disk_1           ; display 'insert disk 1'
@@ -1809,8 +1826,8 @@ L00021B10                       MOVE.W  (A0)+,D1
 L00021B12                       MOVEA.L (A0)+,A4
 L00021B14                       MOVEA.L (A0)+,A5
 L00021B16                       BSR.W   L00021932
-L00021B1A                       BSR.W   L0002185C
-L00021B1E                       BSR.W   L000219BE
+L00021B1A                       BSR.W   read_raw_track                          ; L0002185C
+L00021B1E                       BSR.W   decode_raw_track                        ; L000219BE
 L00021B22                       ADDA.L  #$00001600,A4
 L00021B28                       ADD.W   #$0001,D0
 L00021B2C                       DBF.W   D1,L00021B16 
@@ -1820,22 +1837,25 @@ L00021B34                       RTS
 L00021B36                       OR.B    #$01,$00bfd100
 L00021B3E                       AND.B   #$fe,$00bfd100
 L00021B46                       OR.B    #$01,$00bfd100
-L00021B4E                       BSR.W   L000218C4
-L00021B52                       BSR.W   L000218C4
-L00021B56                       BSR.W   L000218C4
-L00021B5A                       BSR.W   L000218C4
-L00021B5E                       BSR.W   L000218C4
-L00021B62                       BSR.W   L000218C4
-L00021B66                       BSR.W   L000218C4
-L00021B6A                       BSR.W   L000218C4
-L00021B6E                       BSR.W   L000218C4
-L00021B72                       BSR.W   L000218C4
-L00021B76                       BSR.W   L000218C4
-L00021B7A                       BSR.W   L000218C4
+L00021B4E                       BSR.W   timer_delay_2ms                         ; L000218C4
+L00021B52                       BSR.W   timer_delay_2ms                         ; L000218C4
+L00021B56                       BSR.W   timer_delay_2ms                         ; L000218C4
+L00021B5A                       BSR.W   timer_delay_2ms                         ; L000218C4
+L00021B5E                       BSR.W   timer_delay_2ms                         ; L000218C4
+L00021B62                       BSR.W   timer_delay_2ms                         ; L000218C4
+L00021B66                       BSR.W   timer_delay_2ms                         ; L000218C4
+L00021B6A                       BSR.W   timer_delay_2ms                         ; L000218C4
+L00021B6E                       BSR.W   timer_delay_2ms                         ; L000218C4
+L00021B72                       BSR.W   timer_delay_2ms                         ; L000218C4
+L00021B76                       BSR.W   timer_delay_2ms                         ; L000218C4
+L00021B7A                       BSR.W   timer_delay_2ms                         ; L000218C4
 L00021B7E                       RTS 
 
-L00021B80                       dc.w    $0007,$5000
+mfm_track_buffer_ptr
+L00021B80                       dc.l    $00075000
+current_track
 L00021B84                       dc.w    $0000
+
 L00021B86                       dc.w    $0000
 L00021B88                       dc.w    $0000
 L00021B8A                       dc.w    $0000
