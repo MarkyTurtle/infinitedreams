@@ -1021,164 +1021,164 @@ L00020E24                       BLE.W   L00020ADA
 L00020E28                       BRA.W   display_menu_menu               ; L0002124E 
 
 L00020E2C                       BSET.B  #$0000,L000203A9
-L00020E34                       MOVE.W  #$008e,L00021B86
-L00020E3C                       MOVE.W  #$0011,L00021B88
-L00020E44                       MOVE.L  #LOAD_BUFFER,L00021B8A            ; address?
-L00020E4E                       MOVE.L  #$00000001,disk_number          ; L00021B92             ; disk number
+L00020E34                       MOVE.W  #$008e,loader_start_track               ; L00021B86
+L00020E3C                       MOVE.W  #$0011,loader_number_of_tracks          ; L00021B88
+L00020E44                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A 
+L00020E4E                       MOVE.L  #$00000001,loader_disk_number           ; L00021B92             ; disk number
 L00020E58                       RTS 
 
 L00020E5A                       BSET.B  #$0000,L000203A9
-L00020E62                       MOVE.W  #$005c,L00021B86
-L00020E6A                       MOVE.W  #$0015,L00021B88
-L00020E72                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L00020E7C                       MOVE.L  #$00000001,disk_number          ; L00021B92            ; disk number
+L00020E62                       MOVE.W  #$005c,loader_start_track               ; L00021B86
+L00020E6A                       MOVE.W  #$0015,loader_number_of_tracks          ; L00021B88
+L00020E72                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L00020E7C                       MOVE.L  #$00000001,loader_disk_number          ; L00021B92            ; disk number
 L00020E86                       RTS 
 
 L00020E88                       BSET.B  #$0000,L000203A9
-L00020E90                       MOVE.W  #$003b,L00021B86
-L00020E98                       MOVE.W  #$001f,L00021B88
-L00020EA0                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L00020EAA                       MOVE.L  #$00000001,disk_number          ; L00021B92            ; disk number
+L00020E90                       MOVE.W  #$003b,loader_start_track               ; L00021B86
+L00020E98                       MOVE.W  #$001f,loader_number_of_tracks          ; L00021B88
+L00020EA0                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L00020EAA                       MOVE.L  #$00000001,loader_disk_number          ; L00021B92            ; disk number
 L00020EB4                       RTS 
 
 L00020EB6                       BSET.B  #$0000,L000203A9
-L00020EBE                       MOVE.W  #$0073,L00021B86
-L00020EC6                       MOVE.W  #$0019,L00021B88
-L00020ECE                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L00020ED8                       MOVE.L  #$00000001,disk_number          ; L00021B92            ; disk number
+L00020EBE                       MOVE.W  #$0073,loader_start_track               ; L00021B86
+L00020EC6                       MOVE.W  #$0019,loader_number_of_tracks          ; L00021B88
+L00020ECE                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L00020ED8                       MOVE.L  #$00000001,loader_disk_number          ; L00021B92            ; disk number
 L00020EE2                       RTS 
 
 L00020EE4                       BSET.B  #$0000,L000203A9
-L00020EEC                       MOVE.W  #$001b,L00021B86
-L00020EF4                       MOVE.W  #$001e,L00021B88
-L00020EFC                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L00020F06                       MOVE.L  #$00000001,disk_number          ; L00021B92            ; disk number
+L00020EEC                       MOVE.W  #$001b,loader_start_track               ; L00021B86
+L00020EF4                       MOVE.W  #$001e,loader_number_of_tracks          ; L00021B88
+L00020EFC                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L00020F06                       MOVE.L  #$00000001,loader_disk_number          ; L00021B92            ; disk number
 L00020F10                       RTS 
 
 L00020F12                       BSET.B  #$0000,L000203A9
-L00020F1A                       MOVE.W  #$0001,L00021B86
-L00020F22                       MOVE.W  #$0009,L00021B88
-L00020F2A                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L00020F34                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
+L00020F1A                       MOVE.W  #$0001,loader_start_track               ; L00021B86
+L00020F22                       MOVE.W  #$0009,loader_number_of_tracks          ; L00021B88
+L00020F2A                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L00020F34                       MOVE.L  #$00000002,loader_disk_number          ; L00021B92            ; disk number
 L00020F3E                       RTS 
 
 L00020F40                       BSET.B  #$0000,L000203A9
-L00020F48                       MOVE.W  #$007e,L00021B86
-L00020F50                       MOVE.W  #$000e,L00021B88
-L00020F58                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L00020F62                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number 
+L00020F48                       MOVE.W  #$007e,loader_start_track               ; L00021B86
+L00020F50                       MOVE.W  #$000e,loader_number_of_tracks          ; L00021B88
+L00020F58                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L00020F62                       MOVE.L  #$00000002,loader_disk_number          ; L00021B92            ; disk number 
 L00020F6C                       RTS 
 
 L00020F6E                       BSET.B  #$0000,L000203A9
-L00020F76                       MOVE.W  #$0070,L00021B86
-L00020F7E                       MOVE.W  #$000c,L00021B88
-L00020F86                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L00020F90                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
+L00020F76                       MOVE.W  #$0070,loader_start_track               ; L00021B86
+L00020F7E                       MOVE.W  #$000c,loader_number_of_tracks          ; L00021B88
+L00020F86                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L00020F90                       MOVE.L  #$00000002,loader_disk_number          ; L00021B92            ; disk number
 L00020F9A                       RTS 
 
 L00020F9C                       BSET.B  #$0000,L000203A9
-L00020FA4                       MOVE.W  #$000c,L00021B86
-L00020FAC                       MOVE.W  #$000d,L00021B88
-L00020FB4                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L00020FBE                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
+L00020FA4                       MOVE.W  #$000c,loader_start_track               ; L00021B86
+L00020FAC                       MOVE.W  #$000d,loader_number_of_tracks          ; L00021B88
+L00020FB4                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L00020FBE                       MOVE.L  #$00000002,loader_disk_number          ; L00021B92            ; disk number
 L00020FC8                       RTS 
 
 L00020FCA                       BSET.B  #$0000,L000203A9
-L00020FD2                       MOVE.W  #$0055,L00021B86
-L00020FDA                       MOVE.W  #$0019,L00021B88
-L00020FE2                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L00020FEC                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
+L00020FD2                       MOVE.W  #$0055,loader_start_track               ; L00021B86
+L00020FDA                       MOVE.W  #$0019,loader_number_of_tracks          ; L00021B88
+L00020FE2                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L00020FEC                       MOVE.L  #$00000002,loader_disk_number          ; L00021B92            ; disk number
 L00020FF6                       RTS 
 
 L00020FF8                       BSET.B  #$0000,L000203A9
-L00021000                       MOVE.W  #$0040,L00021B86
-L00021008                       MOVE.W  #$0013,L00021B88
-L00021010                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L0002101A                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
+L00021000                       MOVE.W  #$0040,loader_start_track               ; L00021B86
+L00021008                       MOVE.W  #$0013,loader_number_of_tracks          ; L00021B88
+L00021010                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L0002101A                       MOVE.L  #$00000002,loader_disk_number          ; L00021B92            ; disk number
 L00021024                       RTS 
 
 L00021026                       BSET.B  #$0000,L000203A9
-L0002102E                       MOVE.W  #$001b,L00021B86
-L00021036                       MOVE.W  #$0010,L00021B88
-L0002103E                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L00021048                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
+L0002102E                       MOVE.W  #$001b,loader_start_track               ; L00021B86
+L00021036                       MOVE.W  #$0010,loader_number_of_tracks          ; L00021B88
+L0002103E                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L00021048                       MOVE.L  #$00000002,loader_disk_number          ; L00021B92            ; disk number
 L00021052                       RTS 
 
 L00021054                       BSET.B  #$0000,L000203A9
-L0002105C                       MOVE.W  #$002d,L00021B86
-L00021064                       MOVE.W  #$0011,L00021B88
-L0002106C                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L00021076                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
+L0002105C                       MOVE.W  #$002d,loader_start_track               ; L00021B86
+L00021064                       MOVE.W  #$0011,loader_number_of_tracks          ; L00021B88
+L0002106C                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L00021076                       MOVE.L  #$00000002,loader_disk_number          ; L00021B92            ; disk number
 L00021080                       RTS 
 
 L00021082                       BSET.B  #$0000,L000203A9
-L0002108A                       MOVE.W  #$008e,L00021B86
-L00021092                       MOVE.W  #$0011,L00021B88
-L0002109A                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L000210A4                       MOVE.L  #$00000002,disk_number          ; L00021B92            ; disk number
+L0002108A                       MOVE.W  #$008e,loader_start_track               ; L00021B86
+L00021092                       MOVE.W  #$0011,loader_number_of_tracks          ; L00021B88
+L0002109A                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L000210A4                       MOVE.L  #$00000002,loader_disk_number          ; L00021B92            ; disk number
 L000210AE                       RTS 
 
 L000210B0                       BSET.B  #$0000,L000203A9
-L000210B8                       MOVE.W  #$008d,L00021B86
-L000210C0                       MOVE.W  #$0012,L00021B88
-L000210C8                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L000210D2                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
+L000210B8                       MOVE.W  #$008d,loader_start_track               ; L00021B86
+L000210C0                       MOVE.W  #$0012,loader_number_of_tracks          ; L00021B88
+L000210C8                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L000210D2                       MOVE.L  #$00000003,loader_disk_number          ; L00021B92            ; disk number
 L000210DC                       RTS 
 
 L000210DE                       BSET.B  #$0000,L000203A9
-L000210E6                       MOVE.W  #$0002,L00021B86
-L000210EE                       MOVE.W  #$0011,L00021B88
-L000210F6                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L00021100                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
+L000210E6                       MOVE.W  #$0002,loader_start_track               ; L00021B86
+L000210EE                       MOVE.W  #$0011,loader_number_of_tracks          ; L00021B88
+L000210F6                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L00021100                       MOVE.L  #$00000003,loader_disk_number          ; L00021B92            ; disk number
 L0002110A                       RTS 
 
 L0002110C                       BSET.B  #$0000,L000203A9
-L00021114                       MOVE.W  #$007d,L00021B86
-L0002111C                       MOVE.W  #$000e,L00021B88
-L00021124                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L0002112E                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
+L00021114                       MOVE.W  #$007d,loader_start_track               ; L00021B86
+L0002111C                       MOVE.W  #$000e,loader_number_of_tracks          ; L00021B88
+L00021124                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L0002112E                       MOVE.L  #$00000003,loader_disk_number          ; L00021B92            ; disk number
 L00021138                       RTS 
 
 L0002113A                       BSET.B  #$0000,L000203A9
-L00021142                       MOVE.W  #$006f,L00021B86
-L0002114A                       MOVE.W  #$000c,L00021B88
-L00021152                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L0002115C                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
+L00021142                       MOVE.W  #$006f,loader_start_track               ; L00021B86
+L0002114A                       MOVE.W  #$000c,loader_number_of_tracks          ; L00021B88
+L00021152                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L0002115C                       MOVE.L  #$00000003,loader_disk_number          ; L00021B92            ; disk number
 L00021166                       RTS 
 
 L00021168                       BSET.B  #$0000,L000203A9
-L00021170                       MOVE.W  #$0052,L00021B86
-L00021178                       MOVE.W  #$001b,L00021B88
-L00021180                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L0002118A                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
+L00021170                       MOVE.W  #$0052,loader_start_track               ; L00021B86
+L00021178                       MOVE.W  #$001b,loader_number_of_tracks          ; L00021B88
+L00021180                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L0002118A                       MOVE.L  #$00000003,loader_disk_number          ; L00021B92            ; disk number
 L00021194                       RTS 
 
 L00021196                       BSET.B  #$0000,L000203A9
-L0002119E                       MOVE.W  #$0043,L00021B86
-L000211A6                       MOVE.W  #$000d,L00021B88
-L000211AE                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L000211B8                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
+L0002119E                       MOVE.W  #$0043,loader_start_track               ; L00021B86
+L000211A6                       MOVE.W  #$000d,loader_number_of_tracks          ; L00021B88
+L000211AE                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L000211B8                       MOVE.L  #$00000003,loader_disk_number          ; L00021B92            ; disk number
 L000211C2                       RTS 
 
 L000211C4                       BSET.B  #$0000,L000203A9
-L000211CC                       MOVE.W  #$0015,L00021B86
-L000211D4                       MOVE.W  #$000d,L00021B88
-L000211DC                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L000211E6                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
+L000211CC                       MOVE.W  #$0015,loader_start_track               ; L00021B86
+L000211D4                       MOVE.W  #$000d,loader_number_of_tracks          ; L00021B88
+L000211DC                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L000211E6                       MOVE.L  #$00000003,loader_disk_number          ; L00021B92            ; disk number
 L000211F0                       RTS 
 
 L000211F2                       BSET.B  #$0000,L000203A9
-L000211FA                       MOVE.W  #$0035,L00021B86
-L00021202                       MOVE.W  #$000c,L00021B88
-L0002120A                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L00021214                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
+L000211FA                       MOVE.W  #$0035,loader_start_track               ; L00021B86
+L00021202                       MOVE.W  #$000c,loader_number_of_tracks          ; L00021B88
+L0002120A                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L00021214                       MOVE.L  #$00000003,loader_disk_number          ; L00021B92            ; disk number
 L0002121E                       RTS 
 
 L00021220                       BSET.B  #$0000,L000203A9
-L00021228                       MOVE.W  #$0024,L00021B86
-L00021230                       MOVE.W  #$000f,L00021B88
-L00021238                       MOVE.L  #LOAD_BUFFER,L00021B8A
-L00021242                       MOVE.L  #$00000003,disk_number          ; L00021B92            ; disk number
+L00021228                       MOVE.W  #$0024,loader_start_track               ; L00021B86
+L00021230                       MOVE.W  #$000f,loader_number_of_tracks          ; L00021B88
+L00021238                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
+L00021242                       MOVE.L  #$00000003,loader_disk_number          ; L00021B92            ; disk number
 L0002124C                       RTS 
 
 
@@ -1618,255 +1618,375 @@ L00021812                       RTS
 
 
 
+
+                ; ---------------------- load music -----------------------
+                ; mfm track loader.
+                ; load a music file from disk, checks the disk number
+                ; in the drive and waits for the correct disk.
+                ;
 load_music      ; original address L00021814
-L00021814                       BSR.W   init_loader             ; L000218A4
-L00021818                       BRA.W   load_file               ; L00021A3C 
-L0002181C                       RTS 
+                                BSR.W   init_loader             ; L000218A4
+                                BRA.W   load_file               ; L00021A3C 
+                                RTS 
 
 
+
+                ; --------------------- enable drive -----------------------
+                ; select drive 0 and start disk motor.
+                ;
 enable_drive_0  ; original address L0002181E
-L0002181E                       OR.B    #$08,$00bfd100          ; select drive 0
-L00021826                       AND.B   #$7f,$00bfd100          ; enable disk motor
-L0002182E                       AND.B   #$f7,$00bfd100          ; latch disk motor
-L00021836                       BTST.B  #$0005,$00bfe001        ; test DSKRDY disk ready signal
-L0002183E                       BNE.B   L00021836               ; wait for disk ready
-L00021840                       RTS 
+                                OR.B    #$08,$00bfd100          ; select drive 0
+                                AND.B   #$7f,$00bfd100          ; enable disk motor
+                                AND.B   #$f7,$00bfd100          ; latch disk motor
+wait_dskrdy
+                                BTST.B  #$0005,$00bfe001        ; test DSKRDY disk ready signal
+                                BNE.B   wait_dskrdy             ; wait for disk ready
+                                RTS 
 
-L00021842                       OR.B    #$88,$00bfd100
-L0002184A                       AND.B   #$f7,$00bfd100
-L00021852                       OR.B    #$08,$00bfd100
-L0002185A                       RTS 
 
+
+                ; --------------------- drive off -------------------------
+                ; switch the drive motor off and deslect drive 0
+                ;
+drive_off       ; original address L00021842
+                                OR.B    #$88,$00bfd100          ; deselect drive and motor
+                                AND.B   #$f7,$00bfd100          ; reselect drive 0 - latch the motor off
+                                OR.B    #$08,$00bfd100          ; deselect drive 0
+                                RTS 
+
+
+
+                ; --------------------- read raw track -------------------
+                ; read in raw mfm track from the disk.
+                ;
 read_raw_track  ; original address L0002185C
-L0002185C                       MOVE.L  mfm_track_buffer_ptr,$0020(a6)      ; L00021B80,$0020(A6)
-L00021864                       MOVE.W  #$7f00,$009e(A6)
-L0002186A                       MOVE.W  #$9500,$009e(A6)
-L00021870                       MOVE.W  #$8210,$0096(A6)
-L00021876                       MOVE.W  #$0000,$0024(A6)
-L0002187C                       MOVE.W  #$9a00,$0024(A6)
-L00021882                       MOVE.W  #$9a00,$0024(A6)
-L00021888                       BTST.B  #$0001,$001f(A6)
-L0002188E                       BEQ.B   L00021888 
-L00021890                       MOVE.W  #$0000,$0024(A6)
-L00021896                       MOVE.W  #$0002,$009c(A6)
-L0002189C                       MOVE.W  #$0010,$0096(A6)
-L000218A2                       RTS 
+                                MOVE.L  mfm_track_buffer_ptr,DSKPT(a6)          ; raw mfm disk buffer
+                                MOVE.W  #$7f00,ADKCON(A6)                       ; clear disk settings bits
+                                MOVE.W  #$9500,ADKCON(A6)                       ; set disk settings, MFM,FAST,WORDSYNC
+                                MOVE.W  #$8210,DMACON(A6)                       ; Enable DMA, DMAEN, DISK
+                                MOVE.W  #$0000,DSKLEN(A6)                       ; Disable disk DMA, Write, Length
+                                MOVE.W  #$9a00,DSKLEN(A6)                       ; Enable disk, DMA, read $1a00 words
+                                MOVE.W  #$9a00,DSKLEN(A6)                       ; $1a00 words = 6656 words, 13,312 bytes, 13Kb exactly
+wait_DSKBLK                     BTST.B  #$0001,INTREQR+1(A6)                    ; test DSKBLK interrupt
+                                BEQ.B   wait_DSKBLK                             ; wait for DSKBLK to complete read.
+                                MOVE.W  #$0000,DSKLEN(A6)                       ; Disable disk DMA, Write, Length
+                                MOVE.W  #$0002,INTREQ(A6)                       ; Clear DSKBLK interrupt flag
+                                MOVE.W  #$0010,DMACON(A6)                       ; Disable Disk DMA
+                                RTS 
 
-init_loader
-L000218A4                       LEA.L   $00dff000,A6
-L000218AA                       MOVE.W  #$7fff,INTREQ(A6)       ; clear raised interrupt bits
-L000218B0                       MOVE.W  #$3fff,INTENA(A6)       ; disable interrupts
-L000218B6                       MOVE.W  #$8010,INTENA(A6)       ; enable copper interrupt
-L000218BC                       MOVE.W  #$4489,$007e(A6)        ; set disk sync
-L000218C2                       RTS 
 
+
+                ; ------------------- initialise loader ------------------
+                ; set interrupts and disk sync.
+init_loader     ; original address L000218A4
+                                LEA.L   $00dff000,A6
+                                MOVE.W  #$7fff,INTREQ(A6)       ; clear raised interrupt bits
+                                MOVE.W  #$3fff,INTENA(A6)       ; disable interrupts
+                                MOVE.W  #$8010,INTENA(A6)       ; enable copper interrupt
+                                MOVE.W  #$4489,$007e(A6)        ; set disk sync
+                                RTS 
+
+
+
+                ; --------------------- timer delay 2ms ---------------------
+                ; create a 2 millisecond delay using the Timer A of CIAB
+                ;
 timer_delay_2ms ; original address L000218C4
-L000218C4                       MOVE.B  #$00,$00bfde00          ; stop timer A CIAB
-L000218CC                       MOVE.B  #$7f,$00bfdd00          ; clear CIAB ICR
-L000218D4                       MOVE.B  #$00,$00bfd400          ; set timerA Low byte
-L000218DC                       MOVE.B  #$20,$00bfd500          ; set timerA high byte
-L000218E4                       MOVE.B  #$09,$00bfde00          ; start timerA one-shot
-L000218EC                       BTST.B  #$0000,$00bfdd00        ; test timeA underflow
-L000218F4                       BEQ.B   L000218EC               ; wait timerA underflow
-L000218F6                       RTS 
+                                MOVE.B  #$00,$00bfde00          ; stop timer A CIAB
+                                MOVE.B  #$7f,$00bfdd00          ; clear CIAB ICR
+                                MOVE.B  #$00,$00bfd400          ; set timerA Low byte
+                                MOVE.B  #$20,$00bfd500          ; set timerA high byte
+                                MOVE.B  #$09,$00bfde00          ; start timerA one-shot
+wait_timer_a                    BTST.B  #$0000,$00bfdd00        ; test timeA underflow
+                                BEQ.B   wait_timer_a            ; wait timerA underflow
+                                RTS 
 
+
+
+                ; --------------------- heads to track 0 ---------------------
+                ; step the drive heads to track 0
 heads_to_track_0 ; original address L000218F8
-L000218F8                       BTST.B  #$0004,$00bfe001        ; test track 0 bit
-L00021900                       BEQ.W   at_track_0              ; L00021920 
-L00021904                       OR.B    #$03,$00bfd100          ; select drive 0
-L0002190C                       AND.B   #$fe,$00bfd100          ; toggle step heads
-L00021914                       OR.B    #$01,$00bfd100          ; toggle step heads
-L0002191C                       BSR.B   timer_delay_2ms         ; L000218C4               ; 
-L0002191E                       BRA.B   heads_to_track_0        ; L000218F8 
+                                BTST.B  #$0004,$00bfe001        ; test track 0 bit
+                                BEQ.W   at_track_0              ; L00021920 
+                                OR.B    #$03,$00bfd100          ; select drive 0
+                                AND.B   #$fe,$00bfd100          ; toggle step heads
+                                OR.B    #$01,$00bfd100          ; toggle step heads
+                                BSR.B   timer_delay_2ms         ; L000218C4               ; 
+                                BRA.B   heads_to_track_0        ; L000218F8 
 at_track_0
-L00021920                       OR.B    #$04,$00bfd100          ; set disk side (lower head)
-L00021928                       MOVE.W  #$0000,current_track    ; L00021B84
-L00021930                       RTS 
+                                OR.B    #$04,$00bfd100          ; set disk side (lower head)
+                                MOVE.W  #$0000,current_track    ; L00021B84
+                                RTS 
 
 
-L00021932                       TST.W   D0
-L00021934                       BEQ.W   L0002199E 
-L00021938                       MOVE.W  current_track,D3        ; L00021B84,D3
-L0002193E                       CMP.W   D3,D0
-L00021940                       BEQ.W   L00021996 
-L00021944                       MOVE.W  D0,D2
-L00021946                       LSR.W   #$00000001,D2
-L00021948                       LSR.W   #$00000001,D3
-L0002194A                       BTST.L  #$0000,D0
-L0002194E                       BNE.W   L0002195C 
-L00021952                       OR.B    #$04,$00bfd100
-L0002195A                       BRA.B   L00021964 
-L0002195C                       AND.B   #$fb,$00bfd100
-L00021964                       CMP.W   D3,D2
-L00021966                       BEQ.B   L00021996 
-L00021968                       BGT.B   L00021980 
-L0002196A                       MOVE.B  #$02,$00bfd100
-L00021972                       BSR.W   L000219A4
-L00021976                       BSR.W   timer_delay_2ms                 ; L000218C4
-L0002197A                       SUB.W   #$00000001,D3
-L0002197C                       BRA.W   L00021964 
-L00021980                       AND.B   #$fd,$00bfd100
-L00021988                       BSR.W   L000219A4
-L0002198C                       BSR.W   timer_delay_2ms                 ; L000218C4
-L00021990                       ADD.W   #$00000001,D3
-L00021992                       BRA.W   L00021964 
-L00021996                       MOVE.W  D0,current_track                ; L00021B84
-L0002199C                       RTS 
+
+                ; ---------------------- step heads to track ---------------------
+                ; step the heads to the desired track number, selecting the
+                ; top/bottom head as required.
+                ;
+                ; IN:-
+                ;       d0.w = track to step to (0 - 160)
+step_to_track   ; original address L00021932
+                                TST.W   D0
+                                BEQ.W   step_to_track_0
+                                MOVE.W  current_track,D3
+                        ; check already there
+                                CMP.W   D3,D0
+                                BEQ.W   exit_step_to_track
+                        ; get cylinder values (current & desired)
+                                MOVE.W  D0,D2
+                                LSR.W   #$00000001,D2
+                                LSR.W   #$00000001,D3                       
+select_head             ; select top/bottom head (top = odd track, bottom = even track)
+                                BTST.L  #$0000,D0
+                                BNE.W   select_top_head 
+select_lower_head
+                                OR.B    #$04,$00bfd100                  ; set /SIDE = 1 - lower head (even tracks 0,2,4,6...)
+                                BRA.B   step_the_heads_loop
+select_top_head
+                                AND.B   #$fb,$00bfd100                  ; set /SIDE = 0 - upper head (odd tracks 1,3,5,7...)
+step_the_heads_loop
+                                CMP.W   D3,D2
+                                BEQ.B   exit_step_to_track 
+                                BGT.B   step_inwards 
+step_outwards
+                                MOVE.B  #$02,$00bfd100                  ; set /DIR = 1 - towards track 0 - outwards
+                                BSR.W   step_drive_heads
+                                BSR.W   timer_delay_2ms 
+                                SUB.W   #$0001,D3                       ; decrement current track number
+                                BRA.W   step_the_heads_loop
+step_inwards
+                                AND.B   #$fd,$00bfd100                  ; set /DIR = 0 - towards centre - inwards
+                                BSR.W   step_drive_heads
+                                BSR.W   timer_delay_2ms
+                                ADD.W   #$0001,D3                       ; increment current track number
+                                BRA.W   step_the_heads_loop
+
+exit_step_to_track      ; store current track number & exit
+                                MOVE.W  D0,current_track
+                                RTS 
+
+step_to_track_0         ; short cut step to track 0
+                                BSR.W   heads_to_track_0
+                                BRA.B   exit_step_to_track
 
 
-L0002199E                       BSR.W   heads_to_track_0                ; L000218F8
-L000219A2                       BRA.B   L00021996 
-L000219A4                       OR.B    #$01,$00bfd100
-L000219AC                       AND.B   #$fe,$00bfd100
-L000219B4                       OR.B    #$01,$00bfd100
-L000219BC                       RTS 
 
+                ; ------------------- step drive heads ----------------------
+                ; step the drive heads in the direction already selected.
+                ; the /STEP bit must be pulsed to step the heads.
+step_drive_heads        ; original address L000219A4
+                                OR.B    #$01,$00bfd100                  ; toggle /STEP
+                                AND.B   #$fe,$00bfd100                  ; toggle /STEP
+                                OR.B    #$01,$00bfd100                  ; toggle /STEP
+                                RTS 
+
+
+
+
+; Each Track contains 11 sectors on a normal DOS track.
+;
+; Each Track contains one track gap of varying length (less than one sector in size) 
+; which can occur inbetween any sector on the track.
+;
+; Each Sector begins with a Sector Header of 2 words (mfm encoded) sync marks
+;  - 0x4489, 0x4489
+;
+; The header is followed by the Admin Block of 56 bytes (mfm encoded), 28 bytes (decoded)
+; Admin Block/Sector Header (28 bytes decoded)
+; Offset        Data Field
+; 0             dc.b   FormatId         - 
+; 1             dc.b   TrackNumber      - current track number (even = bottom side, odd = top side)
+; 2             dc.b   SectorNumber     - current sector number (0 - 10)
+; 3             dc.b   SectorsToGap     - number of sectors until the track gap (1 - 11)
+; $4  - 4       dc.l   0,0,0,0          - 16 admin bytes (normally 0 for DOS Disk) can be used to store info
+; $14 - 20      dc.l   headerChecksum
+; $18 - 24      dc.l   dataChecksum
+;
+; Next is the 1024 bytes of mfm encoded data, 512 bytes decoded
+;  - The data is typically formatted as two blocks of 182 long words
+;  - Can also be stored as Odd/Even interleaved long words
+;
+
+                ; --------------------- decode raw track ----------------------
+                ; decodes a full mfm track buffer to the destination memory
+                ; buffer passed in address register a4.
+                ;
                 ; IN:
                 ;       a4.l    - dest buffer address
 decode_raw_track        ; original address L000219BE
-L000219BE                       MOVEA.l mfm_track_buffer_ptr,a0             ; L00021B80,A0
-L000219C4                       MOVE.W  #$000a,D6
-L000219C8                       MOVE.W  (A0)+,D5
-L000219CA                       CMP.W   #$4489,D5
-L000219CE                       BNE.B   L000219C8 
-L000219D0                       MOVE.W  (A0),D5
-L000219D2                       CMP.W   #$4489,D5
-L000219D6                       BNE.B   L000219DA 
-L000219D8                       ADDA.W  #$00000002,A0
-L000219DA                       MOVE.L  (A0)+,D5
-L000219DC                       MOVE.L  (A0)+,D4
-L000219DE                       AND.L   #$55555555,D5
-L000219E4                       AND.L   #$55555555,D4
-L000219EA                       LSL.L   #$00000001,D5
-L000219EC                       OR.L    D4,D5
-L000219EE                       SWAP.W  D5
-L000219F0                       AND.W   #$ff00,D5
-L000219F4                       CMP.W   #$ff00,D5
-L000219F8                       BNE.B   L00021A30 
-L000219FA                       SWAP.W  D5
-L000219FC                       AND.W   #$ff00,D5
-L00021A00                       LSL.W   #$00000001,D5
-L00021A02                       LEA.L   $00(A4,D5.W),A3
-L00021A06                       LEA.L   $0030(A0),A0
-L00021A0A                       MOVE.W  #$007f,D7
-L00021A0E                       MOVE.L  $0200(A0),D4
-L00021A12                       MOVE.L  (A0)+,D5
-L00021A14                       AND.L   #$55555555,D5
-L00021A1A                       AND.L   #$55555555,D4
-L00021A20                       LSL.L   #$00000001,D5
-L00021A22                       OR.L    D4,D5
-L00021A24                       MOVE.L  D5,(A3)+
-L00021A26                       DBF.W   D7,L00021A0E 
-L00021A2A                       DBF.W   D6,L000219C8 
-L00021A2E                       RTS 
+                                MOVEA.l mfm_track_buffer_ptr,a0             ; L00021B80,A0
+                                MOVE.W  #$000a,D6
+                        ; find sync marks
+find_sync                       MOVE.W  (A0)+,D5
+                                CMP.W   #$4489,D5
+                                BNE.B   find_sync 
+                        ; skip remaining sync marks (maybe 2 of them)
+                                MOVE.W  (A0),D5
+                                CMP.W   #$4489,D5
+                                BNE.B   decode_header
+                        ; skip second sync mark 
+skip_sync                       ADDA.W  #$0002,A0
+                        ; decode sector header (56 bytes encoded to 28 bytes decoded)
+decode_header                   MOVE.L  (A0)+,D5
+                                MOVE.L  (A0)+,D4
+                                AND.L   #$55555555,D5
+                                AND.L   #$55555555,D4
+                                LSL.L   #$00000001,D5
+                                OR.L    D4,D5
+                                SWAP.W  D5
+                                AND.W   #$ff00,D5                       ; mask out format id 
+                                CMP.W   #$ff00,D5                       ; check format id = $ff
+                                BNE.B   decode_error                             
+                                SWAP.W  D5
+                                AND.W   #$ff00,D5                       ; mask sector number
+                                LSL.W   #$00000001,D5                   ; already multiplyied by 256, so multiply by 2 to get dest buffer index.
+                                LEA.L   $00(A4,D5.W),A3                 ; a3 = decode buffer dest address for this sector
+                                LEA.L   $0030(A0),A0                    ; skip remaining header bytes
+                                MOVE.W  #$007f,D7                       ; decode 128 longs ()
+decode_sector_loop              MOVE.L  $0200(A0),D4                    ; get even mfm encoded bits
+                                MOVE.L  (A0)+,D5                        ; get edd mfm encoded bits
+                                AND.L   #$55555555,D5                   ; remove clock bits
+                                AND.L   #$55555555,D4                   ; remove clock bits
+                                LSL.L   #$00000001,D5                   ; shift odd data bits
+                                OR.L    D4,D5                           ; recombine decoded data bits
+                                MOVE.L  D5,(A3)+                        ; store in dest decoded buffer
+                                DBF.W   D7,decode_sector_loop
+                                DBF.W   D6,find_sync                            ; loop for next sector 
+                                RTS 
+
+decode_error    ; original address L00021A30
+                                MOVE.B  VHPOSR(A6),$00dff180                    ; change background colour
+                                BRA.W   decode_error                            ; loop forever - L00021A30_error
 
 
-L00021A30                       MOVE.B  $0006(A6),$00dff180
-L00021A38                       BRA.W   L00021A30 
 
-
+                ; --------------------- load file ---------------------
 load_file       ; original address L00021A3C
-L00021A3C                       BSR.W   enable_drive_0          ; L0002181E
-L00021A40                       BSR.W   heads_to_track_0        ; L000218F8
-L00021A44                       MOVE.W  #$0000,D0
-L00021A48                       MOVE.W  #$0000,D1
-L00021A4C                       LEA.L   LOAD_BUFFER,A4          ; Load buffer address
-L00021A52                       BSR.W   read_raw_track          ; L0002185C
-L00021A56                       BSR.W   decode_raw_track        ; L000219BE
-L00021A5A                       MOVE.L  disk_number,d0          ; required disk number        
-L00021A60                       CMP.L   LOAD_BUFFER+8,D0        ; disk number from inserted disk
-L00021A66                       BEQ.W   correct_disk_in_drive 
-L00021A6A                       CMP.L   #$00000001,D0
-L00021A70                       BEQ.W   insert_disk_1           ; display 'insert disk 1'
-L00021A74                       CMP.L   #$00000002,D0
-L00021A7A                       BEQ.W   insert_disk_2           ; display 'insert disk 2'
+                                BSR.W   enable_drive_0          ; L0002181E
+                                BSR.W   heads_to_track_0        ; L000218F8
+try_load_file   ; check correct disk in drive by loading track 0 and testing
+                ; disk number loaded in from track data
+                                MOVE.W  #$0000,D0               ; track 0
+                                MOVE.W  #$0000,D1               ; load 1 track
+                                LEA.L   LOAD_BUFFER,A4          ; Load buffer address
+                                BSR.W   read_raw_track          ; L0002185C
+                                BSR.W   decode_raw_track        ; L000219BE
+                                MOVE.L  loader_disk_number,d0          ; required disk number        
+                                CMP.L   LOAD_BUFFER+8,D0        ; disk number from inserted disk
+                                BEQ.W   correct_disk_in_drive 
+                                CMP.L   #$00000001,D0
+                                BEQ.W   insert_disk_1           ; display 'insert disk 1'
+                                CMP.L   #$00000002,D0
+                                BEQ.W   insert_disk_2           ; display 'insert disk 2'
 
+                        ; display 'Insert Disk 3' and wait for disk swap
 insert_disk_3           ; original address L00021A7E
-L00021A7E                       MOVE.L  #insert_disk_3_message,d0       ; #L00036230,D0
-L00021A84                       MOVE.W  D0,insertdisk_bplptl            ; L00022DE0
-L00021A8A                       SWAP.W  D0
-L00021A8C                       MOVE.W  D0,insertdisk_bplpth            ; L00022DDC
-L00021A92                       BRA.W   detect_disk_change              ; L00021AC2 
+                                MOVE.L  #insert_disk_3_message,d0       ; #L00036230,D0
+                                MOVE.W  D0,insertdisk_bplptl            ; L00022DE0
+                                SWAP.W  D0
+                                MOVE.W  D0,insertdisk_bplpth            ; L00022DDC
+                                BRA.W   detect_disk_change              ; L00021AC2 
 
+                        ; display 'Insert Disk 2' and wait for disk swap
 insert_disk_2           ; original address L00021A96
-L00021A96                       MOVE.L  #insert_disk_2_message,d0       ; #L00036118,D0
-L00021A9C                       MOVE.W  D0,insertdisk_bplptl            ; L00022DE0
-L00021AA2                       SWAP.W  D0
-L00021AA4                       MOVE.W  D0,insertdisk_bplpth            ; L00022DDC
-L00021AAA                       BRA.W   detect_disk_change              ; L00021AC2 
+                                MOVE.L  #insert_disk_2_message,d0       ; #L00036118,D0
+                                MOVE.W  D0,insertdisk_bplptl            ; L00022DE0
+                                SWAP.W  D0
+                                MOVE.W  D0,insertdisk_bplpth            ; L00022DDC
+                                BRA.W   detect_disk_change              ; L00021AC2 
 
+                        ; display 'Insert Disk 1' and wait for disk swap 
 insert_disk_1           ; original address L00021AAE
-L00021AAE                       MOVE.L  #insert_disk_1_message,d0       ; #L00036000,D0
-L00021AB4                       MOVE.W  D0,insertdisk_bplptl            ; L00022DE0
-L00021ABA                       SWAP.W  D0
-L00021ABC                       MOVE.W  D0,insertdisk_bplpth            ; L00022DDC
+                                MOVE.L  #insert_disk_1_message,d0       ; #L00036000,D0
+                                MOVE.W  D0,insertdisk_bplptl            ; L00022DE0
+                                SWAP.W  D0
+                                MOVE.W  D0,insertdisk_bplpth            ; L00022DDC
 
 detect_disk_change      ; original address L00021AC2
-L00021AC2                       BTST.B  #$0002,$00bfe001
-L00021ACA                       BEQ.B   L00021ACE 
-L00021ACC                       BRA.B   detect_disk_change              ; L00021AC2 
+                                BTST.B  #$0002,$00bfe001                ; test /CHNG bit (disk changed)
+                                BEQ.B   disk_change_loop                ; no, then wait until disk changed detected
+                                BRA     try_load_file                   ; yes, retry load file ; was - detect_disk_change              ; L00021AC2 
+ 
+                        ; step disk in one track and out one track to update disk changed bit
+                        ; when heads change direction it requires a long wait - ive got 24 milliseconds
+disk_change_loop
+                                AND.B   #$fd,$00bfd100                  ; set DIR = 0 -  towards track 80 - inwards
+                                BSR.W   step_heads_long_wait
+                                OR.B    #$02,$00bfd100                  ; set /DIR = 1 - towards track 0 - outwards
+                                BSR.W   step_heads_long_wait
+                                BTST.B  #$0002,$00bfe001                ; test /CHNG bit (disk changed)
+                                BEQ.B   disk_change_loop                ; disk not changed yet 
+                                BRA.W   try_load_file                   ; disk changed, try load again 
 
-L00021ACE                       AND.B   #$fd,$00bfd100
-L00021AD6                       BSR.W   L00021B36
-L00021ADA                       OR.B    #$02,$00bfd100
-L00021AE2                       BSR.W   L00021B36
-L00021AE6                       BTST.B  #$0002,$00bfe001
-L00021AEE                       BEQ.B   L00021ACE 
-L00021AF0                       BRA.W   L00021A44 
 
 correct_disk_in_drive   ; original address L00021AF4
-L00021AF4                       MOVE.L  #insert_disk_blank_message,d0           ; #L00036348,D0
-L00021AFA                       MOVE.W  D0,insertdisk_bplptl                    ; L00022DE0
-L00021B00                       SWAP.W  D0
-L00021B02                       MOVE.W  D0,insertdisk_bplpth                    ; L00022DDC
+                                MOVE.L  #insert_disk_blank_message,d0           ; #L00036348,D0
+                                MOVE.W  D0,insertdisk_bplptl                    ; L00022DE0
+                                SWAP.W  D0
+                                MOVE.W  D0,insertdisk_bplpth                    ; L00022DDC
 
-L00021B08                       LEA.L   L00021B86,A0
-L00021B0E                       MOVE.W  (A0)+,D0
-L00021B10                       MOVE.W  (A0)+,D1
-L00021B12                       MOVEA.L (A0)+,A4
-L00021B14                       MOVEA.L (A0)+,A5
-L00021B16                       BSR.W   L00021932
-L00021B1A                       BSR.W   read_raw_track                          ; L0002185C
-L00021B1E                       BSR.W   decode_raw_track                        ; L000219BE
-L00021B22                       ADDA.L  #$00001600,A4
-L00021B28                       ADD.W   #$0001,D0
-L00021B2C                       DBF.W   D1,L00021B16 
-L00021B30                       BSR.W   L00021842
-L00021B34                       RTS 
+load_tracks                     ; get file to load parameters & load the file
+                                LEA.L   loader_parameters,a0                    ; L00021B86,A0
+                                MOVE.W  (A0)+,D0                                ; start track
+                                MOVE.W  (A0)+,D1                                ; number of tracks + 1
+                                MOVEA.L (A0)+,A4                                ; load address
+                                MOVEA.L (A0)+,A5                                ; unused
+load_tracks_loop                BSR.W   step_to_track                           ; L00021932
+                                BSR.W   read_raw_track                          ; L0002185C
+                                BSR.W   decode_raw_track                        ; L000219BE
+                                ADDA.L  #$1600,A4
+                                ADD.W   #$0001,D0
+                                DBF.W   D1,load_tracks_loop 
+                                BSR.W   drive_off                               ; L00021842
+                                RTS 
 
-L00021B36                       OR.B    #$01,$00bfd100
-L00021B3E                       AND.B   #$fe,$00bfd100
-L00021B46                       OR.B    #$01,$00bfd100
-L00021B4E                       BSR.W   timer_delay_2ms                         ; L000218C4
-L00021B52                       BSR.W   timer_delay_2ms                         ; L000218C4
-L00021B56                       BSR.W   timer_delay_2ms                         ; L000218C4
-L00021B5A                       BSR.W   timer_delay_2ms                         ; L000218C4
-L00021B5E                       BSR.W   timer_delay_2ms                         ; L000218C4
-L00021B62                       BSR.W   timer_delay_2ms                         ; L000218C4
-L00021B66                       BSR.W   timer_delay_2ms                         ; L000218C4
-L00021B6A                       BSR.W   timer_delay_2ms                         ; L000218C4
-L00021B6E                       BSR.W   timer_delay_2ms                         ; L000218C4
-L00021B72                       BSR.W   timer_delay_2ms                         ; L000218C4
-L00021B76                       BSR.W   timer_delay_2ms                         ; L000218C4
-L00021B7A                       BSR.W   timer_delay_2ms                         ; L000218C4
-L00021B7E                       RTS 
 
-mfm_track_buffer_ptr
-L00021B80                       dc.l    $00075000
-current_track
-L00021B84                       dc.w    $0000
+                ; ------------------ step heads with long wait ---------------------
+                ; when stepping heads and changing direction then a longer wait is 
+                ; required between the next step.
+                ; this routine is called when detecting a change of disk, this 
+                ; requires the heads to be stepped in and out to update the disk
+                ; changed bit.
+step_heads_long_wait    ; original address L00021B36
+                                OR.B    #$01,$00bfd100
+                                AND.B   #$fe,$00bfd100
+                                OR.B    #$01,$00bfd100
+                                BSR.W   timer_delay_2ms                         ; L000218C4
+                                BSR.W   timer_delay_2ms                         ; L000218C4
+                                BSR.W   timer_delay_2ms                         ; L000218C4
+                                BSR.W   timer_delay_2ms                         ; L000218C4
+                                BSR.W   timer_delay_2ms                         ; L000218C4
+                                BSR.W   timer_delay_2ms                         ; L000218C4
+                                BSR.W   timer_delay_2ms                         ; L000218C4
+                                BSR.W   timer_delay_2ms                         ; L000218C4
+                                BSR.W   timer_delay_2ms                         ; L000218C4
+                                BSR.W   timer_delay_2ms                         ; L000218C4
+                                BSR.W   timer_delay_2ms                         ; L000218C4
+                                BSR.W   timer_delay_2ms                         ; L000218C4
+                                RTS 
 
-L00021B86                       dc.w    $0000
-L00021B88                       dc.w    $0000
-L00021B8A                       dc.w    $0000
-L00021B8C                       dc.w    $0000,$0000
-L00021B90                       dc.w    $0000
-disk_number     ; original address L00021B92
+mfm_track_buffer_ptr    ; original address L00021B80
+                                dc.l    $00075000
+current_track           ; original address L00021B84
                                 dc.w    $0000
-L00021B94                       dc.w    $0000
+
+; load file paramters
+loader_parameters       ; original address L00021B86
+loader_start_track      ; original address L00021B86
+                                dc.w    $0000
+loader_number_of_tracks ; original addres L00021B88
+                                dc.w    $0000
+loader_dest_buffer      ; original address L00021B8A
+                                dc.l    $00000000
+loader_disk_number     ; original address L00021B92
+                                dc.l    $0000
 
 
 
+
+
+                        ; music routines
 L00021B96                       MOVEA.L #LOAD_BUFFER,A0           ; external address
 L00021B9C                       MOVE.L  A0,L00022CB8
 L00021BA2                       MOVEA.L A0,A1
