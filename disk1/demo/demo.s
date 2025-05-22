@@ -303,70 +303,80 @@ MENU_SELECT_DISABLED    EQU     $0000           ; bit 0 (1 = menu is disabled, 0
                 ; ***********                 MAIN LOOP                 **********
                 ; ****************************************************************
 main_loop       ; original address L000202F6
-L000202F6                       BTST.B  #$0000,L000203A9                ; check running status
-L000202FE                       BEQ.B   L0002033A
+                                BTST.B  #$0000,L000203A9                                        ; check running status
+                                BEQ.B   .check_menu_enabled                                     ; L0002033A
 
-L00020300                       BTST.B  #$0000,L000203AB                ; loading check?
-L00020308                       BEQ.B   L00020316 
+                                BTST.B  #$0000,L000203AB                                        ; loading check?
+                                BEQ.B   .load_music                                             ; L00020316 
+.disable_music
+                                BCLR.B  #$0000,L000203AB
+                                BSR.W   music_off                                               ; L00021C0A
 
-L0002030A                       BCLR.B  #$0000,L000203AB
-L00020312                       BSR.W   music_off                       ; L00021C0A
-L00020316                       BSR.W   load_music                      ; L00021814
-L0002031A                       BCLR.B  #$0000,L000203A9                ; set running status
+.load_music
+                                BSR.W   load_music                                              ; L00021814
+                                BCLR.B  #$0000,L000203A9                                        ; set running status
 
-L00020322                       BCLR.B  #MENU_SELECT_DISABLED,menu_selection_status_bits        ; enable menu selection ; L000203A8
-L0002032A                       BCLR.B  #$0001,menu_selection_status_bits                       ; L000203A8
-L00020332                       BSET.B  #$0001,L000203AB
+                                BCLR.B  #MENU_SELECT_DISABLED,menu_selection_status_bits        ; enable menu selection ; L000203A8
+                                BCLR.B  #$0001,menu_selection_status_bits                       ; L000203A8
+                                BSET.B  #$0001,L000203AB
 
-check_menu_enabled
-L0002033A                       BTST.B  #MENU_SELECT_DISABLED,menu_selection_status_bits       ; L000203A8
-L00020342                       BNE.B   L00020362 
+.check_menu_enabled
+                                BTST.B  #MENU_SELECT_DISABLED,menu_selection_status_bits        ; L000203A8
+                                BNE.B   .mouse_not_clicked                                      ; L00020362 
                         
 .mouse_test             ; test mouse clicked
-L00020344                       BTST.B  #$0006,$00bfe001
-L0002034C                       BNE.B   L00020362 
+                                BTST.B  #$0006,$00bfe001
+                                BNE.B   .mouse_not_clicked                                      ; L00020362 
 
 .mouse_is_clicked       ; do menu item selected processing
-L0002034E                       BSET.B  #MENU_SELECT_DISABLED,menu_selection_status_bits        ; disable menu selection ; L000203A8
-L00020356                       BSET.B  #$0001,menu_selection_status_bits               ; L000203A8
-L0002035E                       BSR.W   do_menu_action                                  ; L0002088E
+                                BSET.B  #MENU_SELECT_DISABLED,menu_selection_status_bits        ; disable menu selection ; L000203A8
+                                BSET.B  #$0001,menu_selection_status_bits                       ; L000203A8
+                                BSR.W   do_menu_action                                          ; L0002088E
 
 .mouse_not_clicked      ; test draw new menu (if required)
-L00020362                       BTST.B  #MENU_DISP_DRAW,menu_display_status_bits        ; L000203AA
-L0002036A                       BNE.B   L00020370 
-L0002036C                       BSR.W   display_menu                                    ; L0002049C
+                                BTST.B  #MENU_DISP_DRAW,menu_display_status_bits                ; L000203AA
+                                BNE.B   .check_clear_menu                                       ; L00020370 
+                                BSR.W   display_menu                                            ; L0002049C
 
                         ; test clear menu display (if required)
-L00020370                       BTST.B  #MENU_DISP_CLEAR,menu_display_status_bits       ; L000203AA
-L00020378                       BEQ.B   L0002037E 
-L0002037A                       BSR.W   clear_menu_display                              ; L000207B6
+.check_clear_menu
+                                BTST.B  #MENU_DISP_CLEAR,menu_display_status_bits               ; L000203AA
+                                BEQ.B   .check_music_init                                       ; L0002037E 
+                                BSR.W   clear_menu_display                                      ; L000207B6
 
                         ; test menu item selected/loading
-L0002037E                       BTST.B  #$0001,L000203AB
-L00020386                       BEQ.B   L000203A4
+.check_music_init
+                                BTST.B  #$0001,L000203AB
+                                BEQ.B   .end_main_loop                                          ; L000203A4
 
-                        ; do menu item selected processing
-L00020388                       BSR.W   L00021B96
-L0002038C                       BSR.W   music_off                       ; L00021C0A
-L00020390                       BSR.W   L00021B96
-L00020394                       BCLR.B  #$0001,L000203AB
-L0002039C                       BSET.B  #$0000,L000203AB
-L000203A4                       BRA.W   main_loop                       ; L000202F6 
+                        ; do music initialisation
+.initialise_music
+                                BSR.W   L00021B96
+                                BSR.W   music_off                                               ; L00021C0A
+                                BSR.W   L00021B96
+                                BCLR.B  #$0001,L000203AB
+                                BSET.B  #$0000,L000203AB
+
+.end_main_loop
+                                BRA.W   main_loop                                               ; L000202F6 
+
 
 
 ; state flags
 menu_selection_status_bits      ; original address L000203A8
-L000203A8                       dc.b    $00
+                                dc.b    $00
 
 
 L000203A9                       dc.b    $00
 menu_display_status_bits        ; original address L000203AA
-L000203AA                       dc.b    $00                     ; menu status bits 
+                                dc.b    $00                     ; menu status bits 
                                                                 ; bit - value - description
                                                                 ;  0      1     do fade in menu display
                                                                 ;  1      1     do fade out menu display
                                                                 ;  6      1     clear menu display  
                                                                 ;  7      1     menu display draw complete
+
+music_status_bits       ; original address L000203AB (maybe menu status bits)
 L000203AB                       dc.b    $00
 menu_ptr_index  ; original address L000203AC
 L000203AC                       dc.b    $00                     ; index to the list of menu text pointers (multiple of 4 - longword list)
@@ -381,7 +391,7 @@ L000203AD                       dc.b    $00
                 ; ones per frame.
 level_3_interrupt_handler
 L000203AE                       MOVEM.L D0-D7/A0-A6,-(A7)
-L000203B2                       MOVE.W  #$0010,$009c(A6)
+L000203B2                       MOVE.W  #$0010,INTREQ(A6)
 
 L000203B8                       BSR.W   text_scroller                   ; Bottom screen text scroller - L0002152E
 L000203BC                       BSR.W   swap_vector_logo_buffers        ; L000212F8
@@ -401,47 +411,26 @@ L000203E6                       BTST.B  #MENU_DISP_FADE_OUT,menu_display_status_
 L000203EE                       BEQ.B   L000203F4                       
 L000203F0                       BSR.W   fade_out_menu_display                                   ; L00020672 - bit 1 = 1 - menu routine
 
-L000203F4                       BSR.W   L00020746
+                        ; blend typer colour where it overlaps with vector logo (alpha blend effect)
+L000203F4                       BSR.W   blend_typer_colour_fade                                 ; L00020746
 
-L000203F8                       BTST.B  #$0001,menu_selection_status_bits                       ; L000203A8
-L00020400                       BNE.B   L00020406 
+do_menu_item_pointers   ; test menu disabled status bits
+                                BTST.B  #$0001,menu_selection_status_bits                       ; L000203A8
+                                BNE.B   do_music                                                ; L00020406 
+                        ; update menu item selection pointer display
+                                BSR.W   update_menu_selector_position                           ; L000207EA
 
-L00020402                       BSR.W   update_menu_selector_position                           ; L000207EA
+do_music                ; test music loaded & ready - original address L00020406
+                                BTST.B  #$0000,L000203AB
+                                BEQ.B   exit_handler                                            ; L00020420
+                        ; play/update music
+                                BSR.W   play_music                                              ; L00021C2C
 
-L00020406                       BTST.B  #$0000,L000203AB
-L0002040E                       BEQ.B   L00020420 
-L00020410                       BSR.W   L00021C2C
+exit_handler    ; original address L00020424
+                                MOVEM.L (A7)+,D0-D7/A0-A6
+                                RTE 
 
-L00020420                       ;BSR.W   L0002042A    
-                                NOP
-L00020424                       MOVEM.L (A7)+,D0-D7/A0-A6
-L00020428                       RTE 
 
-;L0002042a                       add.w   #$0001,L0002049a
-;L00020432                       cmp.w   #$0014,L0002049a
-;L0002043a                       bne.w   L0002048e
-;L0002043e                       move.w  #$0000,L0002049a
-;L00020446                       move.l  #$00000000,d7
-;L0002044c                       move.b  $00bfea01,d7
-;L00020452                       lsl.l   #$04,d7
-;L00020454                       lsl.l   #$04,d7
-;L00020456                       move.b  $00bfe901,d7
-;L0002045c                       lsl.l   #$04,d7
-;L0002045e                       lsl.l   #$04,d7
-;L00020460                       move.b  $00bfe801,d7
-;L00020466                       cmp.l   L00020496,d7
-;L0002046c                       bne.w   L00020488 
-;L00020470                       move.l  #$ffffffff,$00af0000
-;L0002047a                       lea.l   L00020490,a0
-;L00020480                       move.l  a0,$0080
-;L00020484                       trap    #$00
-;L00020486                       rts  
-;L00020488                       move.l  d7,L00020496
-;L0002048e                       rts 
-;L00020490                       jmp $00fc0002
-
-;00020496 0000 031b                or.b #$1b,d0
-;0002049a 000e                     illegal
 
 
                 ; ------------------------ display menu -------------------------
@@ -538,127 +527,187 @@ L000205D0                       dc.w    $0000
 L000205D2                       dc.w    $0000
 
 
+
+                        ; --------------------- fade in menu display text ----------------------
+                        ; Fades in the text colour of the menu text display. 
+                        ; This routine sets the colour in the copper list for the value where
+                        ; the text does not overlap the vector logo in the backround.
+                        ; A separate routine is used to blend the vector colour with the text
+                        ; colour when it fades in/out to give an alpha type effect.
+                        ; This routine does set the colour used by the alpha routine in the
+                        ; menu_text_fade_colour_copy variable.
+                        ;
 fade_in_menu_display    ; original address L000205D4
-L000205D4                       CMP.B   #$03,fade_speed_counter         ; L00020743
-L000205DC                       BNE.W   L00020668 
-L000205E0                       MOVE.B  #$00,fade_speed_counter         ; L00020743
-L000205E8                       LEA.L   L00022DAE,A0
-L000205EE                       MOVE.W  $0002(A0),D0
-L000205F2                       MOVE.W  D0,D1
-L000205F4                       AND.W   #$000f,D1
-L000205F8                       CMP.W   #$000f,D1
-L000205FC                       BEQ.B   L00020604 
-L000205FE                       ADD.W   #$0001,$0002(A0)
-L00020604                       MOVE.W  D0,D1
-L00020606                       AND.W   #$00f0,D1
-L0002060A                       CMP.W   #$00f0,D1
-L0002060E                       BEQ.B   L00020616 
-L00020610                       ADD.W   #$0010,$0002(A0)
-L00020616                       MOVE.W  D0,D1
-L00020618                       AND.W   #$0f00,D1
-L0002061C                       CMP.W   #$0f00,D1
-L00020620                       BEQ.B   L00020628 
-L00020622                       ADD.W   #$0100,$0002(A0)
-L00020628                       MOVE.W  L00020744,D0
-L0002062E                       CMP.W   #$0fff,D0
-L00020632                       BEQ.B   L0002063C 
-L00020634                       ADD.W   #$0111,L00020744
-L0002063C                       ADD.B   #$01,L00020742
-L00020644                       CMP.B   #$10,L00020742
-L0002064C                       BNE.B   L00020666 
-L0002064E                       BCLR.B  #MENU_DISP_FADE_IN,menu_display_status_bits             ; set fade in completed (clear bit 0) - L000203AA
-L00020656                       BCLR.B  #$0000,menu_selection_status_bits                       ; L000203A8
-L0002065E                       MOVE.W  #$0000,L00020742
-L00020666                       RTS 
+                                CMP.B   #$03,fade_speed_counter                         ; L00020743
+                                BNE.W   .exit_fade_in                                   ; L00020668 
+                                MOVE.B  #$00,fade_speed_counter                         ; L00020743
+                                LEA.L   copper_menu_fade_colour,a0                      ; L00022DAE,A0
+                                MOVE.W  $0002(A0),D0                                    ; get current colour from copper list
+.calc_blue_component
+                                MOVE.W  D0,D1
+                                AND.W   #$000f,D1
+                                CMP.W   #$000f,D1
+                                BEQ.B   .calc_green_component                           ; L00020604 
+                                ADD.W   #$0001,$0002(A0)                                ; update colour reg in copper list
+.calc_green_component
+                                MOVE.W  D0,D1
+                                AND.W   #$00f0,D1
+                                CMP.W   #$00f0,D1
+                                BEQ.B   .calc_red_component                             ; L00020616 
+                                ADD.W   #$0010,$0002(A0)                                ; update colour reg in copper list
+.calc_red_component
+                                MOVE.W  D0,D1
+                                AND.W   #$0f00,D1
+                                CMP.W   #$0f00,D1
+                                BEQ.B   .set_blend_copy_colour                          ; L00020628 
+                                ADD.W   #$0100,$0002(A0)                                ; update colour reg in copper list
+.set_blend_copy_colour   ; set the copy of the colour for the blend fade routine
+                                MOVE.W  menu_text_fade_colour_copy,d0                   ; L00020744,D0
+                                CMP.W   #$0fff,D0
+                                BEQ.B   .update_fade_count                              ; L0002063C 
+                                ADD.W   #$0111,menu_text_fade_colour_copy               ; increment current fade colour - L00020744
+.update_fade_count
+                                ADD.B   #$01,fade_counter                               ; L00020742
+                                CMP.B   #$10,fade_counter                               ; L00020742
+                                BNE.B   .fade_in_not_complete                           ; L00020666 
+.set_fade_in_complete
+                                BCLR.B  #MENU_DISP_FADE_IN,menu_display_status_bits      ; set fade in completed (clear bit 0) - L000203AA
+                                BCLR.B  #$0000,menu_selection_status_bits                ; L000203A8
+                                MOVE.W  #$0000,fade_counter                              ; L00020742
+.fade_in_not_complete
+                                RTS 
 
-L00020668                       ADD.B   #$01,fade_speed_counter                 ; L00020743
-L00020670                       RTS 
+.exit_fade_in
+                                ADD.B   #$01,fade_speed_counter                 ; L00020743
+                                RTS 
 
 
+
+                        ; --------------------- fade in menu display text ----------------------
+                        ; Fades out the text colour of the menu text display. 
+                        ; This routine sets the colour in the copper list for the value where
+                        ; the text does not overlap the vector logo in the backround.
+                        ; A separate routine is used to blend the vector colour with the text
+                        ; colour when it fades in/out to give an alpha type effect.
+                        ; This routine does set the colour used by the alpha routine in the
+                        ; menu_text_fade_colour_copy variable.
+                        ; when the fade completes, then this routine sets the menu sprite
+                        ; coords ready for the next menu (obviously I didn;t care or know
+                        ; much about separation of concerns when I was 17)
+                        ;
 fade_out_menu_display   ; original address L00020672
-L00020672                       CMP.B   #$03,fade_speed_counter                 ; L00020743
-L0002067A                       BNE.W   L00020738 
-L0002067E                       MOVE.B  #$00,fade_speed_counter                 ; L00020743
-L00020686                       LEA.L   L00022DAE,A0
-L0002068C                       MOVE.W  $0002(A0),D0
-L00020690                       MOVE.W  D0,D1
-L00020692                       AND.W   #$000f,D1
-L00020696                       CMP.W   #$0002,D1
-L0002069A                       BEQ.B   L000206A2 
-L0002069C                       SUB.W   #$0001,$0002(A0)
-L000206A2                       MOVE.W  D0,D1
-L000206A4                       AND.W   #$00f0,D1
-L000206A8                       CMP.W   #$0000,D1
-L000206AC                       BEQ.B   L000206B4 
-L000206AE                       SUB.W   #$0010,$0002(A0)
-L000206B4                       AND.W   #$0f00,D0
-L000206B8                       CMP.W   #$0000,D0
-L000206BC                       BEQ.B   L000206C4 
-L000206BE                       SUB.W   #$0100,$0002(A0)
-L000206C4                       MOVE.W  L00020744,D0
-L000206CA                       CMP.W   #$0000,D0
-L000206CE                       BEQ.B   L000206D8 
-L000206D0                       SUB.W   #$0111,L00020744
-L000206D8                       ADD.B   #$01,L00020742
-L000206E0                       CMP.B   #$10,L00020742
-L000206E8                       BNE.B   L00020736 
+                                CMP.B   #$03,fade_speed_counter                         ; L00020743
+                                BNE.W   .exit_fade_out                                  ; L00020738 
+                                MOVE.B  #$00,fade_speed_counter                         ; L00020743
+                                LEA.L   copper_menu_fade_colour,a0                      ; L00022DAE,A0
+                                MOVE.W  $0002(A0),D0
+.calc_blue_component
+                                MOVE.W  D0,D1
+                                AND.W   #$000f,D1
+                                CMP.W   #$0002,D1
+                                BEQ.B   .calc_green_component                           ; L000206A2 
+                                SUB.W   #$0001,$0002(A0)
+.calc_green_component
+                                MOVE.W  D0,D1
+                                AND.W   #$00f0,D1
+                                CMP.W   #$0000,D1
+                                BEQ.B   .calc_red_component                             ; L000206B4 
+                                SUB.W   #$0010,$0002(A0)
+.calc_red_component
+                                AND.W   #$0f00,D0
+                                CMP.W   #$0000,D0
+                                BEQ.B   .set_blend_copy_colour                          ; L000206C4 
+                                SUB.W   #$0100,$0002(A0)
+.set_blend_copy_colour   ; set the copy of the colour for the blend fade routine
+                                MOVE.W  menu_text_fade_colour_copy,D0
+                                CMP.W   #$0000,D0
+                                BEQ.B   .update_fade_count                              ; L000206D8 
+                                SUB.W   #$0111,menu_text_fade_colour_copy
+.update_fade_count
+                                ADD.B   #$01,fade_counter                               ; L00020742
+                                CMP.B   #$10,fade_counter                               ; L00020742
+                                BNE.B   .fade_in_not_complete                           ; L00020736 
+.set_fade_out_complete
+                                BCLR.B  #MENU_DISP_FADE_OUT,menu_display_status_bits            ; set fade out completed (clear bit 1) - L000203AA
+                                BSET.B  #MENU_DISP_CLEAR,menu_display_status_bits               ; (set bit 6) - L000203AA
+                                BCLR.B  #$0001,menu_selection_status_bits                       ; L000203A8
+                                MOVE.W  #$0000,fade_counter                                     ; L00020742
+.set_menu_sprite_ptrs
+                                LEA.L   menu_sprite_left,A0                                     ; L00035FB8,A0
+                                MOVE.B  L0002088A,$0001(A0)
+                                MOVE.B  L0002088B,$0003(A0)
+                                LEA.L   menu_sprite_right,A0                                    ; L00035FDC,A0
+                                MOVE.B  L0002088C,$0001(A0)
+                                MOVE.B  L0002088D,$0003(A0)
+.fade_in_not_complete
+                                RTS 
 
-L000206EA                       BCLR.B  #MENU_DISP_FADE_OUT,menu_display_status_bits            ; set fade out completed (clear bit 1) - L000203AA
-L000206F2                       BSET.B  #MENU_DISP_CLEAR,menu_display_status_bits               ; (set bit 6) - L000203AA
-L000206FA                       BCLR.B  #$0001,menu_selection_status_bits                       ; L000203A8
-L00020702                       MOVE.W  #$0000,L00020742
-L0002070A                       LEA.L   menu_sprite_left,A0             ; L00035FB8,A0
-L00020710                       MOVE.B  L0002088A,$0001(A0)
-L00020718                       MOVE.B  L0002088B,$0003(A0)
-L00020720                       LEA.L   menu_sprite_right,A0            ; L00035FDC,A0
-L00020726                       MOVE.B  L0002088C,$0001(A0)
-L0002072E                       MOVE.B  L0002088D,$0003(A0)
-L00020736                       RTS 
-
-L00020738                       ADD.B   #$01,fade_speed_counter         ; L00020743
-L00020740                       RTS 
+.exit_fade_out
+                                ADD.B   #$01,fade_speed_counter         ; L00020743
+                                RTS 
 
 
-L00020742                       dc.b $00
+fade_counter            ; original address L00020742 - used to measure if the fade is complete (after 16 fade levels)
+                                dc.b $00
 fade_speed_counter      ; original address L00020743
-L00020743                       dc.b $00 
-L00020744                       dc.b $00,$00
+                                dc.b $00
+
+                                even
+menu_text_fade_colour_copy ; original address L00020744 - copy of the menu text colour (used by the colour blend routine below)
+                                dc.w $0000
 
 
-L00020746                       LEA.L   L00022DAC,A0
-L0002074C                       LEA.L   L00022DAE,A1
-L00020752                       MOVE.L  #$00000000,D4
-L00020754                       MOVE.W  (A0),D0
-L00020756                       MOVE.W  D0,D2
-L00020758                       MOVE.W  L00020744,D1
-L0002075E                       MOVE.W  D1,D3
-L00020760                       AND.W   #$000f,D2
-L00020764                       AND.W   #$000f,D3
-L00020768                       ADD.W   D2,D3
-L0002076A                       CMP.W   #$000f,D3
-L0002076E                       BLE.W   L00020776 
-L00020772                       MOVE.W  #$000f,D3
-L00020776                       OR.W    D3,D4
-L00020778                       MOVE.W  D0,D2
-L0002077A                       MOVE.W  D1,D3
-L0002077C                       AND.W   #$00f0,D2
-L00020780                       AND.W   #$00f0,D3
-L00020784                       ADD.W   D2,D3
-L00020786                       CMP.W   #$00f0,D3
-L0002078A                       BLE.W   L00020792 
-L0002078E                       MOVE.W  #$00f0,D3
-L00020792                       OR.W    D3,D4
-L00020794                       MOVE.W  D0,D2
-L00020796                       MOVE.W  D1,D3
-L00020798                       AND.W   #$0f00,D2
-L0002079C                       AND.W   #$0f00,D3
-L000207A0                       ADD.W   D2,D3
-L000207A2                       CMP.W   #$0f00,D3
-L000207A6                       BLE.W   L000207AE 
-L000207AA                       MOVE.W  #$0f00,D3
-L000207AE                       OR.W    D3,D4
-L000207B0                       MOVE.W  D4,$0006(A1)
-L000207B4                       RTS 
+
+
+                ; ----------------------- blend typer colour fade ----------------------
+                ; combines the current typer colour (which i've named alpha here) with
+                ; the current vector logo colour behind it on the display.
+                ; clamp the colour to the max value.
+                ;
+blend_typer_colour_fade ; original address L00020746
+                                LEA.L   copper_vector_logo_colour,A0                    ; vector logo colour
+                                LEA.L   copper_menu_fade_colour,A1      ; text menu copper colour
+                                MOVE.L  #$00000000,D4
+                                MOVE.W  (A0),D0                         ; get current vector logo colour value
+                                MOVE.W  D0,D2
+                                MOVE.W  menu_text_fade_colour_copy,d1       ; L00020744,D1
+.calc_blue_component
+                                MOVE.W  D1,D3
+                                AND.W   #$000f,D2                       ; vector logo blue component
+                                AND.W   #$000f,D3                       ; typer alpha value
+                                ADD.W   D2,D3                           ; add together
+                                CMP.W   #$000f,D3
+                                BLE.W   .set_blue_component              ; L00020776 
+                                MOVE.W  #$000f,D3                       ; clamp blue to max blue
+.set_blue_component
+                                OR.W    D3,D4                           ; set blue component
+.calc_green_component
+                                MOVE.W  D0,D2
+                                MOVE.W  D1,D3
+                                AND.W   #$00f0,D2                       ; vector logo green component
+                                AND.W   #$00f0,D3                       ; typer green component
+                                ADD.W   D2,D3                           ; add together
+                                CMP.W   #$00f0,D3       
+                                BLE.W   .set_green_component             ; L00020792 
+                                MOVE.W  #$00f0,D3                       ; clamp to max green
+.set_green_component
+                                OR.W    D3,D4
+.calc_red_component
+                                MOVE.W  D0,D2
+                                MOVE.W  D1,D3
+                                AND.W   #$0f00,D2                       ; vector logo red component
+                                AND.W   #$0f00,D3                       ; typer red component
+                                ADD.W   D2,D3                           ; add together
+                                CMP.W   #$0f00,D3
+                                BLE.W   .set_red_component               ; L000207AE 
+                                MOVE.W  #$0f00,D3                       ; clamp to max red
+.set_red_component
+                                OR.W    D3,D4
+                                MOVE.W  D4,$0006(A1)                    ; set blended colour value in copper list
+                                RTS 
+
+
+
 
 
                 ; -------------------- clear menu display ---------------------
@@ -1299,7 +1348,7 @@ L000213D6                       RTS
 calc_logo_lighting    ; original address L000213D8
 L000213D8                       MOVE.W  L000213EC(PC),D0
 L000213DC                       LEA.L   L00039A4E,A0
-L000213E2                       MOVE.W  $00(A0,D0.W),L00022DAC
+L000213E2                       MOVE.W  $00(A0,D0.W),copper_vector_logo_colour  ; L00022DAC
 L000213EA                       RTS 
 
 L000213EC                       dc.w    $0000 
@@ -2031,6 +2080,7 @@ music_off       ; original address L00021C0A
                                 RTS 
 
 
+play_music      ; original address L00021C2C
 L00021C2C                       MOVEM.L D0-D4/A0-A6,-(A7)
 L00021C30                       ADD.B   #$00000001,L00022CBD
 L00021C36                       MOVE.B  L00022CBD(PC),D0
@@ -3065,14 +3115,16 @@ toplogo_bpl4ptl                 dc.w    $0000           ; original addressw L000
                                 dc.w    $0180
                                 dc.w    $0002
                                 dc.w    $0182
-L00022DAC                       dc.w    $0000
-L00022DAE                       dc.w    $0184
+copper_vector_logo_colour
+L00022DAC                       dc.w    $0000           ; vector logo colour
+copper_menu_fade_colour
+L00022DAE                       dc.w    $0184           ; text typer colour
                                 dc.w    $0002
                                 dc.w    $0186
-                                dc.w    $0002
-                                dc.w    $01A0
+                                dc.w    $0002           ; text typer colour where it overlaps vector logo
+                                dc.w    $01A0           ; sprite ptr colour
                                 dc.w    $00AA
-                                dc.w    $01A2
+                                dc.w    $01A2           ; sprite ptr colour
                                 dc.w    $00AA
 
                         ; start of menu & vector logo display
