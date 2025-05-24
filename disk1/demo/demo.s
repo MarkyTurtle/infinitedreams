@@ -41,9 +41,11 @@ TEST_BUILD SET 1                                              ; Comment this to 
         IFD TEST_BUILD
 STACK_ADDRESS   EQU     start_demo                      ; test stack address (start of program)
 LOAD_BUFFER     EQU     load_buffer                     ; file load buffer
+MFM_BUFFER      EQU     mfm_track_buffer
         ELSE
 STACK_ADDRESS   EQU     $00080000                       ; original stack address
 LOAD_BUFFER     EQU     $00040000                       ; file load buffer
+MFM_BUFFER      EQU     $00075000
         ENDC
 
 
@@ -298,16 +300,20 @@ top_logo_fade_count     ; original address L000202F4
                 ; ***********                 MAIN LOOP                 **********
                 ; ****************************************************************
 main_loop       ; original address L000202F6
-                                BTST.B  #$0000,L000203A9                                        ; check running status
-                                BEQ.B   .check_menu_fading                                     ; L0002033A
 
-                                BTST.B  #$0000,music_status_bits                                ; loading check?
-                                BEQ.B   .load_music                                             ; L00020316 
-.disable_music
-                                BCLR.B  #$0000,music_status_bits
+                        ; check if need to change music track
+                                BTST.B  #$0000,L000203A9                                        ; check running status
+                                BEQ.B   .do_menu_processing                                     ; L0002033A
+
+.do_change_music        ; stop existing track(if playing), then load selected track
+                                BTST.B  #MUSIC_PLAYING,music_status_bits        ; is music playing?
+                                BEQ.B   .load_music                             ;   if no, load music
+                                                                                ;   if yes, stop music
+.disable_music          ; stop music playing
+                                BCLR.B  #MUSIC_PLAYING,music_status_bits
                                 BSR.W   music_off                                               ; L00021C0A
 
-.load_music
+.load_music             ; load music
                                 BSR.W   load_music                                              ; L00021814
                                 BCLR.B  #$0000,L000203A9                                        ; set running status
 
@@ -315,7 +321,9 @@ main_loop       ; original address L000202F6
                                 BCLR.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     ; L000203A8
                                 BSET.B  #$0001,music_status_bits
 
-.check_menu_fading
+
+
+.do_menu_processing     ; do menu processing
                                 BTST.B  #MENU_FADING,menu_selection_status_bits                 ; L000203A8
                                 BNE.B   .mouse_not_clicked                                      ; L00020362 
                         
@@ -346,9 +354,9 @@ main_loop       ; original address L000202F6
 
                         ; do music initialisation
 .initialise_music
-                                BSR.W   L00021B96
+                                BSR.W   music_start_stop                                        ; L00021B96
                                 BSR.W   music_off                                               ; L00021C0A
-                                BSR.W   L00021B96
+                                BSR.W   music_start_stop                                        ; L00021B96
                                 BCLR.B  #$0001,music_status_bits
                                 BSET.B  #$0000,music_status_bits
 
@@ -423,7 +431,7 @@ level_3_interrupt_handler ; original address L000203AE
 
 
 .do_music                ; test music loaded & ready - original address L00020406
-                                BTST.B  #$0000,music_status_bits
+                                BTST.B  #MUSIC_PLAYING,music_status_bits
                                 BEQ.B   .exit_handler                                            ; L00020420
                         ; play/update music
                                 BSR.W   play_music                                              ; L00021C2C
@@ -2019,7 +2027,7 @@ step_heads_long_wait    ; original address L00021B36
                                 RTS 
 
 mfm_track_buffer_ptr    ; original address L00021B80
-                                dc.l    $00075000
+                                dc.l    MFM_BUFFER              ; $00075000
 current_track           ; original address L00021B84
                                 dc.w    $0000
 
@@ -2038,41 +2046,69 @@ loader_disk_number     ; original address L00021B92
 
 
 
-                        ; music routines
-L00021B96                       MOVEA.L #LOAD_BUFFER,A0           ; external address
-L00021B9C                       MOVE.L  A0,L00022CB8
+
+        ; *************************************************************************
+        ; ***                           MUSIC PLAYER ROUTINES                   ***
+        ; *************************************************************************
+
+        ; -------------------------- music start/stop --------------------------
+        ; This routine appears to be called to both stop and initiailise the
+        ; music - this may be an error.
+        ; It's probably an initialisation routine (memory lost to time)
+        ; I will find out when/if I get the time...
+        ;
+music_start_stop        ; original address L00021B96
+L00021B96                       MOVEA.L #LOAD_BUFFER,A0         ; module load address = $40000
+L00021B9C                       MOVE.L  A0,module_start_ptr     ; L00022CB8
 L00021BA2                       MOVEA.L A0,A1
-L00021BA4                       LEA.L   $03b8(A1),A1
-L00021BA8                       MOVE.L  #$0000007f,D0
+
+                        ; find highest byte value in memory range 952-1080 ($3b8-$438)
+                        ; find highest pattern number used (from pattern list/table)
+                        ; pattern table offset = $03b8 (952)
+                        ; the table is 128 bytes
+L00021BA4                       LEA.L   $03b8(A1),A1            ; a1 = offset 952
+L00021BA8                       MOVE.L  #$0000007f,D0           ; d0 = 127+1 - loop counter
 L00021BAA                       MOVE.L  #$00000000,D1
 L00021BAC                       MOVE.L  D1,D2
 L00021BAE                       SUB.W   #$00000001,D0
-L00021BB0                       MOVE.B  (A1)+,D1
-L00021BB2                       CMP.B   D2,D1
+L00021BB0                       MOVE.B  (A1)+,D1                ; read byte from offset 952+
+L00021BB2                       CMP.B   D2,D1                   ; if d1 > d2 then d2 = d1 (branch taken)
 L00021BB4                       BGT.B   L00021BAC 
-L00021BB6                       DBF.W   D0,L00021BB0 
-L00021BBA                       ADD.B   #$00000001,D2
+L00021BB6                       DBF.W   D0,L00021BB0            ; find highest byte value (d2)
+L00021BBA                       ADD.B   #$00000001,D2           ; increment d2
 
-L00021BBC                       LEA.L   L00022C3C(PC),A1
-L00021BC0                       ASL.L   #$00000008,D2
-L00021BC2                       ASL.L   #$00000002,D2
-L00021BC4                       ADD.L   #$0000043c,D2
-L00021BCA                       ADD.L   A0,D2
-L00021BCC                       MOVEA.L D2,A2
-L00021BCE                       MOVE.L  #$0000001e,D0
-L00021BD0                       CLR.L   (A2)
-L00021BD2                       MOVE.L  A2,(A1)+
+                        ; d2 = highest patten index
+                        ; calc start of sample data address
+L00021BBC                       LEA.L   sample_ptr_table(pc),a1         ; L00022C3C(PC),A1
+L00021BC0                       ASL.L   #$00000008,D2           ; multiply index by 256
+L00021BC2                       ASL.L   #$00000002,D2           ; multiply index y 1024 (max pattern index)
+L00021BC4                       ADD.L   #$0000043c,D2           ; add start pattern offset
+L00021BCA                       ADD.L   A0,D2                   ; d2 = start of sample data address
+
+                        ; d2 = start of sample data address
+                        ; step through each sample and get the sample
+                        ; start address for each instrument.
+                        ; records the start address in the sample_ptr_table
+L00021BCC                       MOVEA.L D2,A2                   ; a2 = start of sample data
+L00021BCE                       MOVE.L  #$0000001e,D0           ; samples = 30+1 (31 samples)
+L00021BD0                       CLR.L   (A2)                    ; zero first pair of sample bytes (remove pop/click?)
+L00021BD2                       MOVE.L  A2,(A1)+                ; store sample ptr data
 L00021BD4                       MOVE.L  #$00000000,D1
-L00021BD6                       MOVE.W  $002a(A0),D1
-L00021BDA                       ASL.L   #$00000001,D1
-L00021BDC                       ADDA.L  D1,A2
-L00021BDE                       ADDA.L  #$0000001e,A0
-L00021BE4                       DBF.W   D0,L00021BD0 
+L00021BD6                       MOVE.W  $002a(A0),D1            ; d1 = module offset 42 (sample length offset - sample 1)
+L00021BDA                       ASL.L   #$00000001,D1           ; convert sample length in words to sample length in bytes
+L00021BDC                       ADDA.L  D1,A2                   ; a2 = next sample start address
+L00021BDE                       ADDA.L  #$0000001e,A0           ; a0 = next sample length address ptr
+L00021BE4                       DBF.W   D0,L00021BD0            ; loop for next sample
+
+                        ; switch audio filter off
 L00021BE8                       OR.B    #$02,$00bfe001          ; /LED (sound filter off)
+
+                        ; initialise play counters/tracker vars
 L00021BF0                       MOVE.B  #$06,L00022CBC
 L00021BF8                       CLR.B   L00022CBD
 L00021BFE                       CLR.B   L00022CBE
 L00021C04                       CLR.W   L00022CC6
+
 
 music_off       ; original address L00021C0A
                                 CLR.W   CUSTOM+AUD0VOL          ; $00dff0a8
@@ -2112,7 +2148,7 @@ L00021C8A                       LEA.L   L00022C10(PC),A6
 L00021C8E                       BRA.W   L00021F72 
 
 
-L00021C92                       MOVEA.L L00022CB8(PC),A0
+L00021C92                       MOVEA.L module_start_ptr(pc),a0                 ; L00022CB8(PC),A0
 L00021C96                       LEA.L   $000c(A0),A3
 L00021C9A                       LEA.L   $03b8(A0),A2
 L00021C9E                       LEA.L   $043c(A0),A0
@@ -2154,7 +2190,7 @@ L00021D10                       OR.B    D0,D2
 L00021D12                       TST.B   D2
 L00021D14                       BEQ.W   L00021D9A 
 L00021D18                       MOVE.L  #$00000000,D3
-L00021D1A                       LEA.L   L00022C3C(PC),A1
+L00021D1A                       LEA.L   sample_ptr_table(pc),a1                 ; L00022C3C(PC),A1
 L00021D1E                       MOVE.W  D2,D4
 L00021D20                       SUB.L   #$00000001,D2
 L00021D22                       ASL.L   #$00000002,D2
@@ -2298,7 +2334,7 @@ L00021F3C                       CLR.B   L00022CC0
 L00021F42                       ADD.B   #$00000001,L00022CBE
 L00021F48                       AND.B   #$7f,L00022CBE
 L00021F50                       MOVE.B  L00022CBE(PC),D1
-L00021F54                       MOVEA.L L00022CB8(PC),A0
+L00021F54                       MOVEA.L module_start_ptr(pc),a0                 ; L00022CB8(PC),A0
 L00021F58                       CMP.B   $03b6(A0),D1
 L00021F5C                       BCS.B   L00021F64 
 L00021F5E                       CLR.B   L00022CBE
@@ -2980,36 +3016,63 @@ L00022B8C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$000
 L00022B9C                       dc.w    $0000,$0000,$0001,$0000,$0000,$0000,$0000,$0000         ;................
 L00022BAC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000
 
-L00022BB8                       dc.w    $0000,$0000         ;................
+L00022BB8                       dc.w    $0000,$0000
 
-L00022BBC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L00022BCC                       dc.w    $0002,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
+L00022BBC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+L00022BCC                       dc.w    $0002,$0000,$0000,$0000,$0000,$0000,$0000,$0000
 L00022BDC                       dc.w    $0000,$0000,$0000,$0000
 
-L00022BE4                       dc.w    $0000,$0000,$0000,$0000         ;................
-L00022BEC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0004,$0000         ;................
-L00022BFC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
+L00022BE4                       dc.w    $0000,$0000,$0000,$0000
+L00022BEC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0004,$0000
+L00022BFC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
 L00022C0C                       dc.w    $0000,$0000
 
-L00022C10                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000         ;................
-L00022C1C                       dc.w    $0000,$0000,$0000,$0000,$0008,$0000,$0000,$0000         ;................
-L00022C2C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L00022C3C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L00022C4C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L00022C5C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L00022C6C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L00022C7C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L00022C8C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L00022C9C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000         ;................
-L00022CAC                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000
+L00022C10                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000 
+L00022C1C                       dc.w    $0000,$0000,$0000,$0000,$0008,$0000,$0000,$0000
+L00022C2C                       dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
 
-L00022CB8                       dc.w    $0000
-L00022CBA                       dc.w    $0000         ;................
 
-L00022CBC                       dc.b    $06
-L00022CBD                       dc.b    $00
+sample_ptr_table        ; original address L00022C3C
+L00022C3C                       dc.l    $00000000       ; sample 1
+                                dc.l    $00000000
+                                dc.l    $00000000
+                                dc.l    $00000000
+L00022C4C                       dc.l    $00000000
+                                dc.l    $00000000
+                                dc.l    $00000000
+                                dc.l    $00000000       ; sample 8
+L00022C5C                       dc.l    $00000000
+                                dc.l    $00000000
+                                dc.l    $00000000
+                                dc.l    $00000000
+L00022C6C                       dc.l    $00000000
+                                dc.l    $00000000
+                                dc.l    $00000000
+                                dc.l    $00000000       ; sample 16
+L00022C7C                       dc.l    $00000000
+                                dc.l    $00000000
+                                dc.l    $00000000
+                                dc.l    $00000000
+L00022C8C                       dc.l    $00000000
+                                dc.l    $00000000
+                                dc.l    $00000000
+                                dc.l    $00000000       ; sample 24
+L00022C9C                       dc.l    $00000000
+                                dc.l    $00000000
+                                dc.l    $00000000
+                                dc.l    $00000000
+L00022CAC                       dc.l    $00000000
+                                dc.l    $00000000
+                                dc.l    $00000000       ; sample 31
 
-L00022CBE                       dc.b    $00
+
+module_start_ptr        ; original address L00022CB8
+L00022CB8                       dc.l   $00000000        ; module load address
+
+L00022CBC                       dc.b    $06             ; init music sets this to #$06
+L00022CBD                       dc.b    $00             ; init music sets this to #$00
+L00022CBE                       dc.b    $00             ; init music sets this to #$00
+
 L00022CBF                       dc.b    $00
 
 L00022CC0                       dc.b    $00
@@ -3018,8 +3081,17 @@ L00022CC2                       dc.b    $00
 L00022CC3                       dc.b    $00
 
 L00022CC4                       dc.w    $0000
-L00022CC6                       dc.w    $0000
+L00022CC6                       dc.w    $0000           ; init music sets this to #$00
 L00022CC8                       dc.w    $0000
+
+
+
+        ; *************************************************************************
+        ; ***                      END OF MUSIC PLAYER ROUTINES                 ***
+        ; *************************************************************************
+
+
+
 
 
 
@@ -5826,9 +5898,12 @@ pd_message_menu        ; original address L0003CEEA
                                 dc.b    '                                             '  
                                 dc.b    '                                             ' 
 
+        IFD TEST_BUILD 
+mfm_track_buffer        dcb.b   1024*13         ; 13Kb raw mfm track buffer for testing
+        ENDC
 
         IFD TEST_BUILD
-load_buffer             dcb.b   1024*200,$00
+load_buffer             dcb.b   1024*200,$00    ; 200Kb Soundtrack module buffer for testing
         ENDC
 
 
