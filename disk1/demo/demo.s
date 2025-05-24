@@ -1,4 +1,5 @@
 
+
         ; Display Memory Buffers
         ; ----------------------
         ; Top Logo Display      = 320 x 57          - 40 x 57  = 2280 (bytes per bitplane) - 4 bitplanes = 9120
@@ -9,6 +10,47 @@
         ; Scroller Display      = 704 x 32  pixels  - 88 x 32  = 2816 (bytes per bitplane) - 4 bitplanes = 11264
         ; Typer Font            =
         ; Scroller Font         =
+        ;
+
+
+
+        ; Disk Track Storage
+        ;------------------------
+        ; The music disk loader loads in an extra track (no of tracks + 1) 
+        ; There is 5.5Kb loaded per track (5632 bytes per track)
+        ;
+        ; Disk 1        Title                   Start Track     No of Tracks    Last Track (inclusive)  Data loaded (bytes)
+        ;               Loading Picture         $00 (00)        $09+1 (10)      $09 (09)                56,320 (raw gfx)
+        ;               Demo Program            $0b (11)        $07+1 (8)       $12 (18)                45,056 (cruched executable)
+        ;               Jarresque               $8e (142)       $11+1 (18)      $9f (159)               101,376
+        ;               The Fly                 $5c (92)        $15+1 (22)      $71 (113)               123,904
+        ;               Stratospheric City      $3b (59)        $1f+1 (32)      $5a (90)                180,224
+        ;               Float                   $73 (115)       $19+1 (26)      $8c (140)               146,432
+        ;               Flight-Sleepy Mix       $1b (27)        $1e+1 (31)      $39 (57)                174,592
+        ;
+        ; Disk 2        Title                   Start Track     No of Tracks    Last Track (inclusive)  Data loaded (bytes)
+        ;               bootblock & gfx         $00 (00)        $00+1 (01)      $00 (00)                5,632
+        ;               Shaft                   $8e (142)       $11+1 (18)      $9f (159)               101,376
+        ;               Love Your Money         $7e (126)       $0e+1 (15)      $8c (140)               84,480
+        ;               Cosmic How Much         $70 (112)       $0c+1 (13)      $7c (124)               73,216
+        ;               This is not a Rave Song $0c (12)        $0d+1 (14)      $19 (25)                78,848
+        ;               Eat the Ballbearing     $55 (85)        $19+1 (26)      $6e (110)               146,432
+        ;               Sound of Silence        $40 (64)        $13+1 (20)      $54 (84)                112,640
+        ;               Retouche                $1b (27)        $10+1 (17)      $2c (44)                95,744
+        ;               Techwar                 $2d (45)        $11+1 (18)      $3e (62)                101,376
+        ;               Bright                  $01 (01)        $09+1 (10)      $0a (10)                56,320
+        ;
+        ; Disk 3        Title                   Start Track     No of Track     Last Track (inclusive)  Data Loaded (bytes)
+        ;               bootblock & gfx         $00 (00)        $00+1 (01)      $00 (00)                5,632
+        ;               Mental Obstacle         $8d (141)       $12+1 (19)      $9f (159)               107,008
+        ;               Blade Runner            $02 (02)        $11+1 (18)      $13 (19)                101,376
+        ;               Natural Reality         $7d (125)       $0e+1 (15)      $8b (139)               84,480
+        ;               Obiliteration Fin       $6f (111)       $0c+1 (13)      $7b (123)               73,216
+        ;               Skyriders               $52 (82)        $1b+1 (28)      $6d (109)               157,696
+        ;               Zero Gravity            $43 (67)        $0d+1 (14)      $50 (80)                78,848
+        ;               Break THrough           $15 (21)        $0d+1 (14)      $22 (34)                78,848
+        ;               Summer In Sweden        $35 (53)        $0c+1 (13)      $41 (65)                73,216
+        ;               Never to Much           $24 (36)        $0f+1 (16)      $33 (51)                90,112
         ;
 
                     section     demo,code_c
@@ -35,9 +77,13 @@ MENU_IDX_addresses_6_menu       EQU     $30     ; L0003CBED - index = $30
 MENU_IDX_pd_message_menu        EQU     $34     ; L0003CEEA - index = $34
 
 
-TEST_BUILD SET 1                                              ; Comment this to remove 'testboot'
 
 
+TEST_BUILD SET 1                                        ; Comment this to remove 'testboot'
+
+
+
+        ; Set 'Test Build' or 'Live Build' parameters 
         IFD TEST_BUILD
 STACK_ADDRESS   EQU     start_demo                      ; test stack address (start of program)
 LOAD_BUFFER     EQU     load_buffer                     ; file load buffer
@@ -47,6 +93,9 @@ STACK_ADDRESS   EQU     $00080000                       ; original stack address
 LOAD_BUFFER     EQU     $00040000                       ; file load buffer
 MFM_BUFFER      EQU     $00075000
         ENDC
+
+
+
 
 
 
@@ -302,8 +351,8 @@ top_logo_fade_count     ; original address L000202F4
 main_loop       ; original address L000202F6
 
                         ; check if need to change music track
-                                BTST.B  #$0000,L000203A9                                        ; check running status
-                                BEQ.B   .do_menu_processing                                     ; L0002033A
+                                BTST.B  #LOAD_MODULE,loader_status_bits         
+                                BEQ.B   .do_menu_processing                     
 
 .do_change_music        ; stop existing track(if playing), then load selected track
                                 BTST.B  #MUSIC_PLAYING,music_status_bits        ; is music playing?
@@ -315,7 +364,7 @@ main_loop       ; original address L000202F6
 
 .load_music             ; load music
                                 BSR.W   load_music                                              ; L00021814
-                                BCLR.B  #$0000,L000203A9                                        ; set running status
+                                BCLR.B  #LOAD_MODULE,loader_status_bits                                                 ; set running status
 
                                 BCLR.B  #MENU_FADING,menu_selection_status_bits                 ; enable menu selection ; L000203A8
                                 BCLR.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     ; L000203A8
@@ -369,7 +418,10 @@ MENU_MOUSE_PTR_DISABLED EQU     $0001           ; bit 1 (1 = menu pointer update
 menu_selection_status_bits      dc.b    $00     ; original address L000203A8
 
 
-L000203A9                       dc.b    $00
+
+LOAD_MODULE             EQU     $0000           ; bit 0 (1 = loading protracker module)
+loader_status_bits      ; original address L000203A9
+                                dc.b    $00     ; bit 0 (1 = loading protrackermodule)
 
 
                 ; menu_display_status_bits
@@ -382,9 +434,9 @@ menu_display_status_bits        dc.b    $00     ; original address L000203AA
 MUSIC_PLAYING                   EQU     $0      ; bit 0 - 1 = music playing
 music_status_bits               dc.b    $00     ; original address L000203AB 
 
-menu_ptr_index  ; original address L000203AC
-L000203AC                       dc.b    $00                     ; index to the list of menu text pointers (multiple of 4 - longword list)
-L000203AD                       dc.b    $00 
+menu_ptr_index  ; original address L000203AC -  ;  index to menu typer ptr list.
+                                dc.w    $0000    ; index to the list of menu text pointers (multiple of 4 - longword list)
+
 
 
 
@@ -642,11 +694,11 @@ fade_out_menu_display   ; original address L00020672
                                 MOVE.W  #$0000,fade_counter                                     ; L00020742
 .set_menu_sprite_ptrs
                                 LEA.L   menu_sprite_left,A0                                     ; L00035FB8,A0
-                                MOVE.B  L0002088A,$0001(A0)
-                                MOVE.B  L0002088B,$0003(A0)
+                                MOVE.B  left_sprite_hpos1,$0001(A0)
+                                MOVE.B  left_sprite_hpos2,$0003(A0)
                                 LEA.L   menu_sprite_right,A0                                    ; L00035FDC,A0
-                                MOVE.B  L0002088C,$0001(A0)
-                                MOVE.B  L0002088D,$0003(A0)
+                                MOVE.B  right_sprite_hpos1,$0001(A0)
+                                MOVE.B  right_sprite_hpos2,$0003(A0)
 .fade_in_not_complete
                                 RTS 
 
@@ -722,17 +774,17 @@ blend_typer_colour_fade ; original address L00020746
                 ; uses the processor to clear the 1 bitplane 320x135 pixel
                 ; menu display.
 clear_menu_display      ; original address L000207B6
-L000207B6                       LEA.L   menu_typer_bitplane,a0          ; L00022E82,A0
-L000207BC                       MOVE.W  #$0009,D7                       ; loop counter 9+1
-L000207C0                       MOVE.W  #$0087,D6                       ; loop counter 135+1
-L000207C4                       MOVE.L  #$00000000,D0
-L000207CA_loop                  MOVE.L  D0,(A0)+
-L000207CC                       DBF.W   D7,L000207CA_loop
-L000207D0                       MOVE.W  #$0009,D7
-L000207D4                       DBF.W   D6,L000207CA_loop
-L000207D8                       BCLR.B  #MENU_DISP_DRAW,menu_display_status_bits        ; L000203AA ; flag - menu cleared status bits
-L000207E0                       BCLR.B  #MENU_DISP_CLEAR,menu_display_status_bits       ; L000203AA ; flag - menu cleared status bits
-L000207E8                       RTS 
+                                LEA.L   menu_typer_bitplane,a0          ; L00022E82,A0
+                                MOVE.W  #$0009,D7                       ; loop counter 9+1
+                                MOVE.W  #$0087,D6                       ; loop counter 135+1
+                                MOVE.L  #$00000000,D0
+.clear_loop                     MOVE.L  D0,(A0)+
+                                DBF.W   D7,.clear_loop 
+                                MOVE.W  #$0009,D7
+                                DBF.W   D6,.clear_loop 
+                                BCLR.B  #MENU_DISP_DRAW,menu_display_status_bits        ; L000203AA ; flag - menu cleared status bits
+                                BCLR.B  #MENU_DISP_CLEAR,menu_display_status_bits       ; L000203AA ; flag - menu cleared status bits
+                                RTS 
 
 
 
@@ -806,450 +858,776 @@ menu_selector_y         ; original address L00020888
                                 dc.w    $0000
 
 
-L0002088A                       dc.b    $6c
-L0002088B                       dc.b    $01
-L0002088C                       dc.b    $a9
-L0002088D                       dc.b    $01 
+; sprite menu pointer control word values (used to set sprite control word values directly)
+left_sprite_hpos1               dc.b    $6c     ; left sprite hvalue (bit 2-9 of hpos)
+left_sprite_hpos2               dc.b    $01     ; left sprite hvalue (bit 1 of hpos)
+right_sprite_hpos1              dc.b    $a9     ; right sprite hvalue (bit 2-9 of hpos)
+right_sprite_hpos2              dc.b    $01     ; right sprite hvalue (bit 1 of hpos)
 
 
 
+
+
+
+        ; *****************************************************************************
+        ; ***                         MENU ACTION PROCESSING                        ***
+        ; *****************************************************************************
+        ; The menu action processing is hard-coded (I was only 17 at the time)
+        ; It works as follows:-
+        ;
+        ; 1) Detect which menu is currently displayed and call the relevent handler
+        ; 2) compare the vertical position of the sprite selection sprites
+        ;       depending on the position, either:-
+        ;              a) display a different menu, or
+        ;              b) load a module to play
+        ;
+
+
+        ; -------------------------------- do menu action ------------------------------
+        ; called from the main loop when the mouse button is clicked. 
+        ; the routine checks the currently displayed menu and performs the necessary 
+        ; actions for that menu.
+        ;
 do_menu_action                  ; original address L0002088E
-L0002088E                       CMP.W   #MENU_IDX_main_menu,menu_ptr_index              ; L000203AC
-L00020896                       BEQ.W   do_main_menu_actions                            ; L00020938 
-
-L0002089A                       CMP.W   #MENU_IDX_disk_1_menu,menu_ptr_index            ; L000203AC
-L000208A2                       BEQ.W   do_disk_1_menu_actions                          ; L00020CFC
-
-L000208A6                       CMP.W   #MENU_IDX_disk_2_menu,menu_ptr_index            ; L000203AC
-L000208AE                       BEQ.W   do_disk_2_menu_actions                          ; L00020D3C 
-
-L000208B2                       CMP.W   #MENU_IDX_disk_3_menu,menu_ptr_index            ; L000203AC
-L000208BA                       BEQ.W   do_disk_3_menu_actions                          ; L00020DAC 
-
-L000208BE                       CMP.W   #MENU_IDX_credits_menu,menu_ptr_index           ; L000203AC
-L000208C6                       BEQ.W   display_menu_menu                               ; L0002124E
-
-L000208CA                       CMP.W   #MENU_IDX_greetings_1_menu,menu_ptr_index       ; L000203AC
-L000208D2                       BEQ.W   do_greetings_1_menu_actions                     ; L00020E1C 
-
-L000208D6                       CMP.W   #MENU_IDX_greetings_2_menu,menu_ptr_index       ; L000203AC
-L000208DE                       BEQ.W   display_menu_menu                               ; L0002124E
- 
-L000208E2                       CMP.W   #MENU_IDX_addresses_1_menu,menu_ptr_index       ; L000203AC
-L000208EA                       BEQ.W   display_address_2_menu                          ; L00020B5E 
-
-L000208EE                       CMP.W   #MENU_IDX_addresses_2_menu,menu_ptr_index       ; L000203AC
-L000208F6                       BEQ.W   display_address_3_menu                          ; L00020BA0 
-
-L000208FA                       CMP.W   #MENU_IDX_addresses_3_menu,menu_ptr_index       ; L000203AC
-L00020902                       BEQ.W   display_address_4_menu                          ; L00020BE2 
-
-L00020906                       CMP.W   #MENU_IDX_addresses_4_menu,menu_ptr_index       ; L000203AC
-L0002090E                       BEQ.W   display_address_5_menu                          ; L00020C24 
-
-L00020912                       CMP.W   #MENU_IDX_addresses_5_menu,menu_ptr_index       ; L000203AC
-L0002091A                       BEQ.W   display_address_6_menu                          ; L00020C66 
-
-L0002091E                       CMP.W   #MENU_IDX_addresses_6_menu,menu_ptr_index       ; L000203AC
-L00020926                       BEQ.W   display_menu_menu                               ; L0002124E 
-
-L0002092A                       CMP.W   #MENU_IDX_pd_message_menu,menu_ptr_index        ; L000203AC
-L00020932                       BEQ.W   display_menu_menu                               ; L0002124E
-
-L00020936                       RTS 
-
-
-
-do_main_menu_actions
-L00020938                       CMP.W   #$0024,menu_selector_y          ; L00020888
-L00020940                       BLE.W   L00020990 
-L00020944                       CMP.W   #$002c,menu_selector_y          ; L00020888
-L0002094C                       BLE.W   L000209D2 
-L00020950                       CMP.W   #$0034,menu_selector_y          ; L00020888
-L00020958                       BLE.W   L00020A14 
-L0002095C                       CMP.W   #$003c,menu_selector_y          ; L00020888
-L00020964                       BLE.W   L00020A56 
-L00020968                       CMP.W   #$0044,menu_selector_y          ; L00020888
-L00020970                       BLE.W   L00020A98 
-L00020974                       CMP.W   #$004c,menu_selector_y          ; L00020888
-L0002097C                       BLE.W   L00020B1C 
-L00020980                       CMP.W   #$0054,menu_selector_y          ; L00020888
-L00020988                       BLE.W   L00020CA8 
-L0002098C                       BRA.W   enable_menu_selection           ; L00020CEA 
+                        ; main menu actions
+                                CMP.W   #MENU_IDX_main_menu,menu_ptr_index              ; L000203AC
+                                BEQ.W   do_main_menu_actions                            ; L00020938 
+                        ; disk 1 menu actions
+                                CMP.W   #MENU_IDX_disk_1_menu,menu_ptr_index            ; L000203AC
+                                BEQ.W   do_disk_1_menu_actions                          ; L00020CFC
+                        ; disk 2 menu actions
+                                CMP.W   #MENU_IDX_disk_2_menu,menu_ptr_index            ; L000203AC
+                                BEQ.W   do_disk_2_menu_actions                          ; L00020D3C 
+                        ; disk 3 menu actions
+                                CMP.W   #MENU_IDX_disk_3_menu,menu_ptr_index            ; L000203AC
+                                BEQ.W   do_disk_3_menu_actions                          ; L00020DAC 
+                        ; credits menu actions
+                                CMP.W   #MENU_IDX_credits_menu,menu_ptr_index           ; L000203AC
+                                BEQ.W   set_main_menu_params                            ; L0002124E
+                        ; greetings 1 menu actions
+                                CMP.W   #MENU_IDX_greetings_1_menu,menu_ptr_index       ; L000203AC
+                                BEQ.W   do_greetings_1_menu_actions                     ; L00020E1C 
+                        ; greetings 2 menu actions
+                                CMP.W   #MENU_IDX_greetings_2_menu,menu_ptr_index       ; L000203AC
+                                BEQ.W   set_main_menu_params                            ; L0002124E
+                        ; addresses 1 menu actions
+                                CMP.W   #MENU_IDX_addresses_1_menu,menu_ptr_index       ; L000203AC
+                                BEQ.W   set_addresses_2_menu_params                     ; L00020B5E 
+                        ; addresses 2 menu actions
+                                CMP.W   #MENU_IDX_addresses_2_menu,menu_ptr_index       ; L000203AC
+                                BEQ.W   set_addresses_3_menu_params                     ; L00020BA0 
+                        ; addresses 3 menu actions
+                                CMP.W   #MENU_IDX_addresses_3_menu,menu_ptr_index       ; L000203AC
+                                BEQ.W   set_addresses_4_menu_params                     ; L00020BE2 
+                        ; addresses 4 menu actions
+                                CMP.W   #MENU_IDX_addresses_4_menu,menu_ptr_index       ; L000203AC
+                                BEQ.W   set_addresses_5_menu_params                     ; L00020C24 
+                        ; addresses 5 menu actions
+                                CMP.W   #MENU_IDX_addresses_5_menu,menu_ptr_index       ; L000203AC
+                                BEQ.W   set_addresses_6_menu_params                     ; L00020C66 
+                        ; addresses 6 menu actions
+                                CMP.W   #MENU_IDX_addresses_6_menu,menu_ptr_index       ; L000203AC
+                                BEQ.W   set_main_menu_params                            ; L0002124E 
+                        ; pd menu actions
+                                CMP.W   #MENU_IDX_pd_message_menu,menu_ptr_index        ; L000203AC
+                                BEQ.W   set_main_menu_params                            ; L0002124E
+                        ; other - exit (shouldn't happen)
+                                RTS 
 
 
-L00020990                       BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-L00020998                       MOVE.W  #$0030,menu_selector_min_y                      ; L00020884
-L000209A0                       MOVE.W  #$0058,menu_selector_max_y                      ; L00020886
-L000209A8                       MOVE.W  #MENU_IDX_disk_1_menu,menu_ptr_index            ; L000203AC
-L000209B0                       MOVE.B  #$42,L0002088A
-L000209B8                       MOVE.B  #$01,L0002088B
-L000209C0                       MOVE.B  #$d6,L0002088C
-L000209C8                       MOVE.B  #$01,L0002088D
-L000209D0                       RTS 
 
-L000209D2                       BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-L000209DA                       MOVE.W  #$0028,menu_selector_min_y                      ; L00020884
-L000209E2                       MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-L000209EA                       MOVE.W  #MENU_IDX_disk_2_menu,menu_ptr_index            ; L000203AC
-L000209F2                       MOVE.B  #$42,L0002088A
-L000209FA                       MOVE.B  #$01,L0002088B
-L00020A02                       MOVE.B  #$d6,L0002088C
-L00020A0A                       MOVE.B  #$01,L0002088D
-L00020A12                       RTS 
 
-L00020A14                       BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-L00020A1C                       MOVE.W  #$0028,menu_selector_min_y                      ; L00020884
-L00020A24                       MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-L00020A2C                       MOVE.W  #MENU_IDX_disk_3_menu,menu_ptr_index            ; L000203AC
-L00020A34                       MOVE.B  #$42,L0002088A
-L00020A3C                       MOVE.B  #$01,L0002088B
-L00020A44                       MOVE.B  #$d6,L0002088C
-L00020A4C                       MOVE.B  #$01,L0002088D
-L00020A54                       RTS 
+                ; ------------------------ do main menu actions -------------------------
+                ; called from main 'do_menu_action' when the main menu is displayed.
+                ; From this menu, you can only navigate to other sub menus.
+                ;
+                ;                - Disk 1 Menu
+                ;                - Disk 2 Menu
+                ;                - Disk 3 Menu
+                ;                - Credits 
+                ;                - Greetings
+                ;                - Addresses
+                ;                - PD Message
+                ;
+do_main_menu_actions    ; original address L00020938
+                                CMP.W   #$0024,menu_selector_y          
+                                BLE.W   set_disk_1_menu_params           
+                                CMP.W   #$002c,menu_selector_y          
+                                BLE.W   set_disk_2_menu_params           
+                                CMP.W   #$0034,menu_selector_y          
+                                BLE.W   set_disk_3_menu_params           
+                                CMP.W   #$003c,menu_selector_y          
+                                BLE.W   set_credits_menu_params          
+                                CMP.W   #$0044,menu_selector_y          
+                                BLE.W   set_greetz_1_menu_params         
+                                CMP.W   #$004c,menu_selector_y          
+                                BLE.W   set_addresses_1_menu_params      
+                                CMP.W   #$0054,menu_selector_y          
+                                BLE.W   set_pd_message_menu_params       
+                                BRA.W   enable_menu_selection            
 
-L00020A56                       BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-L00020A5E                       MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
-L00020A66                       MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-L00020A6E                       MOVE.W  #MENU_IDX_credits_menu,menu_ptr_index           ; L000203AC
-L00020A76                       MOVE.B  #$42,L0002088A
-L00020A7E                       MOVE.B  #$01,L0002088B
-L00020A86                       MOVE.B  #$d6,L0002088C
-L00020A8E                       MOVE.B  #$01,L0002088D
-L00020A96                       RTS 
-
-L00020A98                       BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-L00020AA0                       MOVE.W  #$0068,menu_selector_min_y                      ; L00020884
-L00020AA8                       MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-L00020AB0                       MOVE.W  #MENU_IDX_greetings_1_menu,menu_ptr_index       ; L000203AC
-L00020AB8                       MOVE.B  #$42,L0002088A
-L00020AC0                       MOVE.B  #$01,L0002088B
-L00020AC8                       MOVE.B  #$d6,L0002088C
-L00020AD0                       MOVE.B  #$01,L0002088D
-L00020AD8                       RTS 
-
-L00020ADA                       BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-L00020AE2                       MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
-L00020AEA                       MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-L00020AF2                       MOVE.W  #MENU_IDX_greetings_2_menu,menu_ptr_index       ; L000203AC
-L00020AFA                       MOVE.B  #$42,L0002088A
-L00020B02                       MOVE.B  #$01,L0002088B
-L00020B0A                       MOVE.B  #$d6,L0002088C
-L00020B12                       MOVE.B  #$01,L0002088D
-L00020B1A                       RTS 
-
-L00020B1C                       BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-L00020B24                       MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
-L00020B2C                       MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-L00020B34                       MOVE.W  #MENU_IDX_addresses_1_menu,menu_ptr_index       ; L000203AC
-L00020B3C                       MOVE.B  #$42,L0002088A
-L00020B44                       MOVE.B  #$01,L0002088B
-L00020B4C                       MOVE.B  #$d6,L0002088C
-L00020B54                       MOVE.B  #$01,L0002088D
-L00020B5C                       RTS 
-
-display_address_2_menu
-L00020B5E                       BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-L00020B66                       MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
-L00020B6E                       MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-L00020B76                       MOVE.W  #MENU_IDX_addresses_2_menu,menu_ptr_index       ; L000203AC
-L00020B7E                       MOVE.B  #$42,L0002088A
-L00020B86                       MOVE.B  #$01,L0002088B
-L00020B8E                       MOVE.B  #$d6,L0002088C
-L00020B96                       MOVE.B  #$01,L0002088D
-L00020B9E                       RTS 
-
-display_address_3_menu
-L00020BA0                       BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-L00020BA8                       MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
-L00020BB0                       MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-L00020BB8                       MOVE.W  #MENU_IDX_addresses_3_menu,menu_ptr_index       ; L000203AC
-L00020BC0                       MOVE.B  #$42,L0002088A
-L00020BC8                       MOVE.B  #$01,L0002088B
-L00020BD0                       MOVE.B  #$d6,L0002088C
-L00020BD8                       MOVE.B  #$01,L0002088D
-L00020BE0                       RTS 
-
-display_address_4_menu
-L00020BE2                       BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-L00020BEA                       MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
-L00020BF2                       MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-L00020BFA                       MOVE.W  #MENU_IDX_addresses_4_menu,menu_ptr_index       ; L000203AC
-L00020C02                       MOVE.B  #$42,L0002088A
-L00020C0A                       MOVE.B  #$01,L0002088B
-L00020C12                       MOVE.B  #$d6,L0002088C
-L00020C1A                       MOVE.B  #$01,L0002088D
-L00020C22                       RTS 
-
-display_address_5_menu
-L00020C24                       BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-L00020C2C                       MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
-L00020C34                       MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-L00020C3C                       MOVE.W  #MENU_IDX_addresses_5_menu,menu_ptr_index       ; L000203AC
-L00020C44                       MOVE.B  #$42,L0002088A
-L00020C4C                       MOVE.B  #$01,L0002088B
-L00020C54                       MOVE.B  #$d6,L0002088C
-L00020C5C                       MOVE.B  #$01,L0002088D
-L00020C64                       RTS 
-
-display_address_6_menu
-L00020C66                       BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-L00020C6E                       MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
-L00020C76                       MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-L00020C7E                       MOVE.W  #MENU_IDX_addresses_6_menu,menu_ptr_index       ; L000203AC
-L00020C86                       MOVE.B  #$42,L0002088A
-L00020C8E                       MOVE.B  #$01,L0002088B
-L00020C96                       MOVE.B  #$d6,L0002088C
-L00020C9E                       MOVE.B  #$01,L0002088D
-L00020CA6                       RTS 
-
-L00020CA8                       BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-L00020CB0                       MOVE.W  #$0078,menu_selector_min_y                      ; L00020884
-L00020CB8                       MOVE.W  #$0078,menu_selector_max_y                      ; L00020886
-L00020CC0                       MOVE.W  #MENU_IDX_pd_message_menu,menu_ptr_index        ; L000203AC 
-L00020CC8                       MOVE.B  #$42,L0002088A
-L00020CD0                       MOVE.B  #$01,L0002088B
-L00020CD8                       MOVE.B  #$d6,L0002088C
-L00020CE0                       MOVE.B  #$01,L0002088D
-L00020CE8                       RTS 
 
 enable_menu_selection
-L00020CEA                       BCLR.B  #MENU_FADING,menu_selection_status_bits                 ; L000203A8
-L00020CF2                       BCLR.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     ; L000203A8
-L00020CFA                       RTS 
+                                BCLR.B  #MENU_FADING,menu_selection_status_bits                 
+                                BCLR.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     
+                                RTS 
 
-do_disk_1_menu_actions
-L00020CFC                       CMP.W   #$0034,menu_selector_y          ; L00020888
-L00020D04                       BLE.W   L00020E2C 
-L00020D08                       CMP.W   #$003c,menu_selector_y          ; L00020888
-L00020D10                       BLE.W   L00020E5A 
-L00020D14                       CMP.W   #$0044,menu_selector_y          ; L00020888
-L00020D1C                       BLE.W   L00020E88 
-L00020D20                       CMP.W   #$004c,menu_selector_y          ; L00020888
-L00020D28                       BLE.W   L00020EB6 
-L00020D2C                       CMP.W   #$0054,menu_selector_y          ; L00020888
-L00020D34                       BLE.W   L00020EE4 
-L00020D38                       BRA.W   display_menu_menu               ; L0002124E 
 
-do_disk_2_menu_actions
-L00020D3C                       CMP.W   #$002c,menu_selector_y          ; L00020888
-L00020D44                       BLE.W   L00021082 
-L00020D48                       CMP.W   #$0034,menu_selector_y          ; L00020888
-L00020D50                       BLE.W   L00020F40 
-L00020D54                       CMP.W   #$003c,menu_selector_y          ; L00020888
-L00020D5C                       BLE.W   L00020F6E 
-L00020D60                       CMP.W   #$0044,menu_selector_y          ; L00020888
-L00020D68                       BLE.W   L00020F9C 
-L00020D6C                       CMP.W   #$004c,menu_selector_y          ; L00020888
-L00020D74                       BLE.W   L00020FCA 
-L00020D78                       CMP.W   #$0054,menu_selector_y          ; L00020888
-L00020D80                       BLE.W   L00020FF8 
-L00020D84                       CMP.W   #$005c,menu_selector_y          ; L00020888
-L00020D8C                       BLE.W   L00021026 
-L00020D90                       CMP.W   #$0064,menu_selector_y          ; L00020888
-L00020D98                       BLE.W   L00021054 
-L00020D9C                       CMP.W   #$006c,menu_selector_y          ; L00020888
-L00020DA4                       BLE.W   L00020F12 
-L00020DA8                       BRA.W   display_menu_menu               ; L0002124E 
 
+                ; ----------------------- do disk 1 menu actions ---------------------
+                ; called from main 'do_menu_action' when the menu is displayed.
+                ; From this menu, you can load music, or return to the main menu
+                ;
+                ;               Jarresque
+                ;               The Fly
+                ;               Stratospheric City
+                ;               Float
+                ;               FLight-Sleepy Mix
+                ;               Return to Main Menu
+                ;
+do_disk_1_menu_actions ; original address L00020CFC
+                                CMP.W   #$0034,menu_selector_y          
+                                BLE.W   set_loader_jarresque             
+                                CMP.W   #$003c,menu_selector_y          
+                                BLE.W   set_loader_the_fly               
+                                CMP.W   #$0044,menu_selector_y          
+                                BLE.W   set_loader_stratospheric_city    
+                                CMP.W   #$004c,menu_selector_y          
+                                BLE.W   set_loader_float                 
+                                CMP.W   #$0054,menu_selector_y          
+                                BLE.W   set_loader_flight_sleepy_mix     
+                                BRA.W   set_main_menu_params             
+
+
+
+                ; ----------------------- do disk 2 menu actions ---------------------
+                ; called from main 'do_menu_action' when the menu is displayed.
+                ; From this menu, you can load music, or return to the main menu
+                ;
+                ;               Shaft
+                ;               Love Your Money
+                ;               Cosmic How Much
+                ;               This Is Not A Love Song
+                ;               Eat The Ballbearing
+                ;               Sound Of Silence
+                ;               Retouche
+                ;               Techwar
+                ;               Bright
+                ;               Return to Main Menu
+                ;
+do_disk_2_menu_actions  ; original address L00020D3C
+                                CMP.W   #$002c,menu_selector_y          
+                                BLE.W   set_loader_shaft                 
+                                CMP.W   #$0034,menu_selector_y          
+                                BLE.W   set_loader_love_your_money       
+                                CMP.W   #$003c,menu_selector_y          
+                                BLE.W   set_loader_cosmic_how_much       
+                                CMP.W   #$0044,menu_selector_y          
+                                BLE.W   set_loader_not_a_love_song       
+                                CMP.W   #$004c,menu_selector_y          
+                                BLE.W   set_loader_eat_the_ballbearing   
+                                CMP.W   #$0054,menu_selector_y          
+                                BLE.W   set_loader_sound_of_silence      
+                                CMP.W   #$005c,menu_selector_y          
+                                BLE.W   set_loader_retouche              
+                                CMP.W   #$0064,menu_selector_y          
+                                BLE.W   set_loader_techwar               
+                                CMP.W   #$006c,menu_selector_y          
+                                BLE.W   set_loader_bright                
+                                BRA.W   set_main_menu_params             
+
+
+
+                ; ----------------------- do disk 3 menu actions ---------------------
+                ; called from main 'do_menu_action' when the menu is displayed.
+                ; From this menu, you can load music, or return to the main menu
+                ;
+                ;               Mental Obstacle
+                ;               Blade Runner
+                ;               Natural Reality
+                ;               Obliteration Fin
+                ;               Skyriders
+                ;               Zero Gravity
+                ;               Break Through
+                ;               Summer In Sweden
+                ;               Never To Much
+                ;               Return to Main Menu
+                ; 
 do_disk_3_menu_actions
-L00020DAC                       CMP.W   #$002c,menu_selector_y          ; L00020888
-L00020DB4                       BLE.W   L000210B0 
-L00020DB8                       CMP.W   #$0034,menu_selector_y          ; L00020888
-L00020DC0                       BLE.W   L000210DE 
-L00020DC4                       CMP.W   #$003c,menu_selector_y          ; L00020888
-L00020DCC                       BLE.W   L0002110C 
-L00020DD0                       CMP.W   #$0044,menu_selector_y          ; L00020888
-L00020DD8                       BLE.W   L0002113A 
-L00020DDC                       CMP.W   #$004c,menu_selector_y          ; L00020888
-L00020DE4                       BLE.W   L00021168 
-L00020DE8                       CMP.W   #$0054,menu_selector_y          ; L00020888
-L00020DF0                       BLE.W   L00021196 
-L00020DF4                       CMP.W   #$005c,menu_selector_y          ; L00020888
-L00020DFC                       BLE.W   L000211C4 
-L00020E00                       CMP.W   #$0064,menu_selector_y          ; L00020888
-L00020E08                       BLE.W   L000211F2 
-L00020E0C                       CMP.W   #$006c,menu_selector_y          ; L00020888
-L00020E14                       BLE.W   L00021220 
-L00020E18                       BRA.W   display_menu_menu               ; L0002124E 
-
-do_greetings_1_menu_actions
-L00020E1C                       CMP.W   #$006c,menu_selector_y          ; L00020888
-L00020E24                       BLE.W   L00020ADA 
-L00020E28                       BRA.W   display_menu_menu               ; L0002124E 
-
-L00020E2C                       BSET.B  #$0000,L000203A9
-L00020E34                       MOVE.W  #$008e,loader_start_track               ; L00021B86
-L00020E3C                       MOVE.W  #$0011,loader_number_of_tracks          ; L00021B88
-L00020E44                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A 
-L00020E4E                       MOVE.L  #$00000001,loader_disk_number           ; L00021B92             ; disk number
-L00020E58                       RTS 
-
-L00020E5A                       BSET.B  #$0000,L000203A9
-L00020E62                       MOVE.W  #$005c,loader_start_track               ; L00021B86
-L00020E6A                       MOVE.W  #$0015,loader_number_of_tracks          ; L00021B88
-L00020E72                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L00020E7C                       MOVE.L  #$00000001,loader_disk_number          ; L00021B92            ; disk number
-L00020E86                       RTS 
-
-L00020E88                       BSET.B  #$0000,L000203A9
-L00020E90                       MOVE.W  #$003b,loader_start_track               ; L00021B86
-L00020E98                       MOVE.W  #$001f,loader_number_of_tracks          ; L00021B88
-L00020EA0                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L00020EAA                       MOVE.L  #$00000001,loader_disk_number          ; L00021B92            ; disk number
-L00020EB4                       RTS 
-
-L00020EB6                       BSET.B  #$0000,L000203A9
-L00020EBE                       MOVE.W  #$0073,loader_start_track               ; L00021B86
-L00020EC6                       MOVE.W  #$0019,loader_number_of_tracks          ; L00021B88
-L00020ECE                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L00020ED8                       MOVE.L  #$00000001,loader_disk_number          ; L00021B92            ; disk number
-L00020EE2                       RTS 
-
-L00020EE4                       BSET.B  #$0000,L000203A9
-L00020EEC                       MOVE.W  #$001b,loader_start_track               ; L00021B86
-L00020EF4                       MOVE.W  #$001e,loader_number_of_tracks          ; L00021B88
-L00020EFC                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L00020F06                       MOVE.L  #$00000001,loader_disk_number          ; L00021B92            ; disk number
-L00020F10                       RTS 
-
-L00020F12                       BSET.B  #$0000,L000203A9
-L00020F1A                       MOVE.W  #$0001,loader_start_track               ; L00021B86
-L00020F22                       MOVE.W  #$0009,loader_number_of_tracks          ; L00021B88
-L00020F2A                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L00020F34                       MOVE.L  #$00000002,loader_disk_number          ; L00021B92            ; disk number
-L00020F3E                       RTS 
-
-L00020F40                       BSET.B  #$0000,L000203A9
-L00020F48                       MOVE.W  #$007e,loader_start_track               ; L00021B86
-L00020F50                       MOVE.W  #$000e,loader_number_of_tracks          ; L00021B88
-L00020F58                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L00020F62                       MOVE.L  #$00000002,loader_disk_number          ; L00021B92            ; disk number 
-L00020F6C                       RTS 
-
-L00020F6E                       BSET.B  #$0000,L000203A9
-L00020F76                       MOVE.W  #$0070,loader_start_track               ; L00021B86
-L00020F7E                       MOVE.W  #$000c,loader_number_of_tracks          ; L00021B88
-L00020F86                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L00020F90                       MOVE.L  #$00000002,loader_disk_number          ; L00021B92            ; disk number
-L00020F9A                       RTS 
-
-L00020F9C                       BSET.B  #$0000,L000203A9
-L00020FA4                       MOVE.W  #$000c,loader_start_track               ; L00021B86
-L00020FAC                       MOVE.W  #$000d,loader_number_of_tracks          ; L00021B88
-L00020FB4                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L00020FBE                       MOVE.L  #$00000002,loader_disk_number          ; L00021B92            ; disk number
-L00020FC8                       RTS 
-
-L00020FCA                       BSET.B  #$0000,L000203A9
-L00020FD2                       MOVE.W  #$0055,loader_start_track               ; L00021B86
-L00020FDA                       MOVE.W  #$0019,loader_number_of_tracks          ; L00021B88
-L00020FE2                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L00020FEC                       MOVE.L  #$00000002,loader_disk_number          ; L00021B92            ; disk number
-L00020FF6                       RTS 
-
-L00020FF8                       BSET.B  #$0000,L000203A9
-L00021000                       MOVE.W  #$0040,loader_start_track               ; L00021B86
-L00021008                       MOVE.W  #$0013,loader_number_of_tracks          ; L00021B88
-L00021010                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L0002101A                       MOVE.L  #$00000002,loader_disk_number          ; L00021B92            ; disk number
-L00021024                       RTS 
-
-L00021026                       BSET.B  #$0000,L000203A9
-L0002102E                       MOVE.W  #$001b,loader_start_track               ; L00021B86
-L00021036                       MOVE.W  #$0010,loader_number_of_tracks          ; L00021B88
-L0002103E                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L00021048                       MOVE.L  #$00000002,loader_disk_number          ; L00021B92            ; disk number
-L00021052                       RTS 
-
-L00021054                       BSET.B  #$0000,L000203A9
-L0002105C                       MOVE.W  #$002d,loader_start_track               ; L00021B86
-L00021064                       MOVE.W  #$0011,loader_number_of_tracks          ; L00021B88
-L0002106C                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L00021076                       MOVE.L  #$00000002,loader_disk_number          ; L00021B92            ; disk number
-L00021080                       RTS 
-
-L00021082                       BSET.B  #$0000,L000203A9
-L0002108A                       MOVE.W  #$008e,loader_start_track               ; L00021B86
-L00021092                       MOVE.W  #$0011,loader_number_of_tracks          ; L00021B88
-L0002109A                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L000210A4                       MOVE.L  #$00000002,loader_disk_number          ; L00021B92            ; disk number
-L000210AE                       RTS 
-
-L000210B0                       BSET.B  #$0000,L000203A9
-L000210B8                       MOVE.W  #$008d,loader_start_track               ; L00021B86
-L000210C0                       MOVE.W  #$0012,loader_number_of_tracks          ; L00021B88
-L000210C8                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L000210D2                       MOVE.L  #$00000003,loader_disk_number          ; L00021B92            ; disk number
-L000210DC                       RTS 
-
-L000210DE                       BSET.B  #$0000,L000203A9
-L000210E6                       MOVE.W  #$0002,loader_start_track               ; L00021B86
-L000210EE                       MOVE.W  #$0011,loader_number_of_tracks          ; L00021B88
-L000210F6                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L00021100                       MOVE.L  #$00000003,loader_disk_number          ; L00021B92            ; disk number
-L0002110A                       RTS 
-
-L0002110C                       BSET.B  #$0000,L000203A9
-L00021114                       MOVE.W  #$007d,loader_start_track               ; L00021B86
-L0002111C                       MOVE.W  #$000e,loader_number_of_tracks          ; L00021B88
-L00021124                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L0002112E                       MOVE.L  #$00000003,loader_disk_number          ; L00021B92            ; disk number
-L00021138                       RTS 
-
-L0002113A                       BSET.B  #$0000,L000203A9
-L00021142                       MOVE.W  #$006f,loader_start_track               ; L00021B86
-L0002114A                       MOVE.W  #$000c,loader_number_of_tracks          ; L00021B88
-L00021152                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L0002115C                       MOVE.L  #$00000003,loader_disk_number          ; L00021B92            ; disk number
-L00021166                       RTS 
-
-L00021168                       BSET.B  #$0000,L000203A9
-L00021170                       MOVE.W  #$0052,loader_start_track               ; L00021B86
-L00021178                       MOVE.W  #$001b,loader_number_of_tracks          ; L00021B88
-L00021180                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L0002118A                       MOVE.L  #$00000003,loader_disk_number          ; L00021B92            ; disk number
-L00021194                       RTS 
-
-L00021196                       BSET.B  #$0000,L000203A9
-L0002119E                       MOVE.W  #$0043,loader_start_track               ; L00021B86
-L000211A6                       MOVE.W  #$000d,loader_number_of_tracks          ; L00021B88
-L000211AE                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L000211B8                       MOVE.L  #$00000003,loader_disk_number          ; L00021B92            ; disk number
-L000211C2                       RTS 
-
-L000211C4                       BSET.B  #$0000,L000203A9
-L000211CC                       MOVE.W  #$0015,loader_start_track               ; L00021B86
-L000211D4                       MOVE.W  #$000d,loader_number_of_tracks          ; L00021B88
-L000211DC                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L000211E6                       MOVE.L  #$00000003,loader_disk_number          ; L00021B92            ; disk number
-L000211F0                       RTS 
-
-L000211F2                       BSET.B  #$0000,L000203A9
-L000211FA                       MOVE.W  #$0035,loader_start_track               ; L00021B86
-L00021202                       MOVE.W  #$000c,loader_number_of_tracks          ; L00021B88
-L0002120A                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L00021214                       MOVE.L  #$00000003,loader_disk_number          ; L00021B92            ; disk number
-L0002121E                       RTS 
-
-L00021220                       BSET.B  #$0000,L000203A9
-L00021228                       MOVE.W  #$0024,loader_start_track               ; L00021B86
-L00021230                       MOVE.W  #$000f,loader_number_of_tracks          ; L00021B88
-L00021238                       MOVE.L  #LOAD_BUFFER,loader_dest_buffer         ; L00021B8A
-L00021242                       MOVE.L  #$00000003,loader_disk_number          ; L00021B92            ; disk number
-L0002124C                       RTS 
+                                CMP.W   #$002c,menu_selector_y          
+                                BLE.W   set_loader_mental_obstacle       
+                                CMP.W   #$0034,menu_selector_y          
+                                BLE.W   set_loader_blade_runner          
+                                CMP.W   #$003c,menu_selector_y          
+                                BLE.W   set_loader_natural_reality       
+                                CMP.W   #$0044,menu_selector_y          
+                                BLE.W   set_loader_obliteration_fin      
+                                CMP.W   #$004c,menu_selector_y          
+                                BLE.W   set_loader_skyriders             
+                                CMP.W   #$0054,menu_selector_y          
+                                BLE.W   set_loader_zero_gravity          
+                                CMP.W   #$005c,menu_selector_y          
+                                BLE.W   set_loader_break_through         
+                                CMP.W   #$0064,menu_selector_y          
+                                BLE.W   set_loader_summer_in_sweden      
+                                CMP.W   #$006c,menu_selector_y          
+                                BLE.W   set_loader_never_to_much         
+                                BRA.W   set_main_menu_params             
 
 
-display_menu_menu
-L0002124E                       BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-L00021256                       MOVE.W  #$0020,menu_selector_min_y                      ; L00020884
-L0002125E                       MOVE.W  #$0050,menu_selector_max_y                      ; L00020886
-L00021266                       MOVE.W  #MENU_IDX_main_menu,menu_ptr_index              ; L000203AC
-L0002126E                       MOVE.B  #$6c,L0002088A
-L00021276                       MOVE.B  #$01,L0002088B
-L0002127E                       MOVE.B  #$a9,L0002088C
-L00021286                       MOVE.B  #$01,L0002088D
-L0002128E                       RTS 
+
+                ; ----------------------- do greetings 1 menu actions ---------------------
+                ; called from main 'do_menu_action' when the menu is displayed.
+                ; From this menu, you can load music, or return to the main menu
+                ;
+                ;               More Greetz
+                ;               Return to Main Menu
+                ;
+do_greetings_1_menu_actions     ; original address L00020E1C
+                                CMP.W   #$006c,menu_selector_y    
+                                BLE.W   set_greetz_2_menu_params   
+                                BRA.W   set_main_menu_params       
+
+
+
+
+
+
+                ; ---------------------- set main menu params ------------------------
+                ; set the parameters necessary for the display of the 'main menu'
+                ;
+set_main_menu_params    ; original address L0002124E
+                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                                MOVE.W  #$0020,menu_selector_min_y                      ; L00020884
+                                MOVE.W  #$0050,menu_selector_max_y                      ; L00020886
+                                MOVE.W  #MENU_IDX_main_menu,menu_ptr_index              ; L000203AC
+                                MOVE.B  #$6c,left_sprite_hpos1                          ; L0002088A
+                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
+                                MOVE.B  #$a9,right_sprite_hpos1                         ; L0002088C
+                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+                                RTS 
+
+
+
+                ; ---------------------- set disk 1 menu params ------------------------
+                ; set the parameters necessary for the display of the 'disk 1 menu'
+                ;
+set_disk_1_menu_params    ; original address L00020990
+                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                                MOVE.W  #$0030,menu_selector_min_y                      ; L00020884
+                                MOVE.W  #$0058,menu_selector_max_y                      ; L00020886
+                                MOVE.W  #MENU_IDX_disk_1_menu,menu_ptr_index            ; L000203AC
+                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
+                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
+                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
+                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+                                RTS 
+
+
+
+                ; ---------------------- set disk 2 menu params ------------------------
+                ; set the parameters necessary for the display of the 'disk 2 menu'
+                ;
+set_disk_2_menu_params   ; original address L000209D2
+                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                                MOVE.W  #$0028,menu_selector_min_y                      ; L00020884
+                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
+                                MOVE.W  #MENU_IDX_disk_2_menu,menu_ptr_index            ; L000203AC
+                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
+                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
+                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
+                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+                                RTS 
+
+
+
+                ; ---------------------- set disk 3 menu params ------------------------
+                ; set the parameters necessary for the display of the 'disk 3 menu'
+                ;
+set_disk_3_menu_params  ; original address L00020A14
+                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                                MOVE.W  #$0028,menu_selector_min_y                      ; L00020884
+                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
+                                MOVE.W  #MENU_IDX_disk_3_menu,menu_ptr_index            ; L000203AC
+                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
+                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
+                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
+                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+                                RTS 
+
+
+
+                ; ---------------------- set credits menu params ------------------------
+                ; set the parameters necessary for the display of the 'credits menu'
+                ;
+set_credits_menu_params ; original address L00020A56
+                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                                MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
+                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
+                                MOVE.W  #MENU_IDX_credits_menu,menu_ptr_index           ; L000203AC
+                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
+                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
+                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
+                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+                                RTS 
+
+
+
+                ; ---------------------- set greetings 1 menu params ------------------------
+                ; set the parameters necessary for the display of the 'greetings 1 menu'
+                ;
+set_greetz_1_menu_params ; original address L00020A98
+                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                                MOVE.W  #$0068,menu_selector_min_y                      ; L00020884
+                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
+                                MOVE.W  #MENU_IDX_greetings_1_menu,menu_ptr_index       ; L000203AC
+                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
+                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
+                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
+                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+                                RTS 
+
+
+
+                ; ---------------------- set greetings 2 menu params ------------------------
+                ; set the parameters necessary for the display of the 'greetings 2 menu'
+                ;
+set_greetz_2_menu_params ; original address L00020ADA
+                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                                MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
+                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
+                                MOVE.W  #MENU_IDX_greetings_2_menu,menu_ptr_index       ; L000203AC
+                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
+                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
+                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
+                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+                                RTS 
+
+
+
+                ; ---------------------- set addresses 1 menu params ------------------------
+                ; set the parameters necessary for the display of the 'addresses 1 menu'
+                ;
+set_addresses_1_menu_params ; original address L00020B1C
+                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                                MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
+                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
+                                MOVE.W  #MENU_IDX_addresses_1_menu,menu_ptr_index       ; L000203AC
+                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
+                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
+                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
+                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+                                RTS 
+
+
+
+                ; ---------------------- set addresses 2 menu params ------------------------
+                ; set the parameters necessary for the display of the 'addresses 2 menu'
+                ;
+set_addresses_2_menu_params ; original address L00020B5E
+                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                                MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
+                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
+                                MOVE.W  #MENU_IDX_addresses_2_menu,menu_ptr_index       ; L000203AC
+                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
+                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
+                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
+                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+                                RTS 
+
+
+
+                ; ---------------------- set addresses 3 menu params ------------------------
+                ; set the parameters necessary for the display of the 'addresses 3 menu'
+                ;
+set_addresses_3_menu_params ; original address L00020BA0
+                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                                MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
+                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
+                                MOVE.W  #MENU_IDX_addresses_3_menu,menu_ptr_index       ; L000203AC
+                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
+                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
+                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
+                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+                                RTS 
+
+
+
+                ; ---------------------- set addresses 4 menu params ------------------------
+                ; set the parameters necessary for the display of the 'addresses 4 menu'
+                ;
+set_addresses_4_menu_params ; original address L00020BE2
+                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                                MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
+                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
+                                MOVE.W  #MENU_IDX_addresses_4_menu,menu_ptr_index       ; L000203AC
+                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
+                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
+                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
+                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+                                RTS 
+
+
+
+                ; ---------------------- set addresses 5 menu params ------------------------
+                ; set the parameters necessary for the display of the 'addresses 5 menu'
+                ;
+set_addresses_5_menu_params ; original address L00020C24
+                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                                MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
+                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
+                                MOVE.W  #MENU_IDX_addresses_5_menu,menu_ptr_index       ; L000203AC
+                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
+                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
+                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
+                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+                                RTS 
+
+
+
+                ; ---------------------- set addresses 6 menu params ------------------------
+                ; set the parameters necessary for the display of the 'addresses 6 menu'
+                ;
+set_addresses_6_menu_params ; original address L00020C66
+                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                                MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
+                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
+                                MOVE.W  #MENU_IDX_addresses_6_menu,menu_ptr_index       ; L000203AC
+                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
+                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
+                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
+                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+                                RTS 
+
+
+
+                ; ---------------------- set pd message menu params ------------------------
+                ; set the parameters necessary for the display of the 'pd message menu'
+                ;
+set_pd_message_menu_params ; original address L00020CA8
+                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                                MOVE.W  #$0078,menu_selector_min_y                      ; L00020884
+                                MOVE.W  #$0078,menu_selector_max_y                      ; L00020886
+                                MOVE.W  #MENU_IDX_pd_message_menu,menu_ptr_index        ; L000203AC 
+                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
+                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
+                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
+                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+                                RTS 
+
+
+
+
+
+                ; -------------------- load music: jarresque -------------------
+                ; disk number:  $01
+                ; start track:  $8e
+                ; no of tracks: $11
+set_loader_jarresque    ; original address L00020E2C
+                                BSET.B  #LOAD_MODULE,loader_status_bits         
+                                MOVE.W  #$008e,loader_start_track               
+                                MOVE.W  #$0011,loader_number_of_tracks          
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer          
+                                MOVE.L  #$00000001,loader_disk_number
+                                RTS 
+
+
+                ; ------------------- load music: the fly --------------------
+                ; disk number:  $01
+                ; start track:  $5c
+                ; no of tracks: $15
+set_loader_the_fly      ; original address L00020E5A
+                                BSET.B  #LOAD_MODULE,loader_status_bits         
+                                MOVE.W  #$005c,loader_start_track               
+                                MOVE.W  #$0015,loader_number_of_tracks          
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer         
+                                MOVE.L  #$00000001,loader_disk_number           
+                                RTS 
+
+
+                ; ------------------- load music: stratospheric city --------------------
+                ; disk number:  $01
+                ; start track:  $3b
+                ; no of tracks: $1f
+set_loader_stratospheric_city; original address L00020E88
+                                BSET.B  #LOAD_MODULE,loader_status_bits
+                                MOVE.W  #$003b,loader_start_track      
+                                MOVE.W  #$001f,loader_number_of_tracks 
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
+                                MOVE.L  #$00000001,loader_disk_number  
+                                RTS 
+
+
+                ; ------------------- load music: float --------------------
+                ; disk number:  $01
+                ; start track:  $73
+                ; no of tracks: $19
+set_loader_float        ; original address L00020EB6
+                                BSET.B  #LOAD_MODULE,loader_status_bits 
+                                MOVE.W  #$0073,loader_start_track       
+                                MOVE.W  #$0019,loader_number_of_tracks  
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer 
+                                MOVE.L  #$00000001,loader_disk_number   
+                                RTS 
+
+
+                ; ------------------- load music: flight-sleepy mix --------------------
+                ; disk number:  $01
+                ; start track:  $1b
+                ; no of tracks: $1e
+set_loader_flight_sleepy_mix ; original address L00020EE4
+                                BSET.B  #LOAD_MODULE,loader_status_bits 
+                                MOVE.W  #$001b,loader_start_track       
+                                MOVE.W  #$001e,loader_number_of_tracks  
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer 
+                                MOVE.L  #$00000001,loader_disk_number    
+                                RTS 
+
+
+                ; ------------------- load music: bright --------------------
+                ; disk number:  $02
+                ; start track:  $01
+                ; no of tracks: $09
+set_loader_bright       ; original address L00020F12
+                                BSET.B  #LOAD_MODULE,loader_status_bits 
+                                MOVE.W  #$0001,loader_start_track       
+                                MOVE.W  #$0009,loader_number_of_tracks  
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer 
+                                MOVE.L  #$00000002,loader_disk_number   
+                                RTS 
+
+
+                ; ------------------- load music: love your money --------------------
+                ; disk number:  $02
+                ; start track:  $7e
+                ; no of tracks: $0e
+set_loader_love_your_money      ; original address L00020F40
+                                BSET.B  #LOAD_MODULE,loader_status_bits
+                                MOVE.W  #$007e,loader_start_track      
+                                MOVE.W  #$000e,loader_number_of_tracks 
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
+                                MOVE.L  #$00000002,loader_disk_number   
+                                RTS 
+
+
+                ; ------------------- load music: cosmic how much --------------------
+                ; disk number:  $02
+                ; start track:  $70
+                ; no of tracks: $0c
+set_loader_cosmic_how_much      ; original address L00020F6E
+                                BSET.B  #LOAD_MODULE,loader_status_bits
+                                MOVE.W  #$0070,loader_start_track      
+                                MOVE.W  #$000c,loader_number_of_tracks 
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
+                                MOVE.L  #$00000002,loader_disk_number  
+                                RTS 
+
+
+                ; ------------------- load music: this is not a love song --------------------
+                ; disk number:  $02
+                ; start track:  $0c
+                ; no of tracks: $0d
+set_loader_not_a_love_song      ; original address L00020F9C
+                                BSET.B  #LOAD_MODULE,loader_status_bits
+                                MOVE.W  #$000c,loader_start_track      
+                                MOVE.W  #$000d,loader_number_of_tracks 
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
+                                MOVE.L  #$00000002,loader_disk_number   
+                                RTS 
+
+
+                ; ------------------- load music: eat the ballbearing --------------------
+                ; disk number:  $02
+                ; start track:  $55
+                ; no of tracks: $19
+set_loader_eat_the_ballbearing ; original address L00020FCA
+                                BSET.B  #LOAD_MODULE,loader_status_bits
+                                MOVE.W  #$0055,loader_start_track      
+                                MOVE.W  #$0019,loader_number_of_tracks 
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
+                                MOVE.L  #$00000002,loader_disk_number  
+                                RTS 
+
+
+                ; ------------------- load music: sound of silence --------------------
+                ; disk number:  $02
+                ; start track:  $40
+                ; no of tracks: $13
+set_loader_sound_of_silence ; orignal address L00020FF8
+                                BSET.B  #LOAD_MODULE,loader_status_bits
+                                MOVE.W  #$0040,loader_start_track      
+                                MOVE.W  #$0013,loader_number_of_tracks 
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
+                                MOVE.L  #$00000002,loader_disk_number  
+                                RTS 
+
+
+                ; ------------------- load music: retouche --------------------
+                ; disk number:  $02
+                ; start track:  $1b
+                ; no of tracks: $10
+set_loader_retouche     ; original address L00021026
+                                BSET.B  #LOAD_MODULE,loader_status_bits
+                                MOVE.W  #$001b,loader_start_track      
+                                MOVE.W  #$0010,loader_number_of_tracks 
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
+                                MOVE.L  #$00000002,loader_disk_number  
+                                RTS 
+
+
+                ; ------------------- load music: techwar --------------------
+                ; disk number:  $02
+                ; start track:  $2d
+                ; no of tracks: $11
+set_loader_techwar      ; original address L00021054
+                                BSET.B  #LOAD_MODULE,loader_status_bits
+                                MOVE.W  #$002d,loader_start_track      
+                                MOVE.W  #$0011,loader_number_of_tracks 
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
+                                MOVE.L  #$00000002,loader_disk_number  
+                                RTS 
+
+
+                ; ------------------- load music: shaft --------------------
+                ; disk number:  $02
+                ; start track:  $8e
+                ; no of tracks: $11
+set_loader_shaft        ; original address L00021082
+                                BSET.B  #LOAD_MODULE,loader_status_bits
+                                MOVE.W  #$008e,loader_start_track      
+                                MOVE.W  #$0011,loader_number_of_tracks 
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
+                                MOVE.L  #$00000002,loader_disk_number  
+                                RTS 
+
+
+                ; ------------------- load music: mental obstacle --------------------
+                ; disk number:  $03
+                ; start track:  $8d
+                ; no of tracks: $12
+set_loader_mental_obstacle      ; original address L000210B0
+                                BSET.B  #LOAD_MODULE,loader_status_bits
+                                MOVE.W  #$008d,loader_start_track      
+                                MOVE.W  #$0012,loader_number_of_tracks 
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
+                                MOVE.L  #$00000003,loader_disk_number  
+                                RTS 
+
+
+                ; ------------------- load music: blade runner --------------------
+                ; disk number:  $03
+                ; start track:  $02
+                ; no of tracks: $11
+set_loader_blade_runner ; original address L000210DE
+                                BSET.B  #LOAD_MODULE,loader_status_bits
+                                MOVE.W  #$0002,loader_start_track      
+                                MOVE.W  #$0011,loader_number_of_tracks 
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
+                                MOVE.L  #$00000003,loader_disk_number  
+                                RTS 
+
+
+                ; ------------------- load music: natural reality --------------------
+                ; disk number:  $03
+                ; start track:  $7d
+                ; no of tracks: $0e
+set_loader_natural_reality      ; original address L0002110C
+                                BSET.B  #LOAD_MODULE,loader_status_bits
+                                MOVE.W  #$007d,loader_start_track      
+                                MOVE.W  #$000e,loader_number_of_tracks 
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
+                                MOVE.L  #$00000003,loader_disk_number  
+                                RTS 
+
+
+                ; ------------------- load music: obliteration fin --------------------
+                ; disk number:  $03
+                ; start track:  $6f
+                ; no of tracks: $0c
+set_loader_obliteration_fin ; original address L0002113A
+                                BSET.B  #LOAD_MODULE,loader_status_bits
+                                MOVE.W  #$006f,loader_start_track      
+                                MOVE.W  #$000c,loader_number_of_tracks 
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
+                                MOVE.L  #$00000003,loader_disk_number  
+                                RTS 
+
+
+                ; ------------------- load music: obliteration fin --------------------
+                ; disk number:  $03
+                ; start track:  $52
+                ; no of tracks: $1b
+set_loader_skyriders    ; original address L00021168
+                                BSET.B  #LOAD_MODULE,loader_status_bits
+                                MOVE.W  #$0052,loader_start_track      
+                                MOVE.W  #$001b,loader_number_of_tracks 
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
+                                MOVE.L  #$00000003,loader_disk_number  
+                                RTS 
+
+
+                ; ------------------- load music: zero gravity --------------------
+                ; disk number:  $03
+                ; start track:  $43
+                ; no of tracks: $0d
+set_loader_zero_gravity ; original address L00021196
+                                BSET.B  #LOAD_MODULE,loader_status_bits
+                                MOVE.W  #$0043,loader_start_track      
+                                MOVE.W  #$000d,loader_number_of_tracks 
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
+                                MOVE.L  #$00000003,loader_disk_number  
+                                RTS 
+
+
+                ; ------------------- load music: break through --------------------
+                ; disk number:  $03
+                ; start track:  $15
+                ; no of tracks: $0d
+set_loader_break_through        ; original address L000211C4
+                                BSET.B  #LOAD_MODULE,loader_status_bits
+                                MOVE.W  #$0015,loader_start_track      
+                                MOVE.W  #$000d,loader_number_of_tracks 
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
+                                MOVE.L  #$00000003,loader_disk_number  
+                                RTS 
+
+
+                ; ------------------- load music: summer in sweden --------------------
+                ; disk number:  $03
+                ; start track:  $35
+                ; no of tracks: $0c
+set_loader_summer_in_sweden     ; original address L000211F2
+                                BSET.B  #LOAD_MODULE,loader_status_bits
+                                MOVE.W  #$0035,loader_start_track      
+                                MOVE.W  #$000c,loader_number_of_tracks 
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
+                                MOVE.L  #$00000003,loader_disk_number  
+                                RTS 
+
+
+                ; ------------------- load music: never to much --------------------
+                ; disk number:  $03
+                ; start track:  $24
+                ; no of tracks: $0f
+set_loader_never_to_much        ; original address L00021220
+                                BSET.B  #LOAD_MODULE,loader_status_bits
+                                MOVE.W  #$0024,loader_start_track      
+                                MOVE.W  #$000f,loader_number_of_tracks 
+                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
+                                MOVE.L  #$00000003,loader_disk_number  
+                                RTS 
+
+
+
+        ; *****************************************************************************
+        ; ***                    END OF MENU ACTION PROCESSING                      ***
+        ; *****************************************************************************
+
+
+
+
+
+
 
 
                                 ; --------------------- fill vector logo --------------------
@@ -2045,10 +2423,13 @@ loader_disk_number     ; original address L00021B92
 
 
 
+
         ; *************************************************************************
         ; ***                           MUSIC PLAYER ROUTINES                   ***
         ; *************************************************************************
-
+        ; This player does not use CIA Timing, it is intended to be called
+        ; every frame.
+        ;
         ; -------------------------- music start/stop --------------------------
         ; This routine appears to be called to both stop and initiailise the
         ; music - this may be an error.
@@ -2109,12 +2490,17 @@ music_init        ; original address L00021B96
 
                         ; initialise play counters/tracker vars
 .init_counter_vars
-                                MOVE.B  #$06,L00022CBC
-                                CLR.B   L00022CBD
+                                MOVE.B  #$06,tempo_value        ; default play speed (6 frames per pattern row)
+                                CLR.B   tempo_tick_value        ; L00022CBD
                                 CLR.B   L00022CBE
                                 CLR.W   L00022CC6
 
 
+
+
+                ; ----------------------- switch music off ---------------------
+                ; set all channel volume to 0, disable all channels DMA
+                ;
 music_off       ; original address L00021C0A
                                 CLR.W   CUSTOM+AUD0VOL          ; $00dff0a8
                                 CLR.W   CUSTOM+AUD1VOL          ; $00dff0b8
@@ -2124,20 +2510,31 @@ music_off       ; original address L00021C0A
                                 RTS 
 
 
+
+
+                ; ------------------------- play music ------------------------
+                ; Call this routine at regular intervals (i.e. every VBL) to
+                ; continue to play the current module.
+                ; This player does not use CIA Timing.
+                ;
 play_music      ; original address L00021C2C
 L00021C2C                       MOVEM.L D0-D4/A0-A6,-(A7)
-L00021C30                       ADD.B   #$00000001,L00022CBD
-L00021C36                       MOVE.B  L00022CBD(PC),D0
-L00021C3A                       CMP.B   L00022CBC(PC),D0
+L00021C30                       ADD.B   #$00000001,tempo_tick_value     ; L00022CBD
+L00021C36                       MOVE.B  tempo_tick_value(PC),D0
+L00021C3A                       CMP.B   tempo_value(pc),d0              ; L00022CBC(PC),D0
 L00021C3E                       BCS.B   L00021C54 
-L00021C40                       CLR.B   L00022CBD
+                ; process next pattern line
+L00021C40                       CLR.B   tempo_tick_value                ; L00022CBD
 L00021C46                       TST.B   L00022CC4
 L00021C4C                       BEQ.B   L00021C92 
 L00021C4E                       BSR.B   L00021C5A
 L00021C50                       BRA.W   L00021EC8 
 
+                ; process current pattern line 
 L00021C54                       BSR.B   L00021C5A
 L00021C56                       BRA.W   L00021F64 
+
+
 
 L00021C5A                       LEA.L   $00dff0a0,A5
 L00021C60                       LEA.L   L00022B8C(PC),A6
@@ -2380,7 +2777,7 @@ L00021FDA                       MOVE.W $0010(A6),$0006(A5)
 L00021FE0                       RTS 
 
 L00021FE2                       MOVE.L  #$00000000,D0
-L00021FE4                       MOVE.B  L00022CBD(PC),D0
+L00021FE4                       MOVE.B  tempo_tick_value(PC),D0
 L00021FE8                       DIVS.W  #$0003,D0
 L00021FEC                       SWAP.W  D0
 L00021FEE                       CMP.W   #$0000,D0
@@ -2416,7 +2813,7 @@ L0002203E                       RTS
 L00022040                       MOVE.W  D2,$0006(A5)
 L00022044                       RTS 
 
-L00022046                       TST.B   L00022CBD
+L00022046                       TST.B   tempo_tick_value                ; L00022CBD
 L0002204C                       BNE.B   L00021FD8 
 L0002204E                       MOVE.B  #$0f,L00022CC2
 L00022056                       MOVE.L  #$00000000,D0
@@ -2435,7 +2832,7 @@ L0002208A                       AND.W   #$0fff,D0
 L0002208E                       MOVE.W  D0,$0006(A5)
 L00022092                       RTS 
 
-L00022094                       TST.B   L00022CBD
+L00022094                       TST.B   tempo_tick_value                ; L00022CBD
 L0002209A                       BNE.W   L00021FD8 
 L0002209E                       MOVE.B  #$0f,L00022CC2
 L000220A6                       CLR.W   D0
@@ -2721,8 +3118,8 @@ L000223EE                       RTS
 
 L000223F0                       MOVE.B  $0003(A6),D0
 L000223F4                       BEQ.W   L00021FD8 
-L000223F8                       CLR.B   L00022CBD
-L000223FE                       MOVE.B  D0,L00022CBC
+L000223F8                       CLR.B   tempo_tick_value        ; L00022CBD
+L000223FE                       MOVE.B  D0,tempo_value          ; L00022CBC
 L00022404                       RTS 
 
 L00022406                       BSR.W   L0002268A
@@ -2800,7 +3197,7 @@ L00022502                       AND.B   #$0f,D0
 L00022506                       MOVE.B  D0,$0012(A6)
 L0002250A                       RTS 
 
-L0002250C                       TST.B   L00022CBD
+L0002250C                       TST.B   tempo_tick_value                ; L00022CBD
 L00022512                       BNE.W   L00021FD8 
 L00022516                       MOVE.B  $0003(A6),D0
 L0002251A                       AND.B   #$0f,D0
@@ -2833,13 +3230,13 @@ L0002256A                       MOVE.B  $0003(A6),D0
 L0002256E                       AND.B   #$0f,D0
 L00022572                       BEQ.B   L000225CC 
 L00022574                       MOVE.L  #$00000000,D1
-L00022576                       MOVE.B  L00022CBD(PC),D1
+L00022576                       MOVE.B  tempo_tick_value(PC),D1
 L0002257A                       BNE.B   L0002258A 
 L0002257C                       MOVE.W  (A6),D1
 L0002257E                       AND.W   #$0fff,D1
 L00022582                       BNE.B   L000225CC 
 L00022584                       MOVE.L  #$00000000,D1
-L00022586                       MOVE.B  L00022CBD(PC),D1
+L00022586                       MOVE.B  tempo_tick_value(PC),D1
 L0002258A                       DIVU.W  D0,D1
 L0002258C                       SWAP.W  D1
 L0002258E                       TST.W   D1
@@ -2859,14 +3256,14 @@ L000225C6                       MOVE.L  $000e(A6),$0004(A5)
 L000225CC                       MOVE.L  (A7)+,D1
 L000225CE                       RTS 
 
-L000225D0                       TST.B   L00022CBD
+L000225D0                       TST.B   tempo_tick_value                ; L00022CBD
 L000225D6                       BNE.W   L00021FD8 
 L000225DA                       MOVE.L  #$00000000,D0
 L000225DC                       MOVE.B  $0003(A6),D0
 L000225E0                       AND.B   #$0f,D0
 L000225E4                       BRA.W   L0002235C
 
-L000225E8                       TST.B   L00022CBD
+L000225E8                       TST.B   tempo_tick_value                ; L00022CBD
 L000225EE                       BNE.W   L00021FD8 
 L000225F2                       MOVE.L  #$00000000,D0
 L000225F4                       MOVE.B  $0003(A6),D0
@@ -2876,7 +3273,7 @@ L000225FC                       BRA.W   L00022382
 L00022600                       MOVE.L  #$00000000,D0
 L00022602                       MOVE.B  $0003(A6),D0
 L00022606                       AND.B   #$0f,D0
-L0002260A                       CMP.B   L00022CBD(PC),D0
+L0002260A                       CMP.B   tempo_tick_value(PC),D0
 L0002260E                       BNE.W   L00021FD8 
 L00022612                       CLR.B   $0013(A6)
 L00022616                       MOVE.W  #$0000,$0008(A5)
@@ -2885,14 +3282,14 @@ L0002261C                       RTS
 L0002261E                       MOVE.L  #$00000000,D0
 L00022620                       MOVE.B  $0003(A6),D0
 L00022624                       AND.B   #$0f,D0
-L00022628                       CMP.B   L00022CBD,D0
+L00022628                       CMP.B   tempo_tick_value,D0
 L0002262E                       BNE.W   L00021FD8 
 L00022632                       MOVE.W  (A6),D0
 L00022634                       BEQ.W   L00021FD8 
 L00022638                       MOVE.L  D1,-(A7)
 L0002263A                       BRA.W   L00022592 
 
-L0002263E                       TST.B   L00022CBD
+L0002263E                       TST.B   tempo_tick_value
 L00022644                       BNE.W   L00021FD8 
 L00022648                       MOVE.L  #$00000000,D0
 L0002264A                       MOVE.B  $0003(A6),D0
@@ -2903,7 +3300,7 @@ L0002265C                       ADD.B   #$00000001,D0
 L0002265E                       MOVE.B  D0,L00022CC3
 L00022664                       RTS 
 
-L00022666                       TST.B   L00022CBD
+L00022666                       TST.B   tempo_tick_value
 L0002266C                       BNE.W   L00021FD8 
 L00022670                       MOVE.B  $0003(A6),D0
 L00022674                       AND.B   #$0f,D0
@@ -3074,8 +3471,11 @@ L00022CAC                       dc.l    $00000000
 module_start_ptr        ; original address L00022CB8
 L00022CB8                       dc.l   $00000000        ; module load address
 
-L00022CBC                       dc.b    $06             ; init music sets this to #$06
-L00022CBD                       dc.b    $00             ; init music sets this to #$00
+tempo_value             ; original address L00022CBC
+L00022CBC                       dc.b    $06             ; init music sets this to #$06 - default value
+
+tempo_tick_value        ; original address L00022CBD (frame counter ticks towards tempo_value)
+L00022CBD                       dc.b    $00             ; init music sets this to #$00 - default value
 L00022CBE                       dc.b    $00             ; init music sets this to #$00
 
 L00022CBF                       dc.b    $00
