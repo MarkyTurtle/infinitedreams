@@ -354,9 +354,7 @@ main_loop       ; original address L000202F6
 
                         ; do music initialisation
 .initialise_music
-                                BSR.W   music_start_stop                                        ; L00021B96
-                                BSR.W   music_off                                               ; L00021C0A
-                                BSR.W   music_start_stop                                        ; L00021B96
+                                BSR.W   music_init                                              ; L00021B96
                                 BCLR.B  #$0001,music_status_bits
                                 BSET.B  #$0000,music_status_bits
 
@@ -2057,57 +2055,64 @@ loader_disk_number     ; original address L00021B92
         ; It's probably an initialisation routine (memory lost to time)
         ; I will find out when/if I get the time...
         ;
-music_start_stop        ; original address L00021B96
-L00021B96                       MOVEA.L #LOAD_BUFFER,A0         ; module load address = $40000
-L00021B9C                       MOVE.L  A0,module_start_ptr     ; L00022CB8
-L00021BA2                       MOVEA.L A0,A1
+music_init        ; original address L00021B96
+                                MOVEA.L #LOAD_BUFFER,A0         ; module load address = $40000
+                                MOVE.L  A0,module_start_ptr     ; L00022CB8
+                                MOVEA.L A0,A1
 
                         ; find highest byte value in memory range 952-1080 ($3b8-$438)
                         ; find highest pattern number used (from pattern list/table)
                         ; pattern table offset = $03b8 (952)
                         ; the table is 128 bytes
-L00021BA4                       LEA.L   $03b8(A1),A1            ; a1 = offset 952
-L00021BA8                       MOVE.L  #$0000007f,D0           ; d0 = 127+1 - loop counter
-L00021BAA                       MOVE.L  #$00000000,D1
-L00021BAC                       MOVE.L  D1,D2
-L00021BAE                       SUB.W   #$00000001,D0
-L00021BB0                       MOVE.B  (A1)+,D1                ; read byte from offset 952+
-L00021BB2                       CMP.B   D2,D1                   ; if d1 > d2 then d2 = d1 (branch taken)
-L00021BB4                       BGT.B   L00021BAC 
-L00021BB6                       DBF.W   D0,L00021BB0            ; find highest byte value (d2)
-L00021BBA                       ADD.B   #$00000001,D2           ; increment d2
+.find_highest_pattern_idx       ; original address L00021BA4
+                                LEA.L   $03b8(A1),A1            ; a1 = offset 952
+                                MOVE.L  #$0000007f,D0           ; d0 = 127+1 - loop counter
+                                MOVE.L  #$00000000,D1
+.update_highest_idx
+                                MOVE.L  D1,D2
+                                SUB.W   #$00000001,D0
+.not_highest_idx
+                                MOVE.B  (A1)+,D1                ; read byte from offset 952+
+                                CMP.B   D2,D1                   ; if d1 > d2 then d2 = d1 (branch taken)
+                                BGT.B   .update_highest_idx      
+                                DBF.W   D0,.not_highest_idx     
+                                ADD.B   #$00000001,D2           ; increment d2
 
                         ; d2 = highest patten index
                         ; calc start of sample data address
-L00021BBC                       LEA.L   sample_ptr_table(pc),a1         ; L00022C3C(PC),A1
-L00021BC0                       ASL.L   #$00000008,D2           ; multiply index by 256
-L00021BC2                       ASL.L   #$00000002,D2           ; multiply index y 1024 (max pattern index)
-L00021BC4                       ADD.L   #$0000043c,D2           ; add start pattern offset
-L00021BCA                       ADD.L   A0,D2                   ; d2 = start of sample data address
+.fill_sample_ptr_table
+                                LEA.L   sample_ptr_table(pc),a1         ; L00022C3C(PC),A1
+                                ASL.L   #$00000008,D2           ; multiply index by 256
+                                ASL.L   #$00000002,D2           ; multiply index y 1024 (max pattern index)
+                                ADD.L   #$0000043c,D2           ; add start pattern offset
+                                ADD.L   A0,D2                   ; d2 = start of sample data address
 
                         ; d2 = start of sample data address
                         ; step through each sample and get the sample
                         ; start address for each instrument.
                         ; records the start address in the sample_ptr_table
-L00021BCC                       MOVEA.L D2,A2                   ; a2 = start of sample data
-L00021BCE                       MOVE.L  #$0000001e,D0           ; samples = 30+1 (31 samples)
-L00021BD0                       CLR.L   (A2)                    ; zero first pair of sample bytes (remove pop/click?)
-L00021BD2                       MOVE.L  A2,(A1)+                ; store sample ptr data
-L00021BD4                       MOVE.L  #$00000000,D1
-L00021BD6                       MOVE.W  $002a(A0),D1            ; d1 = module offset 42 (sample length offset - sample 1)
-L00021BDA                       ASL.L   #$00000001,D1           ; convert sample length in words to sample length in bytes
-L00021BDC                       ADDA.L  D1,A2                   ; a2 = next sample start address
-L00021BDE                       ADDA.L  #$0000001e,A0           ; a0 = next sample length address ptr
-L00021BE4                       DBF.W   D0,L00021BD0            ; loop for next sample
+                                MOVEA.L D2,A2                   ; a2 = start of sample data
+                                MOVE.L  #$0000001e,D0           ; samples = 30+1 (31 samples)
+.next_sample_loop
+                                CLR.L   (A2)                    ; zero first pair of sample bytes (remove pop/click?)
+                                MOVE.L  A2,(A1)+                ; store sample ptr data
+                                MOVE.L  #$00000000,D1
+                                MOVE.W  $002a(A0),D1            ; d1 = module offset 42 (sample length offset - sample 1)
+                                ASL.L   #$00000001,D1           ; convert sample length in words to sample length in bytes
+                                ADDA.L  D1,A2                   ; a2 = next sample start address
+                                ADDA.L  #$0000001e,A0           ; a0 = next sample length address ptr
+                                DBF.W   D0,.next_sample_loop    ; loop for next sample
 
                         ; switch audio filter off
-L00021BE8                       OR.B    #$02,$00bfe001          ; /LED (sound filter off)
+.audio_filteR_off
+                                OR.B    #$02,$00bfe001          ; /LED (sound filter off)
 
                         ; initialise play counters/tracker vars
-L00021BF0                       MOVE.B  #$06,L00022CBC
-L00021BF8                       CLR.B   L00022CBD
-L00021BFE                       CLR.B   L00022CBE
-L00021C04                       CLR.W   L00022CC6
+.init_counter_vars
+                                MOVE.B  #$06,L00022CBC
+                                CLR.B   L00022CBD
+                                CLR.B   L00022CBE
+                                CLR.W   L00022CC6
 
 
 music_off       ; original address L00021C0A
