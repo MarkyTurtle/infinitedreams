@@ -14,6 +14,7 @@ Music: **Hollywood, Subculture(Subi), Phaser, Reeal**<br/>
 Maybe I'll this will trigger me do develop something new after this project...
 
 ## Progress To Date
+- **2025-05-24** - Demo runs from VSCode, all components are working. Can load music from the original disks. I have just begun ripping the protracker modules from the original disks.
 - **2025-05-12** - Demo is Disassembled and can be run inside VSCode. Not all working yet, The main logo and scroller is working. 
 - **2025-05-07** - Completed Disassembly of the bootblock Disk 1
 - **2025-05-06** - Started Disassembling the bootblock of Disk 1
