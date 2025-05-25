@@ -3,8 +3,13 @@
 ![InfiniteDreams](/images/InfiniteDreamsScreen.png)
 
 A demo that I wrote in 1992, the last one I did for 'The Lunatics UK', just before I went off to University and stopped writting anymore demos. It's quite sad looking back that I didn't continue developing on the Amiga.
-
-I'll have to disassemble the code because the source has long gone into the great dustbin in the sky.
+<br/>
+I'll have to disassemble the code because the source has long gone into the great dustbin in the sky. (Which I've now done).
+I've re-documented the code and added a TEST_BUILD flag to the code (which is enabled by default) so that the code can be build and executed from within VSCode. 
+If you use the ADF images in the archive, you are able to load and listen to the original protracker tunes from the disks.
+<br/><br/>
+I've also ripped the files from the original disks and placed them in the archive under the  'ripfiles' folder.
+<br/>
 
 ## Production Credits
 Code: **Spongehead**<br/>
