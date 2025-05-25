@@ -1911,7 +1911,7 @@ L00021528                       RTS
 
 
         ; ----------------------- text scroller ---------------------
-        ; This is a 4 bitplane (16 colour), 32x32 font scroller.
+        ; This is a 4 bitplane (16 colour), 32x31 font scroller.
         ; It uses the hardware scroll and a double buffered,
         ; horizontal buffer twice as wide as the screen.
         ; A trade off between memory usage and blitter usage.
@@ -1919,6 +1919,24 @@ L00021528                       RTS
         ; have to flip back to a copy once you've scrolled the
         ; width of the screen. So required twice the display memory.
         ;
+        ; Source GFX = 40 bytes wide
+        ; Each character is 31 pixels high
+        ; each line starts at a byte offset of 1240 bytes
+        ;
+        ; Font Layout in source GFX
+        ; 10 chars per line,
+        ; 32 pixels wide = (320 pixels wide)
+        ;
+        ; ,-./012345    - 0
+        ; 6789:;<=>?    - 1240
+        ; @ABCDEFGHI    - 2480
+        ; JKLMNOPQRS    - 3720
+        ; TUVWXYZ       - 4960
+        ;               - 6200 - per bitplane. ($1838)
+        ; Each plane is actually 6400 bytes ($1900)
+        ; Some Spare bytes at the bottom of each plane (200 bytes = 5 raster lines)
+        ;
+
 scroller_buffer_counter         ; original address L0002152A
                                 dc.w    $0000                                   ; bitplane byte offset counter (scroll text display buffers)
 scroller_character_counter      ; original address L0002152C
@@ -1979,12 +1997,12 @@ scroller_next_character ; original address L000215FA
                                 RTS                                             ; no, no need to blit a character yet, so exit
 .do_scroll_character
                                 MOVE.L  #$00000000,D7
-.blit_wait_1                    BTST.B  #$000e,$0002(A6)                ; blit wait
+.blit_wait_1                    BTST.B  #14-8,DMACONR(A6)                       ; blit wait (hi byte test)
                                 BNE.B   .blit_wait_1 
-                                MOVE.L  #$ffffffff,$0044(A6)
-                                MOVE.L  #$09f00000,$0040(A6)
-                                MOVE.W  #$0024,$0064(A6)
-                                MOVE.W  #$0054,$0066(A6)
+                                MOVE.L  #$ffffffff,BLTAFWM(A6)                  ; 1st and last word masks
+                                MOVE.L  #$09f00000,BLTCON0(A6)
+                                MOVE.W  #$0024,BLTAMOD(A6)                      ; 36 byte modulo (4 byte blit) 40 byte wide source gfx
+                                MOVE.W  #$0054,BLTDMOD(A6)                      ; 84 byte modulo (4 byte blit) 88 byte scroll buffer
 .get_scroll_character   ; get character from scroll text
                                 MOVEA.L scroll_text_ptr,a0
                                 MOVE.B  (A0)+,D7                        ; d7 = scroll character
@@ -2006,7 +2024,13 @@ scroller_next_character ; original address L000215FA
                                 BPL.W   .add_gfx_offset_4
                                 BRA.W   .do_blit_character
 
-                                ; ABCDEFGHI
+                                ; Font Layout in source GFX
+                                ; 10 chars per line,
+                                ; 32 pixels wide = (320 pixels wide)
+                                ;
+                                ; ,-./012345
+                                ; 6789:;<=>?
+                                ; @ABCDEFGHI
                                 ; JKLMNOPQRS
                                 ; TUVWXYZ
 
@@ -2019,66 +2043,75 @@ scroller_next_character ; original address L000215FA
                                 BRA.B   .handle_scroll_char 
 
                         ; 5th line of text offset (source gfx)
-.add_gfx_offset_1               ADD.W   #$04d8,D7                       ; add offset into gfx 
+.add_gfx_offset_1               ADD.W   #$04d8,D7                       ; add 1240 byte offset into gfx 
                                 BRA.B   .do_blit_character 
 
                         ; 4th line of text offset (source gfx)
-.add_gfx_offset_2               ADD.W   #$03a2,D7
+.add_gfx_offset_2               ADD.W   #$03a2,D7                       ; add 930 bytes offset into gfx 
                                 BRA.B   .do_blit_character 
 
                         ; 3rd line of text offset (source gfx)
-.add_gfx_offset_3               ADD.W   #$026c,D7                       ; add 620 bytes
+.add_gfx_offset_3               ADD.W   #$026c,D7                       ; add 620 bytes offset into gfx 
                                 BRA.B   .do_blit_character 
 
                         ; 2nd line of text offset (source gfx)
-.add_gfx_offset_4               ADD.W   #$0136,D7                       ; add 310 bytes
+.add_gfx_offset_4               ADD.W   #$0136,D7                       ; add 310 bytes offset into gfx (310*4 = 1240) - 31 pixel high font
 
                         ; 1st line of text - no offset (source gfx)
-.do_blit_character              SUB.B   #$2c,D7                         ; subtract 44 from char offset
-                                MULU.W  #$0004,D7                       ; mutiply by 4
+.do_blit_character              SUB.B   #$2c,D7                         ; subtract 44 from char offset (',' character)
+                                MULU.W  #$0004,D7                       ; mutiply by 4 to get 32 pixel offset to character.
 
+                        ; do bitplane 1 blits of character
                                 LEA.L   scroll_font_gfx,A1
                                 LEA.L   scroll_font_gfx,A3
                                 ADDA.W  D7,A1                           ; character source gfx ptr
                                 ADDA.W  D7,A3                           ; character source gfx ptr
                                 LEA.L   scroll_text_bpl_0_start,a0              
-                                LEA.L   scroll_text_bpl_0_start,a2              
-                                MOVE.W  scroller_buffer_counter,D0
+                                LEA.L   scroll_text_bpl_0_start,a2   #
+                                ; calc source ptr addresses           
+                                MOVE.W  scroller_buffer_counter,D0      ; buffer offset in byte for next character
                                 ADDA.W  D0,A0
-                                ADD.W   #$0030,D0
+                                ADD.W   #$0030,D0                       ; add 48 - doubd buffer offset
                                 ADDA.W  D0,A2
-                                MOVE.L  A1,$0050(A6)
-                                MOVE.L  A0,$0054(A6)
-                                MOVE.W  #$0802,$0058(A6)
-.L000216D2_wait                 BTST.B  #$000e,$0002(A6)
-                                BNE.B   .L000216D2_wait
-                                MOVE.L  A3,$0050(A6)
-                                MOVE.L  A2,$0054(A6)
-                                MOVE.W  #$0802,$0058(A6)
+                                ; blit 1st copy of char - bpl1
+                                MOVE.L  A1,BLTAPT(A6)
+                                MOVE.L  A0,BLTDPT(A6)
+                                MOVE.W  #$07c2,BLTSIZE(A6)              ; 2 words wide by 31 pixels high
+.blit_wait_2                    BTST.B  #14-8,DMACONR(A6)
+                                BNE.B   .blit_wait_2
+                                ; blit 2nd copy of char - bpl1 
+                                MOVE.L  A3,BLTAPT(A6)
+                                MOVE.L  A2,BLTDPT(A6)
+                                MOVE.W  #$07c2,BLTSIZE(A6)              ; 2 words wide by 31 pixels high
 
+                        ; do bitplane 2 blits of character
                                 LEA.L   scroll_font_gfx,A1
                                 LEA.L   scroll_font_gfx,A3
-                                ADDA.W  D7,A1
-                                ADDA.W  D7,A3
-                                ADDA.W  #$1900,A1
-                                ADDA.W  #$1900,A3
-                                LEA.L   scroll_text_bpl_1_start,a0      ; L0002BB38,A0
-                                LEA.L   scroll_text_bpl_1_start,a2      ; L0002BB38,A2
-                                MOVE.W  scroller_buffer_counter,D0
-                                ADDA.W  D0,A0
+                                ADDA.W  D7,A1                           ; src ptr 1
+                                ADDA.W  D7,A3                           ; src ptr 2
+                                ADDA.W  #$1900,A1                       ; add bitplane offset (source gfx)
+                                ADDA.W  #$1900,A3                       ; add bitplane offset (source gfx)
+                                LEA.L   scroll_text_bpl_1_start,a0      ; dest ptr 1
+                                LEA.L   scroll_text_bpl_1_start,a2      ; dest ptr 2
+                                ; calc source ptr addresses 
+                                MOVE.W  scroller_buffer_counter,D0      ; buffer scroll offset for character
+                                ADDA.W  D0,A0                           
                                 ADD.W   #$0030,D0
                                 ADDA.W  D0,A2
-.L0002171A_wait                 BTST.B  #$000e,$0002(A6)
-                                BNE.B   .L0002171A_wait 
-                                MOVE.L  A1,$0050(A6)
-                                MOVE.L  A0,$0054(A6)
-                                MOVE.W  #$0802,$0058(A6)
-.L00021730_wait                 BTST.B  #$000e,$0002(A6)
-                                BNE.B   .L00021730_wait 
-                                MOVE.L  A3,$0050(A6)
-                                MOVE.L  A2,$0054(A6)
-                                MOVE.W  #$0802,$0058(A6)
+                                ; blit 1st copy of char - bpl2
+.blit_wait_3                    BTST.B  #14-8,DMACONR(A6)
+                                BNE.B   .blit_wait_3 
+                                MOVE.L  A1,BLTAPT(A6)
+                                MOVE.L  A0,BLTDPT(A6)
+                                MOVE.W  #$07c2,BLTSIZE(A6)              ; 2 words wide by 31 pixels high
+.blit_wait_4                    BTST.B  #14-8,DMACONR(A6)
+                                BNE.B   .blit_wait_4 
+                                ; blit 2nd copy of char - bpl2
+                                MOVE.L  A3,BLTAPT(A6)
+                                MOVE.L  A2,BLTDPT(A6)
+                                MOVE.W  #$07c2,BLTSIZE(A6)              ; 2 words wide by 31 pixels high
 
+                        ; do bitplane 3 blits of character
                                 LEA.L   scroll_font_gfx,A1
                                 LEA.L   scroll_font_gfx,A3
                                 ADDA.W  D7,A1
@@ -2091,17 +2124,18 @@ scroller_next_character ; original address L000215FA
                                 ADDA.W  D0,A0
                                 ADD.W   #$0030,D0
                                 ADDA.W  D0,A2
-.L00021778_wait                 BTST.B  #$000e,$0002(A6)
-                                BNE.B   .L00021778_wait 
-                                MOVE.L  A1,$0050(A6)
-                                MOVE.L  A0,$0054(A6)
-                                MOVE.W  #$0802,$0058(A6)
-.L0002178E_wait                 BTST.B  #$000e,$0002(A6)
-                                BNE.B   .L0002178E_wait 
-                                MOVE.L  A3,$0050(A6)
-                                MOVE.L  A2,$0054(A6)
-                                MOVE.W  #$0802,$0058(A6)
+.blit_wait_5                    BTST.B  #14-8,DMACONR(A6)
+                                BNE.B   .blit_wait_5 
+                                MOVE.L  A1,BLTAPT(A6)
+                                MOVE.L  A0,BLTDPT(A6)
+                                MOVE.W  #$07c2,BLTSIZE(A6)              ; 2 words wide by 31 pixels high
+.blit_wait_6                    BTST.B  #14-8,DMACONR(A6)
+                                BNE.B   .blit_wait_6 
+                                MOVE.L  A3,BLTAPT(A6)
+                                MOVE.L  A2,BLTDPT(A6)
+                                MOVE.W  #$07c2,BLTSIZE(A6)              ; 2 words wide by 31 pixels high
 
+                        ; do bitplane 4 blits of character
                                 LEA.L   scroll_font_gfx,A1
                                 LEA.L   scroll_font_gfx,A3
                                 ADDA.W  D7,A1
@@ -2114,20 +2148,25 @@ scroller_next_character ; original address L000215FA
                                 ADDA.W  D0,A0
                                 ADD.W   #$0030,D0
                                 ADDA.W  D0,A2
-.L000217D6_wait                 BTST.B  #$000e,$0002(A6)
-                                BNE.B   .L000217D6_wait 
-                                MOVE.L  A1,$0050(A6)
-                                MOVE.L  A0,$0054(A6)
-                                MOVE.W  #$0802,$0058(A6)
-.L000217EC_wait                 BTST.B  #$000e,$0002(A6)
-                                BNE.B   .L000217EC_wait 
-                                MOVE.L  A3,$0050(A6)
-                                MOVE.L  A2,$0054(A6)
-                                MOVE.W  #$0802,$0058(A6)
-.L00021802_wait                 BTST.B  #$000e,$0002(A6)
-                                BNE.B   .L00021802_wait 
+.blit_wait_7                    BTST.B  #$000e,DMACONR(A6)
+                                BNE.B   .blit_wait_7 
+                                MOVE.L  A1,BLTAPT(A6)
+                                MOVE.L  A0,BLTDPT(A6)
+                                MOVE.W  #$07c2,BLTSIZE(A6)              ; 2 words wide by 31 pixels high
+.blit_wait_8                    BTST.B  #14-8,DMACONR(A6)
+                                BNE.B   .blit_wait_8 
+                                MOVE.L  A3,BLTAPT(A6)
+                                MOVE.L  A2,BLTDPT(A6)
+                                MOVE.W  #$07c2,BLTSIZE(A6)              ; 2 words wide by 31 pixels high
+
+.blit_wait_9                    BTST.B  #14-8,DMACONR(A6)
+                                BNE.B   .blit_wait_9 
                                 MOVE.W  #$0000,scroller_character_counter
                                 RTS 
+
+
+
+
 
 
 
