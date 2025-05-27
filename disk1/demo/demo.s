@@ -408,6 +408,8 @@ main_loop       ; original address L000202F6
                         ; do music initialisation
 .initialise_music
                                 ;BSR.W   music_init                                              ; L00021B96
+                                JSR _mt_remove
+                                
                                 lea     $0,a0
                                 move.L  #$1,d0
                                 JSR     _mt_install
