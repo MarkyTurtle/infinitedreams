@@ -22,7 +22,7 @@ Maybe I'll this will trigger me do develop something new after this project...
 I've been looking for better mod player routines for the Amiga, am listing them below:
 - [Lightspeed Player](https://github.com/arnaud-carre/LSPlayer)
 - [Various Packers and players](https://www.amiga-stuff.com/modpackers-download.html)
-- [Proteacker Support Archive(https://aminet.net/package/mus/edit/ptsupp)
+- [Protracker Support Archive](https://aminet.net/package/mus/edit/ptsupp)
 
 ## Progress To Date
 - **2025-05-25** - Mostly documented the disassembly of the demo code. Just the line draw routine and music player left to document. (I think the music player was supplied by someone else originally).  Think I might try to fit a new disk loader to this and see hoe much I can compress onto a single disk using modern compaction tools. I'll have a think...
