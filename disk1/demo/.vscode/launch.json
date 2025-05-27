@@ -14,7 +14,8 @@
                 "--automatic_input_grab=1",
                 "--floppy-image-0=${workspaceFolder}/disks/disk1.dms",
                 "--floppy-image-1=${workspaceFolder}/disks/disk2.dms",
-                "--floppy-image-2=${workspaceFolder}/disks/disk3.dms"
+                "--floppy-image-2=${workspaceFolder}/disks/disk3.dms",
+                "--video_sync=off"
             ],
             "preLaunchTask": "amigaassembly: build"
         },
@@ -31,7 +32,8 @@
                 "--automatic_input_grab=1",
                 "--floppy-image-0=${workspaceFolder}/disks/disk1.dms",
                 "--floppy-image-1=${workspaceFolder}/disks/disk2.dms",
-                "--floppy-image-2=${workspaceFolder}/disks/disk3.dms"
+                "--floppy-image-2=${workspaceFolder}/disks/disk3.dms",
+                "--video_sync=off"
             ],
             "preLaunchTask": "amigaassembly: build"
         },

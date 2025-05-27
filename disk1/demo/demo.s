@@ -136,6 +136,8 @@ init_system     ; original address L00020052
                                 LEA.L   level_3_interrupt_handler(PC),A0 
                                 MOVE.L  A0,$0000006c                            ; level 3 interrupt autovector
                                 MOVE.W  #$8012,INTENA(A6)                       ; enable COPER & DSKBLK
+
+
                                 RTS 
 
 
@@ -360,7 +362,9 @@ main_loop       ; original address L000202F6
                                                                                 ;   if yes, stop music
 .disable_music          ; stop music playing
                                 BCLR.B  #MUSIC_PLAYING,music_status_bits
-                                BSR.W   music_off                                               ; L00021C0A
+                                ;BSR.W   music_off                                               ; L00021C0A
+                              
+                                JSR     _mt_end
 
 .load_music             ; load music
                                 BSR.W   load_music                                              ; L00021814
@@ -403,7 +407,18 @@ main_loop       ; original address L000202F6
 
                         ; do music initialisation
 .initialise_music
-                                BSR.W   music_init                                              ; L00021B96
+                                ;BSR.W   music_init                                              ; L00021B96
+                                lea     $0,a0
+                                move.L  #$1,d0
+                                JSR     _mt_install
+
+                                lea     LOAD_BUFFER,a0
+                                lea     $0,a1
+                                move.l  #$0,d0
+                                JSR     _mt_init
+
+                                move.b  #$ff,_mt_Enable
+
                                 BCLR.B  #$0001,music_status_bits
                                 BSET.B  #$0000,music_status_bits
 
@@ -447,7 +462,10 @@ menu_ptr_index  ; original address L000203AC -  ;  index to menu typer ptr list.
                 ; ones per frame.
 level_3_interrupt_handler ; original address L000203AE
                                 MOVEM.L D0-D7/A0-A6,-(A7)
-                                MOVE.W  #$0010,INTREQ(A6)
+                                MOVE.W  INTREQR(a6),d0
+                                AND.W   #$0010,d0
+                                BEQ.S   .exit_handler  
+
 
                                 BSR.W   text_scroller                   ; Bottom screen text scroller - L0002152E
                                 BSR.W   swap_vector_logo_buffers        ; L000212F8
@@ -482,11 +500,16 @@ level_3_interrupt_handler ; original address L000203AE
 
 .do_music                ; test music loaded & ready - original address L00020406
                                 BTST.B  #MUSIC_PLAYING,music_status_bits
-                                BEQ.B   .exit_handler                                            ; L00020420
+                                BEQ.B   .no_music                                               ; L00020420
                         ; play/update music
-                                BSR.W   play_music                                              ; L00021C2C
+                                ;BSR.W   play_music                                              ; L00021C2C
+                                move.b  #$ff,_mt_Enable
+                                bra     .exit_handler 
+.no_music
+                                move.b  #$00,_mt_Enable
 
 .exit_handler    ; original address L00020424
+                                MOVE.W  #$0010,INTREQ(A6)
                                 MOVEM.L (A7)+,D0-D7/A0-A6
                                 RTE 
 
@@ -499,92 +522,104 @@ level_3_interrupt_handler ; original address L000203AE
                 ; spinning logo.
                 ; The text is displaed using the processor (which is odd for me)
                 ; i'd normally use the blitter for gfx operations.
+                ; The typer works in the main loop, while all blitter operations
+                ; occur during the copper interrupt.
+                ;
+                ; The screen format is 45 characters wide by 17 text lines high.
+                ;
 display_menu    ; original address L0002049C
-L0002049C                       LEA.L   menu_typer_bitplane,a0
-L000204A2                       LEA.L   menu_font_gfx,a2                        ; L000245F2      
-L000204A8                       LEA.L   menu_ptrs,a3
-L000204AE                       MOVE.W  menu_ptr_index,d0                       ; L000203AC,D0 ; menu ptr index (multiple of 4)
-L000204B4                       LEA.L   $00(A3,D0.W),A3
-L000204B8                       MOVEA.L (A3),A3
-L000204BA                       MOVE.W  #$002c,D7
-L000204BE                       MOVE.W  #$0010,D6
+                                LEA.L   menu_typer_bitplane,a0
+                                LEA.L   menu_font_gfx,a2   
+                                LEA.L   menu_ptrs,a3
+                                MOVE.W  menu_ptr_index,d0                       ; menu ptr index (multiple of 4)
+                                LEA.L   $00(A3,D0.W),A3
+                                MOVEA.L (A3),A3                                 ; a3 = menu text to display
+                                MOVE.W  #$002c,D7                               ; 44+1 characters wide
+                                MOVE.W  #$0010,D6                               ; 16+1 lines tall
 
-L000204C2_loop                          MOVE.L  #$00000000,D0
-L000204C4                               MOVE.L  #$00000000,D1
-L000204C6                               MOVE.L  #$00000000,D2
-L000204C8                               MOVE.L  #$00000000,D3
-L000204CA                               MOVE.L  #$00000000,D4
-L000204CC                               MOVE.B  (A3)+,D0
-L000204CE                               SUB.B   #$20,D0                         ; space char
-L000204D2                               LSL.B   #$00000001,D0
-L000204D4                               LEA.L   $00(A2,D0.W),A4                 ; a4 = char gfx ptr
-L000204D8                               MOVE.W  L000205D0,D1
-L000204DE                               MOVE.W  D1,D3
-L000204E0                               LSR.W   #$00000003,D1
-L000204E2                               MOVE.W  D1,D4
-L000204E4                               LSL.W   #$00000003,D4
-L000204E6                               SUB.W   D4,D3
-L000204E8                               BTST.L  #$0000,D1
-L000204EC                               BEQ.W   L000204FC 
-L000204F0                               BCLR.L  #$0000,D1
-L000204F4                               MOVE.W  #$0008,D2
-L000204F8                               BRA.W   L00020500 
-L000204FC                               MOVE.W  #$0000,D2
-L00020500                               LEA.L   $00(A0,D1.W),A1
-L00020504                               MOVE.W  L000205D2,D1
-L0002050A                               LEA.L   $00(A1,D1.W),A1
-L0002050E                               MOVE.L  $0000(A4),D0                    ; char line 1
-L00020512                               AND.L   #$ffff0000,D0
-L00020518                               ROR.L   D2,D0
-L0002051A                               ROR.L   D3,D0
-L0002051C                               OR.L    D0,$0000(A1)
-L00020520                               MOVE.L  $0076(A4),D0                    ; char line 2
-L00020524                               AND.L   #$ffff0000,D0
-L0002052A                               ROR.L   D2,D0
-L0002052C                               ROR.L   D3,D0
-L0002052E                               OR.L    D0,$0028(A1)
-L00020532                               MOVE.L  $00ec(A4),D0                    ; char line 3
-L00020536                               AND.L   #$ffff0000,D0
-L0002053C                               ROR.L   D2,D0
-L0002053E                               ROR.L   D3,D0
-L00020540                               OR.L    D0,$0050(A1)
-L00020544                               MOVE.L  $0162(A4),D0                    ; char line 4
-L00020548                               AND.L   #$ffff0000,D0
-L0002054E                               ROR.L   D2,D0
-L00020550                               ROR.L   D3,D0
-L00020552                               OR.L    D0,$0078(A1)
-L00020556                               MOVE.L  $01d8(A4),D0                    ; char line 5
-L0002055A                               AND.L   #$ffff0000,D0
-L00020560                               ROR.L   D2,D0
-L00020562                               ROR.L   D3,D0
-L00020564                               OR.L    D0,$00a0(A1)
-L00020568                               MOVE.L  $024e(A4),D0                    ; char line 6
-L0002056C                               AND.L   #$ffff0000,D0
-L00020572                               ROR.L   D2,D0
-L00020574                               ROR.L   D3,D0
-L00020576                               OR.L    D0,$00c8(A1)
-L0002057A                               MOVE.L  $02c4(A4),D0                    ; char line 7
-L0002057E                               AND.L   #$ffff0000,D0
-L00020584                               ROR.L   D2,D0
-L00020586                               ROR.L   D3,D0
-L00020588                               OR.L    D0,$00f0(A1)
+                ; print character loop -L000204C2
+.print_char_loop
+                                MOVE.L  #$00000000,D0
+                                MOVE.L  #$00000000,D1
+                                MOVE.L  #$00000000,D2
+                                MOVE.L  #$00000000,D3
+                                MOVE.L  #$00000000,D4
+                                MOVE.B  (A3)+,D0                        ; d0 = char to print
+                                SUB.B   #$20,D0                         ; font starts at 'space' char (32 ascii)
+                                LSL.B   #$00000001,D0                   ; d- = index to start of char gfx
+                                LEA.L   $00(A2,D0.W),A4                 ; a4 = char gfx ptr
+                                MOVE.W  character_x_pos,d1              
+                                MOVE.W  D1,D3
+                                LSR.W   #$00000003,D1                   ; d1 = byte offset
+                                MOVE.W  D1,D4
+                                LSL.W   #$00000003,D4                   ; d4 = rounded pixel offset
+                                SUB.W   D4,D3                           ; d3 = shift vale
+                                BTST.L  #$0000,D1                       ; check of odd bytes offset
+                                BEQ.W   .is_even_byte_offset 
+                                BCLR.L  #$0000,D1
+                                MOVE.W  #$0008,D2
+                                BRA.W   .do_shift_and_print
+.is_even_byte_offset
+                                MOVE.W  #$0000,D2
+.do_shift_and_print
+                                LEA.L   $00(A0,D1.W),A1                 ; a1 = dest ptr + x offset
+                                MOVE.W  character_y_offset,D1
+                                LEA.L   $00(A1,D1.W),A1                 ; a1 = dest ptr + y offset
+                                MOVE.L  $0000(A4),D0                    ; char line 1
+                                AND.L   #$ffff0000,D0
+                                ROR.L   D2,D0
+                                ROR.L   D3,D0
+                                OR.L    D0,$0000(A1)
+                                MOVE.L  $0076(A4),D0                    ; char line 2
+                                AND.L   #$ffff0000,D0
+                                ROR.L   D2,D0
+                                ROR.L   D3,D0
+                                OR.L    D0,$0028(A1)
+                                MOVE.L  $00ec(A4),D0                    ; char line 3
+                                AND.L   #$ffff0000,D0
+                                ROR.L   D2,D0
+                                ROR.L   D3,D0
+                                OR.L    D0,$0050(A1)
+                                MOVE.L  $0162(A4),D0                    ; char line 4
+                                AND.L   #$ffff0000,D0
+                                ROR.L   D2,D0
+                                ROR.L   D3,D0
+                                OR.L    D0,$0078(A1)
+                                MOVE.L  $01d8(A4),D0                    ; char line 5
+                                AND.L   #$ffff0000,D0
+                                ROR.L   D2,D0
+                                ROR.L   D3,D0
+                                OR.L    D0,$00a0(A1)
+                                MOVE.L  $024e(A4),D0                    ; char line 6
+                                AND.L   #$ffff0000,D0
+                                ROR.L   D2,D0
+                                ROR.L   D3,D0
+                                OR.L    D0,$00c8(A1)
+                                MOVE.L  $02c4(A4),D0                    ; char line 7
+                                AND.L   #$ffff0000,D0
+                                ROR.L   D2,D0
+                                ROR.L   D3,D0
+                                OR.L    D0,$00f0(A1)
 
-L0002058C                               ADD.W   #$00000007,L000205D0
-L00020592                               DBF.W   D7,L000204C2_loop
+                                ADD.W   #$0007,character_x_pos          ; add character width to x position
+                                DBF.W   D7,.print_char_loop
 
-L00020596                       MOVE.W  #$0000,L000205D0
-L0002059E                       ADD.W   #$0140,L000205D2
-L000205A6                       MOVE.W  #$002c,D7
-L000205AA                       DBF.W   D6,L000204C2_loop
+                                MOVE.W  #$0000,character_x_pos          ; reset x position (left hand side)
+                                ADD.W   #$0140,character_y_offset       ; increment line offset (8 rasters = 320 bytes)
+                                MOVE.W  #$002c,D7                       ; reset line loop counter (next 45 chars)
+                                DBF.W   D6,.print_char_loop             ; do next line loop
 
-L000205AE                       BSET.B  #MENU_DISP_DRAW,menu_display_status_bits                ; L000203AA ; bit 7 - 1 = menu typer completed
-L000205B6                       BSET.B  #MENU_DISP_FADE_IN,menu_display_status_bits             ; L000203AA ; bit 0 - 1 = do fade in menu display
-L000205BE                       MOVE.W  #$0000,L000205D0
-L000205C6                       MOVE.W  #$0000,L000205D2
-L000205CE                       RTS 
+                                BSET.B  #MENU_DISP_DRAW,menu_display_status_bits        ; bit 7 - 1 = menu typer completed
+                                BSET.B  #MENU_DISP_FADE_IN,menu_display_status_bits     ; bit 0 - 1 = do fade in menu display
+                                MOVE.W  #$0000,character_x_pos                          ; reset x position
+                                MOVE.W  #$0000,character_y_offset                       ; reset y offset (line position)
+                                RTS 
 
-L000205D0                       dc.w    $0000 
-L000205D2                       dc.w    $0000
+character_x_pos ; original address L000205D0 - x - pixel position        
+                                dc.w    $0000 
+character_y_offset ; original address L000205D2 - y - offset (multiple of bytes per raster)
+                                dc.w    $0000
+
 
 
 
@@ -640,6 +675,7 @@ fade_in_menu_display    ; original address L000205D4
 .exit_fade_in
                                 ADD.B   #$01,fade_speed_counter                 ; L00020743
                                 RTS 
+
 
 
 
@@ -4373,7 +4409,8 @@ menu_ptrs       ; original address L0003A7AC
                                 dc.l    addresses_6_menu        ; L0003CBED - index = $30
                                 dc.l    pd_message_menu         ; L0003CEEA - index = $34
 
-                                ; menu format = 45 x 17
+
+                ; menu format = 45 x 17 characters
 main_menu       ; original address L0003A7E4
                                 ;        123456789012345678901234567890123456789012345
                                 dc.b    '    THE LUNATICS PRESENT INFINITE DREAMS     '
@@ -4734,4 +4771,8 @@ _MOUSE_WAIT
             btst    #6,$bfe001
             bne.s   _MOUSE_WAIT
             rts
+
+
+
+                include "protracker/ptplayer/ptplayer.asm"
 
