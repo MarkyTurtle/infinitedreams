@@ -1,0 +1,19 @@
+SplitMOD V.2.0
+
+This tool was written if you need to load the song and samples data of a
+standard Amiga tracker module into different memory portions. The song data
+into available FAST memory to speed up memory access, whereas the sample
+data remains in CHIP memory.
+
+"SplitMOD" splits old 15 instrument modules as well as standard modules
+with 31 instruments. Amiga modules with 6 or 8 channels are also detected
+and correctly splitted.
+
+The following Amiga tracker types are supported:
+
+- Ultimate Soundtracker
+- (old) Soundtracker with 15 instruments
+- Soundtracker with 31 instruments
+- Noisetracker
+- Startrekker with 4 or 8 channels
+- Protracker with 64 or 100 patterns or 4, 6 or 8 channels

@@ -1,0 +1,155 @@
+Converter for "Ultimate Soundtracker to Protracker" (UST2PT) V.1.4
+
+
+Original Ultimate Soundtracker modules are not compatible with Protracker:
+
+- The command numbers and the command behaviour are different.
+- Special note cuts without an effect command are not supported by the
+  Protracker 3.1.x.
+- Loop samples are replayed in a different way.
+- A song can have raster independant, varying songspeeds in bpm, saved
+  directly in the song/module structure.
+- There are only 15 instruments instead of the ususal 31.
+
+
+What does this tool do for you ?
+
+
+Conversion of incompatible effect commands
+
+The whole module is scanned for effect commands and they are converted into
+Protracker commands like this:
+
+ UST 1xy "Arpeggiato"       -> PT 0xy "Arpeggio"
+ UST 2x0 "Pitchbend (Down)" -> PT 20x "Portamento Down"
+ UST 20y "Pitchbend (Up)"   -> PT 10y "Portamento Up"
+
+
+Conversion of incompatible note cuts
+
+The Ultimate Soundtracker and its successors support note cuts without an
+effect command. The note info only contains the sample number of a oneshot
+sample without a note period and so the audio hardware is not initialized
+with the start and length of the sample, it is initialized with the loop
+start and the repeat length of 1 Word. The sample is played in mute mode.
+The note info could look like this:
+
+Pos Note Track
+00       030000
+
+A good example where this method is used, is the module "STK.amegas" from
+Karsten Obarski here in pattern #10:
+
+Pos Note Track 2
+00  A-1  030000 Play looped sample #3 with note A-1
+...
+46       010000 Play oneshot sample #1 mute without a note -> cut sample #3
+...
+
+This method works upto the Protracker 2.x versions, but tarting with the
+3.1.x versions not anymore. A note info with only a sample number has no
+effect. The previous loop sample is still played.
+
+On the Protracker 3.1.x, note cuts could be done with the "Note Cut" command
+or with a "Set Volume 0" command. I use the second method:
+...
+Pos Note Track 2
+46       000C00
+...
+
+Karsten Obarski often used another critical method playing the same sample
+many times with different notes. Giving the sample number at the top of
+the pattern, but playing all subsequent notes without the sample number,
+like in his module "STK.blueberry" here in pattern #0:
+
+Pos Note Track 1
+00  A-3  0F0000 Play sample #F with note A-3
+01       000000
+02       030000 Play sample #3 in mute mode and cut sample #F
+03       000000
+04       000000
+05       000000
+06  G-3  000000 Play sample #3 with note G-3
+07       000000
+08       000000
+09       000000
+10  D-3  000000 Play sample #3 with note D-3
+...
+
+In this case it would be fatal just to insert a "Set Volume 0" command at
+pattern position 02. The note at position 06 and all subsequent notes
+without a sample number would be muted.
+
+To prevent this, I do a check of the channel pattern data until a note is
+found. If the note has no sample number, then the sample number from the
+note cut position 02 is used and written into the first note position 06:
+
+Pos Note Track 1
+00  A-3  0F0000 Play sample #F with note A-3
+01       000000
+02       000C00 Cut sample #F with command "Set Volume 0"
+03       000000
+04       000000
+05       000000
+06  G-3  030000 Play sample #3 with note G-3
+07       000000
+08       000000
+09       000000
+10  D-3  000000 Play sample #3 with note D-3
+
+
+1:1 conversion of loop samples
+
+As mentioned above, loop samples are played in a different way, whereas
+sample length = repeat length. To ensure that these samples are played in
+the correct way in Protracker, the data before the repeat point and
+after repeat point + repeat length is cut and only the sample data within
+the repeat length is saved in the converted module.
+
+
+Ensuring the right replay speed
+
+For the default speed in ticks, a "Speed 6" command is written into the
+first position of the first played pattern if there is no other command.
+If a command was found, the next free channel is used.
+
+
+Ensuring the right replay tempo
+
+The tempo x will be written at the same position of the next free channel
+with another "Speed x" command.
+
+If the songspeed from the song/module structure is not the default value
+of 120 bpm, then it is multiplied by a factor, because Karsten Obarski
+seemed to use a wrong calculation for the bpm timer value. He generally
+used the formula
+
+ time=(240-bpm)*122
+
+for PAL and NTSC machines.
+
+To get a bpm value for Protracker that is close to the original replay
+speed, I do a multiplication by a factor.
+
+I decided to set a "Speed 125" command for all modules with the default
+songspeed of 120 bpm. This is based on the fact, that mostly 120 bpm tunes
+from Karsten Obarski are replayed in 50 fps. Examples: STK.lepeltheme
+(Sarcophaser), STK.crystalhammer (same) and STK.amegas (same)
+
+
+Ensuring a turned off lowpass filter
+
+The third command to be written at the first pattern position for a channel
+without an effect command is a "Set Filter off".
+
+
+Creating a module with a Protracker compatible songstructure
+
+And last but not least, the missing 16 samples' infostructures and the
+Protracker module ID are added to the converted module.
+
+
+Please keep in mind that is nearly impossible to detect all Ultimate
+Soundtracker modules in the right way. If the module doesn't use any
+typical effect command combination or note cuts, it could be also a
+module composed with an old Soundtracker.

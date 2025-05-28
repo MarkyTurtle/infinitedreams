@@ -1,0 +1,382 @@
+Short:        Package of tracker tools and sources
+Uploader:     dissident.68k@web.de (dissident)
+Author:       dissident.68k@web.de (dissident)
+Type:         util/cli
+Required:     MC68000+, OCS-chipset+, OS 1.2+
+Version:      1.6
+Architecture: m68k-amigaos >= 1.2.0
+Distribution: NoCD
+Kurz:         Sammlung von Tracker Tools und Sources
+
+
+** Introduction **
+
+Welcome to the Ultimate Tracker Support (UTS) package from Resistance for
+Amiga tracker modules, coded by Dissident. If you want some background
+information about the different Amiga tracker types or you want to preserve
+the original sound of old tracker modules, then this is the right package
+for you.
+
+
+** Content **
+
+This package includes six different Shell tools coded in assembler for
+standard non packed Amiga tracker modules:
+
+- WhichMOD V.1.5 detects main characteristics of tracker modules.
+
+- UST2PT   V.1.4 converts Ultimate Soundtracker into Protracker modules.
+
+- OST2PT   V.1.4 converts old Soundtracker into Protracker modules.
+
+- ST2PT    V.1.3 converts Soundtracker into Protracker modules.
+
+- NT2PT    V.1.0 converts Noisetracker/Startrekker into Protracker modules.
+
+- SplitMOD V.2.0 splits tracker modules into song and samples data files.
+
+
+Sixteen different replay routines for 000/0x0 CPUs as assembler sourcecodes:
+
+- UST-Replay27_000_0x0  V.2.1 Ultimate Soundtracker
+
+- DST-Replay6_000_0x0   V.1.1 (old) DOC Soundtracker
+
+- DST-Replay9_000_0x0   V.1.0
+
+- ST-Replay2.2_000_0x0  V.4.1 (old) Soundtracker
+
+- ST-Replay2.4_000_0x0  V.4.1 Soundtracker
+
+- NT-Replay2.0_000_0x0  V.4.1 Noisetracker
+
+- PT-Replay2.3a_000_0x0 V.4.2 Protracker
+
+- PT-Replay3.0b_000_0x0 V.4.0
+
+
+Some words about the included sourcecodes...
+
+The main focus is on the Amiga tracker replay routines. Any other parts like
+turning the system off and on, saving the content of hardware registers
+or enabling/disabling interrupts are NOT part of the sources.
+
+The aim is to provide you 100% documented and standardized replay routines
+as assembler sourcecodes for different Amiga trackers.
+
+All routines are based on the Protracker 2.3a/3.0b original replay routines.
+If possible, I checked the replay routine of the tracker editors which may
+differ in some cases from the published replay routine and I included the
+differences in my replay routines.
+
+For every replay routine there's an optimized 68000 and 680x0 version which
+are very fast.
+
+Feel free to do further optimizations. ;-)
+
+I've decided to include only the latest version of a replay routine before
+fundamental changes happened, like:
+
+- Changing and introducing new effect commands with DOC Soundtracker 4,
+  DOC Soundtracker 9, Master Soundtracker 1.0, Soundtracker 2.0,
+  Soundtracker 2.3, Noisetracker 1.0 and Protracker 1.0
+
+- Changing from raster independent to raster dependent replay with
+  Master Soundtracker 1.0 and Soundtracker 2.0
+
+- Introducing 31 instruments with Soundtracker 2.3
+
+- Changing the interpretation of the repeat point of loop samples from bytes
+  to words with Soundtracker 2.5, Noisetracker 1.0 and expanding the effect
+  commands
+
+- Adding extended commands with Protracker 1.0
+
+- Changing from raster dependent to raster independent replay with
+  Protracker 1.0
+
+- Adding new commands and features with Protracker 3.0
+
+
+The following trackers are supported by the routines:
+
+- UST-Replay27
+
+  * Ultimate Soundtracker 1.21 - the mother of all trackers =)
+  * Ultimate Soundtracker 1.8
+  * Ultimate Soundtracker 2.0 
+
+- DST-Replay6
+
+  * (old) Soundtracker     1
+  * (old) Soundtracker     2
+  * (old) Soundtracker     3
+  * (old) DOC Soundtracker 4
+  * (old) DOC Soundtracker 5
+  * (old) DOC Soundtracker 6
+
+- DST-Replay9
+
+  * (old) DOC Soundtracker    9
+  * (old) Master Soundtracker 1.0
+
+- ST-Replay2.2
+
+  * (old) Soundtracker 2.0
+  * (old) Soundtracker 2.1
+  * (old) Soundtracker 2.2
+
+- ST-Replay2.4
+
+  * Soundtracker 2.3
+  * Soundtracker 2.4
+
+- NT-Replay2.0
+
+  * Noisetracker 2.x
+  * Startrekker  1.x
+
+- PT-Replay2.3a
+
+  * Soundtracker 2.5
+  * Soundtracker 2.6
+  * Noisetracker 1.x
+  * Protracker   1.x
+  * Protracker   2.x
+
+- PT-Replay3.0b
+
+  * Soundtracker 2.5
+  * Soundtracker 2.6
+  * Noisetracker 1.x
+  * Protracker   1.x
+  * Protracker   2.x
+  * Protracker   3.x
+
+----------------------------------------------------------------------------
+
+** History **
+
+V.1.6
+
+- Replay routines:
+
+  * DST-Replay6_000_0x0 V1.1
+    Wrong offset to access the AUDx registers fixed. Thanks for your hint
+    Mikael :-)
+
+  * ST-Replay2.2_00_0x0 V 4.1
+    Wrong offset to access the AUDx registers fixed. Thanks for your hint
+    Mikael :-)
+
+  * PT-Replay2.3a_000_0x0 V.4.2
+    Extended commands check for the ticks #2..speed optimized. Now only the
+    commands which are used are checked. Subroutine SetTonePorta optimized.
+    Now if finetune=0 then no period value is searched in the periods table.
+    Wrong offset to access the AUDx registers fixed. Thanks for your hint
+    Mikael :-)
+
+  * PT-Replay2.4_000_0x0  V.1.1
+    +++++ Removed from package +++++
+    The audio interrupt on real hardware behaves different than on WinUAE.
+    I will fix this.
+
+  * PT-Replay3.0b_000_0x0 V.4.0
+    Extended commands check for the ticks #2..speed optimized. Now only the
+    commands which are used are checked. Subroutine SetTonePorta optimized.
+    Now if finetune=0 then no period value is searched in the periods table.
+    I've optimized the volume update after a voice is played.
+    Wrong offset to access the AUDx registers fixed. Thanks for your hint
+    Mikael :-)
+
+  * PT-Replay3.1_000_0x0  V.1.1
+    +++++ Removed from package +++++
+    The audio interrupt on real hardware behaves different than on WinUAE.
+    I will fix this.
+
+----------------------------------------------------------------------------
+
+V.1.5
+
+- Replay routines:
+
+  * NT-Replay2.0_000_0x0  V.4.1
+    Now "Tone Portamento" doesn't call CheckMoreEffects anymore, if
+    wanted period equals note period. I didn't consider this special
+    case of the original Noisetracker/Startrekker replay routine yet.
+
+  * PT-Replay2.3a_000_0x0 V.4.1
+    Retrig note / Note Delay interrupt routine improved and optimized.
+
+  * PT-Replay2.4_000_0x0  V.1.0 (new)
+    Based on version 2.3, using the audio interrupts for rewriting the
+    audio location and length registers makes a timer wait superfluous.
+    This guarantees a smooth replay of loop samples with a repeat point
+    of NULL instead of the usual cracking sound generated by the first
+    cleared sample data word.
+
+  * PT-Replay3.0b_000_0x0 V.3.9
+    Retrig note / Note Delay interrupt routine improved and optimized.
+
+  * PT-Replay3.1_000_0x0  V.1.0 (new)
+    Based on version 3.0b, using the audio interrupts for rewriting the
+    audio location and length registers makes a timer wait superfluous.
+    This guarantees a smooth replay of loop samples with a repeat point
+    of NULL instead of the usual cracking sound generated by the first
+    cleared sample data word.
+
+
+- Some of the tools also got improved:
+
+  * WhichMOD V.1.5
+    + Songspeed of NULL bpm is no longer displayed
+    + Improved note info check in the patterns
+    + Detection of Ultimate Soundtracker note cuts without an effect command
+    + Considering  special effect commands of the old Soundtracker 1-3 and
+      old DOC Soundtracker 4-6
+    + Used effect commands now displayed based on the logic of my overview
+      "Tracker Features V.1.0" with their different command formats 0-2
+    + Internal song restart position of Noisetracker 2.x or Startrekker 1.x
+      modules with 4 or 8 channels now displayed
+
+  * UST2PT V.1.4
+    + Now directories, set with the Shell "CD" command, properly supported
+      and filename bug removed
+    + Large samples of >32 kB now treated correctly
+    + Detection and conversion of Ultimate Soundtracker note cuts without an
+      effect command
+    + Considering  special effect commands of the old Soundtracker 1-3 and
+      old DOC Soundtracker 4-6
+    + Now only for modules with a songspeed that is not 120 bpm, the song-
+      speed is multiplied by a factor. In case of 120 bpm, the standard
+      tempo of 125 bpm is used, because 120 bpm modules are usally replayed
+      in 50 fps/125 bpm (e.g. "STK.lepeltheme" of the game Sarcophaser)
+    + More precise info which speed command could not be set if there are
+      not enough channels without an effect command at the first position
+      in the first played pattern
+
+  * OST2PT V.1.4
+    + Now directories, set with the Shell "CD" command, properly supported
+      and filename bug removed
+    + Large samples of >32 kB now treated correctly
+    + Detection and conversion of Ultimate Soundtracker note cuts without an
+      effect command
+    + Considering  special effect commands of the old Soundtracker 1-3 and
+      old DOC Soundtracker 4-6 and converting them if possible
+    + Now only for modules with a songspeed that is not 120 bpm, the song-
+      speed is multiplied by a factor. In case of 120 bpm, the standard
+      tempo of 125 bpm is used, because 120 bpm modules are usally replayed
+      in 50 fps/125 bpm.
+    + More precise info which speed command could not be set if there are
+      not enough channels without an effect command at the first position
+      in the first played pattern
+
+  * ST2PT V.1.3
+    + Now directories, set with the Shell "CD" command, properly supported
+      and filename bug removed
+    + Improved note info check in the patterns.
+    + Large samples of >32 kB now treated correctly
+    + There may be some Soundtracker modules with a speed command which sets
+      the speed to a value > 15 ticks. If so, the Soundtracker compatible
+      maximum of 15 ticks is set in the pattern
+    + More precise info which speed command could not be set if there are
+      not enough channels without an effect command at the first position
+      in the first played pattern
+
+  * NT2PT V.1.0 (new)
+    + If the internal song restart position is 1..127, an additional "end"-
+      pattern with a "Position Jump restartpos" effect command is set in
+      the first position of the additional pattern to ensure Protracker
+      compability
+    + Some Noisetracker modules (e.g. MOD.load master loading) have a speed
+      command that sets > 31 ticks cause problems on the Protracker that
+      interprets these values as tempo values. A speed > 31 ticks is set
+      to the Noisetracker/Startrekker compatible maximum value of 31 ticks
+    + More precise info which speed command could not be set if there are
+      not enough channels without an effect command at the first position
+      in the first played pattern
+
+  * SplitMOD V.2.0
+    + Now directories, set with the Shell "CD" command, properly supported
+      and filename bug removed
+    + More precise error message if the length of the samples file will be
+      NULL bytes
+
+
+----------------------------------------------------------------------------
+
+V.1.4
+
+- All sourcecodes updated and replay routines for Soundtracker 1-3, DOC
+  Soundtracker 4-6 and DOC Soundtracker 9 / Master Soundtracker 1.0 added
+
+  *UST-Replay27_000_0x0  V.2.0
+   Now "Pitchbend" slides the current note period and not the last saved
+   note. Any "Pitchbend" commands before a "Arpeggiato" command don't
+   have any influence on the original base note as in the original replay
+   routine. I forgot to consider this fact yet. Comments updated and further
+   optimizing done.
+
+  *DST-Replay6_000_0x0   V.1.0 (new)
+
+  *DST-Replay9_000_0x0   V.1.1 (new)
+
+  *ST-Replay2.2_000_0x0  V.4.0
+   Now "Arpeggio" and "Portamento Up/Down" use separate variables for their
+   periods as in the original replay routine. I forgot to consider this fact
+   yet. Comments updated.
+
+  *ST-Replay2.4_000_0x0  V.4.1
+   Now "Arpeggio" and "Portamento Up/Down" use separate variables for their
+   periods as in the original replay routine. I forgot to consider this fact
+   yet. Comments updated and further optimizing done.
+
+  *NT-Replay2.0_000_0x0  V.4.0
+   Comments updated and further optimizing done.
+
+  *PT-Replay2.3a_000_0x0 V.4.0
+   Comments updated.
+
+  *PT-Replay3.0b_000_0x0 V.3.8
+   Comments updated.
+
+- Some of the tools also changed:
+
+  *WhichMOD V.1.4
+   bpm = NULL check added, now bpm values with 1 or 2 digits are displayed
+   correctly
+
+  *UST2PT   V.1.3
+   bpm = NULL check added
+
+  *OST2PT   V.1.3
+   bpm = NULL check added, now DOC Soundtracker 9 modules with independent
+   raster replay in bpm supported. If a module has already the prefix
+   "mod." then the suffix "(PT)" is added
+
+  *SplitMOD V.1.9
+   Info texts changed
+
+- Overview Tracker Features V.1.0
+  I've added a table with different tracker features and a classification
+  of the trackers by their effect command formats as a pdf-file and a png-
+  picture for the use with multiview
+
+----------------------------------------------------------------------------
+
+V.1.3
+
+- First release
+
+----------------------------------------------------------------------------
+
+Greetings go to all members of Resistance, Jasmin68k, Oriens, Bytebreaker,
+Mccnex, Bifat, Crown, Asle, Meeku, mGGk, Icke and Toni Wilen
+
+Special thanks to Deniil 715! for your great MiniHex editor which helped me
+a lot creating test modules.
+
+
+Have fun with it...
+
+Dissident^Resistance

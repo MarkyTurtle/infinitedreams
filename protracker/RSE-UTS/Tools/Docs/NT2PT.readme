@@ -1,0 +1,61 @@
+Converter for "Noisetracker to Protracker" (NT2PT) V.1.0
+
+Noisetracker 2.x/Startrekker 1.x modules are not 100 % compatible with
+Protracker. The module/song structure may contain a restart song position
+that is more than NULL.
+
+
+What does this tool do for you ?
+
+
+Correcting incompatible commands
+
+The whole Amiga tracker module is scanned for effect commands to make sure
+it is a Noisetracker/Startrekker module and not a Soundtracker or Pro-
+tracker module.
+
+There might be Noisetracker modules (MOD.load master loading with a "Speed"
+effect command which has a value > 31 ticks. Thi value sets the tempo on
+Protracker. To avoid this, the effect command in the pattern is corrected
+to 31 ticks to ensure a compatible replay tempo.
+
+
+Ensuring the right replay speed
+
+For the default speed in ticks, a "Speed 6" command is written into the
+first position of the first played pattern, if there is not already a
+"Speed" command or any other command. If a non-"Speed" command was found,
+the next free channel is used.
+
+
+Ensuring the right replay tempo
+
+The standard Protracker tempo of 125 BPM is written as a "Speed 125" command
+into the first position of the first played pattern if possible.
+
+
+Ensuring a turned off lowpass filter
+
+The third command to be written at the first pattern position for a channel
+without an effect command is a "Set Filter off".
+
+
+Coverting the restart song position
+
+If the restart song position in the song/module structure is more than 1,
+then an additional pattern with a "Position Jump x" effect command in the
+first position is added. The additional pattern number is also written into
+the song position table and the number of patterns in the table is adapted.
+
+
+Creating a module with a Protracker compatible songstructure
+
+And last but not least, the Protracker module ID is added to the converted
+module.
+
+The new file gets the suffix "(PT)" to save the original Noisetracker/
+Startrekker module.
+
+
+Because of the module ID and the scan of effect commands, a Noisetracker/
+Startrekker module can be detected very precise.
