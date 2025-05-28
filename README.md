@@ -26,7 +26,9 @@ I've been looking for better mod player routines for the Amiga, am listing them 
 - [Ultimate Tracker Support Package](https://aminet.net/package/mus/edit/RSE-UTS)
 
 ## Progress To Date
-- **2025-05-25** - Mostly documented the disassembly of the demo code. Just the line draw routine and music player left to document. (I think the music player was supplied by someone else originally).  Think I might try to fit a new disk loader to this and see hoe much I can compress onto a single disk using modern compaction tools. I'll have a think...
+- **2025-05-28** - Have changed the protracker player routine to a CIA routine which is more accurate than the original player (which didn't sound great on some of the
+- original tunes. Also, I've also tried converting the modules to P61 format (and created a seperate test repo), the modules dont play correctly in this compressed format. Finally, I've tried compressing the modules with zx0 compression, this would reduce the demo to 2 disks. I might investigate this avenue, I was hoping to get it compressed down to a single disk. Maybe theres still a compression format that I haven't found yet that will get me there. I'll keep investigating...
+- **2025-05-25** - Mostly documented the disassembly of the demo code. Just the line draw routine and music player left to document. (I think the music player was supplied by someone else originally).  Think I might try to fit a new disk loader to this and see how much I can compress onto a single disk using modern compaction tools. I'll have a think...
 - **2025-05-24** - Demo runs from VSCode, all components are working. Can load music from the original disks. I have just begun ripping the protracker modules from the original disks.
 - **2025-05-12** - Demo is Disassembled and can be run inside VSCode. Not all working yet, The main logo and scroller is working. 
 - **2025-05-07** - Completed Disassembly of the bootblock Disk 1
