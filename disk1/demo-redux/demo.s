@@ -362,8 +362,6 @@ main_loop       ; original address L000202F6
                                                                                 ;   if yes, stop music
 .disable_music          ; stop music playing
                                 BCLR.B  #MUSIC_PLAYING,music_status_bits
-                                ;BSR.W   music_off                                               ; L00021C0A
-                              
                                 JSR     _mt_end
 
 .load_music             ; load music
@@ -406,8 +404,7 @@ main_loop       ; original address L000202F6
                                 BEQ.B   .end_main_loop                                          ; L000203A4
 
                         ; do music initialisation
-.initialise_music
-                                ;BSR.W   music_init                                              ; L00021B96
+.initialise_music                                            ; L00021B96
                                 JSR _mt_remove
 
                                 lea     $0,a0
@@ -503,8 +500,7 @@ level_3_interrupt_handler ; original address L000203AE
 .do_music                ; test music loaded & ready - original address L00020406
                                 BTST.B  #MUSIC_PLAYING,music_status_bits
                                 BEQ.B   .no_music                                               ; L00020420
-                        ; play/update music
-                                ;BSR.W   play_music                                              ; L00021C2C
+                        ; play/update music                                                     ; L00021C2C
                                 move.b  #$ff,_mt_Enable
                                 bra     .exit_handler 
 .no_music
@@ -2205,16 +2201,38 @@ scroller_next_character ; original address L000215FA
 
 
 
+_load_error             move.w  d0,$dff180
+                        add.w   #$1,d0
+                        jmp     _load_error
 
 
-
+filename        dc.b    "df0:jarresque.zx0",0
+                even
 
                 ; ---------------------- load music -----------------------
                 ; mfm track loader.
                 ; load a music file from disk, checks the disk number
                 ; in the drive and waits for the correct disk.
                 ;
-load_music      ; original address L00021814
+load_music      
+                                move.l  #$0,d0
+                                lea     filename,a0
+                                lea     load_buffer,a1
+                                lea     work_buffer,a2
+                                ;jmp     _load_error
+
+                                jsr     dosioR                          ; rnc_loader
+
+                                jmp     _load_error
+
+                                tst.w   d0
+                                bne     _load_error
+                                rts
+
+
+
+
+                                ; original address L00021814
                                 BSR.W   init_loader             ; L000218A4
                                 BRA.W   load_file               ; L00021A3C 
                                 RTS 
@@ -3657,7 +3675,21 @@ pd_message_menu        ; original address L0003CEEA
                                 dc.b    '                                             '  
                                 dc.b    '                                             ' 
 
+
+
+
+
+
+        ; ******************************************************************
+        ; RNC DISK LOADER (DOS)
+        ; ******************************************************************
+rnc_loader
+                incdir "rnctools/DosIO"
+                include "rnctools/DosIO/DosIOR.S"
+
+
         IFD TEST_BUILD 
+work_buffer
 mfm_track_buffer        dcb.b   1024*13         ; 13Kb raw mfm track buffer for testing
         ENDC
 
@@ -3699,5 +3731,10 @@ _MOUSE_WAIT
 
 
 
+        ; ******************************************************************
+        ; ** PROTRACKER PLAYER
+        ; ******************************************************************
                 include "protracker/ptplayer/ptplayer.asm"
+
+
 

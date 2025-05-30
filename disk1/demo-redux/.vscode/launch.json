@@ -12,9 +12,8 @@
             "emulatorArgs": [
                 "--hard_drive_0=${workspaceFolder}/uae/dh0",
                 "--automatic_input_grab=1",
-                "--floppy-image-0=${workspaceFolder}/disks/disk1.dms",
-                "--floppy-image-1=${workspaceFolder}/disks/disk2.dms",
-                "--floppy-image-2=${workspaceFolder}/disks/disk3.dms",
+                "--floppy-image-0=${workspaceFolder}/disks/DosDisk1.adf",
+                "--floppy-image-1=${workspaceFolder}/disks/DosDisk2.adf",
                 "--video_sync=off"
             ],
             "preLaunchTask": "amigaassembly: build"
@@ -23,16 +22,16 @@
             "type": "amiga-assembly",
             "request": "launch",
             "name": "FS-UAE Debug",
-            "stopOnEntry": false,
+            "stopOnEntry": true,
+            "noDebug": false,
             "program": "${workspaceFolder}/uae/dh0/demo",
             "remoteProgram": "SYS:demo",
             "emulatorType": "fs-uae",
             "emulatorArgs": [
                 "--hard_drive_0=${workspaceFolder}/uae/dh0",
                 "--automatic_input_grab=1",
-                "--floppy-image-0=${workspaceFolder}/disks/disk1.dms",
-                "--floppy-image-1=${workspaceFolder}/disks/disk2.dms",
-                "--floppy-image-2=${workspaceFolder}/disks/disk3.dms",
+                "--floppy-image-0=${workspaceFolder}/disks/DosDisk1.adf",
+                "--floppy-image-1=${workspaceFolder}/disks/DosDisk2.adf",
                 "--video_sync=off"
             ],
             "preLaunchTask": "amigaassembly: build"
