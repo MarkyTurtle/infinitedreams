@@ -1,0 +1,1073 @@
+@database Default
+@master !Sources:Productions/Speedy Gonzales/Speedy Gonzales.guide
+@$VER: V1.3
+@author "Håvard 'HOWARD' Pedersen"
+@(c) "1992-95 Compact Inc."
+@index HeddleyAutoIndex
+@remark Created with Heddley v1.1 (c) Edd Dumbill 1994
+
+@node "MAIN" "Speedy Gonzales documentation"
+
+
+
+                       Speedy Gonzales V1.3
+
+                    © 1993-96 Mental Diseases.
+                       All rights reserved.
+
+                               ---
+
+          Idea, concept, documentation and programming:
+                     @{"Håvard 'HOWARD' Pedersen" link "Contacting the author" 0}
+
+                      Amiga hardware and OS:
+                 Commodore Business Machines Ltd.
+
+                        XfdMaster.library:
+                          Georg Hörmann
+
+
+
+                          - I N D E X -
+
+@{b}Overview@{ub}
+        @{"Legal no-no" link "Legal NO-NO" 0}
+        @{"What is Speedy Gonzales?" link "What is Speedy Gonzales?" 0}
+        @{"Why use Speedy Gonzales instead of other rippers?" link "Why use Speedy Gonzales?" 0}
+        @{"Requirements" link "Requirements" 0}
+
+@{b}Normal usage@{ub}
+        @{"Commands available" link "Commands available" 0}
+        @{"List-based file handling" link "List-based file-handling" 0}
+        @{"Numeric input" link "Numeric input" 0}
+        @{"DOS templates" link "DOS Template" 0}
+        @{"Converting your modules" link "Converting modules" 0}
+
+@{b}Miscellaneous@{ub}
+        @{"History" link "History" 0}
+        @{"Notes and bugs" link "Notes and bugs" 0}
+        @{"Future features" link "Future features" 0}
+        @{"New moduleformats" link "New moduleformats" 0}
+        @{"Contacting the author" link "Contacting the author" 0}
+        @{"Thanks and acknowledgements" link "Thanks and acknowledgements" 0}
+@endnode
+
+@node "Legal NO-NO" "Legal NO-NO"
+All users and distributors _MUST_ read this!
+
+- This program is fully public domain software, and may therefore freely
+be copied by anyone to anyone.
+
+- The @{"author" link "Contacting the author" 0} will not accept ANY charges demanded for distribution
+and/or copying of this program unless a written contract exists between
+the author and the persons in request about that matter.
+
+- The @{"author" link "Contacting the author" 0} takes no responsibility for any damages caused by use or
+misuse of this program, though all efforts are taken to make it as
+faultless as possible.
+
+- This program is law-established intellectual achievement, and is
+therefore regulated by laws concerning such, where such laws exists.
+
+- No part of this program may be altered in any way without a written
+permission from the @{"author" link "Contacting the author" 0} to do so.
+
+- This program may not be used to any lawbreaking activity.
+
+- By using and/or distributing this program, you indicate your agreement
+with these paragraphs.
+
+- If there are any of these paragraphs you do not understand, you are
+obliged to contact the @{"author" link "Contacting the author" 0} and ask for further information before
+indicating your agreement through the previous paragraph.
+
+- Any violation of these paragraphs is both illegal and immoral.
+@endnode
+
+@node "What is Speedy Gonzales?" "What is Speedy Gonzales?"
+Speedy Gonzales is yet another ripper. The reason I continued developing
+it, was that there are so many BAD coded rippers nowadays. I think
+Speedy Gonzales is the only ripper that supports redirected I/O and may
+be started from WorkBench! Besides these features, SG is small and uses
+NO chip-memory if your Amiga is equipped with fast-ram. (Other rippers
+opens that friggin' window...) Besides, Speedy Gonzales is pretty fast,
+test yourself!
+
+Speedy Gonzales is capable of ripping the following moduleformats:
+
+    Laxity Tracker
+    NoiseTracker V1.0 - 2.2 (Not 1.3d packed)
+    Phenomena Packer V1.0
+    ProPacker V2.0 - 2.1
+    ProRunner V1.0 - 2.0
+    ProRunner V2.0 preprocessed
+    ProTracker V1.0 - 3.15
+    ProTracker V2.1 - 2.3 (100-Pattern modules)
+    QuadraComposer V1.3 - 2.1 (Also called EMOD modules)
+    SoundTracker V2.3 - 2.5
+    StartTrekker V1.0 - 1.3 (Not AM sounds nor 8 channels)
+    UNIC Tracker
+    Wanton Packer
+
+...and also all formats 100% compatible with the formats listed. It will
+also search through your entire chipmem _AND_ fastmem. No trouble with 1
+MB chip, or even virtual memory!
+@endnode
+
+@node "Why use Speedy Gonzales?" "Why use Speedy Gonzales?"
+* SG Uppercases the first letter in the modulename.
+
+* MANY shortcuts. You'll never again have to search 10 times before you
+find out what I've named the command you need.
+
+* Intelligent modulesave, which creates the modulename on it's own. No
+more mistypes on a keymap you never use unless you're ripping. (Unless
+you're american/english, that is.)
+
+* WShell/Kickstart 2.0/KingCON closegadget works fine.
+
+* Versionstring for the 2.0 Version-command.
+
+* Uses CLI/SHELL-window instead of own window to save precious chip-mem
+from being over-written. (In fact, no other rippers preserves as much
+chip-memory as SG!)
+
+* The only ripper that allows you to use allocated memory instead of
+absolute addresses when reading binary files.
+
+* Works 100% in NTSC.
+
+* Speedy Gonzales is 100 % pure, and may be made resident.
+
+* Automatically finds and utilises extra chip-memory. No more
+time-wasting extra-commands or arguments.
+
+* SG is written 100% in assembler, to make all operations work as fast
+as possible, only for the users' comfort.
+
+* The only ripper available which supports redirectable I/O.
+
+* May be started with user-defined window.
+
+* The only ripper that supports virtual memory!
+
+* Searches fast-memory. (Some games use fast-memory to save chipmem and
+make their 8-voice routines work faster!) And you may also find modules
+after a crash with ProTracker!
+
+* No other rippers displays as much info on the modules as SG.
+
+* @{"Number input" link "Numeric input" 0} supports signs, octal, decimal, hexadecimal and binary
+numbers.
+
+* SG checks if file exists before overwriting.
+
+* SG is launchable from Workbench.
+
+* SG decrunches files using xfdmaster-library, which supports at current
+113 crunchers, including xpk-library.
+
+* SG does not crash when encountering long argument strings as a lot of
+programs do. SG supports 160 bytes long strings, and will respond with
+correct errormessages when the string exceeds this limit.
+
+* SG utilises kickstart 2.0+ to present you with meaningful
+errormessages when something goes wrong.
+
+* SG allocates the found modules to prevent them from being
+overwritten.
+
+* SG is developed using official Commodore debugging tools such as
+Enforcer and Mungwall and should therefore be considered fairly
+bugfree.
+
+* SG flushes the caches after decrunching, so it should work perfectly
+well on mutated Amigas. 8)
+@endnode
+
+@node "Requirements" "Requirements"
+None at all. Speedy Gonzales should work on all Amiga configurations
+from an Amiga 1000 with 256 Kb chipmemory to an A4000/040 with 2 meg
+chipmemory and 128 gigabyte virtual fastmemory and AGSGDY chipset...
+
+However, to fully make use of the sophisticated decrunch engine of
+Speedy  Gonzales, it is adviced to install the xfd decrunch package.
+This is freely  distributable and available a bunch of places. ;)
+@endnode
+
+@node "Commands available" "Commands available"
+@{b}ABOUT@{ub} - Equivalents : None.
+
+Displays some rather uninteresting information.
+
+
+
+@{b}CONTINUE@{ub} - Equivalents : 'CONT', 'C'
+
+Continues search from current module. If there is no current module, the
+search will be processed as the 'HUNT' command. If no module is found,
+the current module will remain current.
+
+
+
+@{b}CD@{ub} [DIRECTORY] - Equivalents : None.
+
+Changes the current directory. If typed without a parameter, you will be
+informed of the current directory.
+
+
+
+@{b}DIRECTORY@{ub} [DIRECTORY] - Equivalents : 'DIR'
+
+Shows the name of the device/assign, all its selected contents and bytes
+free. [DIRECTORY] may be a device, volume, assign, directory or file.
+
+
+
+@{b}DUMP@{ub} [LF|ADR] [H|A|HF|AF] [OFFSET] - Equivalents : 'D'
+
+Dumps the contents of the selected address and outwards. H-mode gives
+hex dump, while A gives ASCII output. By appending an F to the mode, an
+extended range of ASCII characters will be printed. Pause the dump with
+right mousebutton and break with Ctrl-C.
+
+
+
+@{b}FDISK@{ub} [UNIT] [STARTSEC] [NUMSEC] - Equivalents : 'FD'
+
+Reads the selected sectors from a trackdisk unit and chains the memory
+to the filelist as "Read disk". The default numbers are 0, 0 and 1760.
+
+
+
+@{b}FFLUSH@{ub} [FILE] - Equivalents : 'FF'
+
+Flushes the selected file from memory. If no file is selected, all files
+are flushed.
+
+
+
+@{b}FLIST@{ub} - Equivalents : 'FL'
+
+Lists all files currently in the filelist.
+
+
+
+@{b}FLUSH@{ub} - Equivalents : None.
+
+Closes all disk-based libraries opened by SG, and flushes all unused
+system resources from memory.
+
+
+
+@{b}FREAD@{ub} [FILE] - Equivalents : 'FR'
+
+Loads the file attempting the use of xfdmaster-library and then chains
+it to the filelist. The files location may be found by using FLIST, and
+may be flushed with FFLUSH.
+
+
+
+@{b}HUNT@{ub} [LF|ADDRESS] - Equivalents : 'H', 'SEARCH'
+
+Hunt will start searching your entire memory for modules either from the
+specified address, from the start of your chipmemory or from the
+startaddress of a file in the filelist. All chipmemory is first
+searched, then your fastmem. If no address is given, SG will search from
+the first fairly large chunk of free memory.
+
+
+
+@{b}INFORMATION@{ub} - Equivalents : 'I', 'INFO'
+
+Information will show all information relevant to the current module,
+including the 31 first instruments.
+
+
+
+@{b}MENU@{ub} - Equivalents : 'HELP', '?'
+
+Will show a list of all commands available. Useful?
+
+
+
+@{b}QUIT@{ub} - Equivalents : 'Q', 'X', 'EXIT', '!'
+
+Will exit SG. No further documentation necessary.
+
+
+
+@{b}READBIN@{ub} [NAME] [ADR] [LEN] - Equivalents : 'RB', 'READB'
+
+Will attempt to read [LEN] bytes from the file [NAME] to address [ADR].
+If [LEN] is omitted, the entire file will be loaded. All errors will be
+reported.
+
+
+
+@{b}SAVE@{ub} [FILENAME/PATH] - Equivalents : 'S', 'W', 'WRITE'
+
+Will attempt to save the current module. By omitting path, the module
+will be saved in current directory. If no filename is specified, SG will
+attempt to create one for you. If this couldn't be done, you will be
+notified.
+
+
+
+@{b}SEARCH@{ub} [LF|ADR] [LF|LEN] [D|T] [D1-D4] - Equivalents : 'FIND'
+
+Search a specified range of your memory for a given string or data. The
+'D' specifies datamode, where D1-D4 specifies bytes to search for (you
+don't need to specify all). While a 'T' specifies textmode, where a
+string is searched for. The string does not have to be zero-terminated.
+        Ex:     SEARCH $40000 10240 D $F3 $46 %10110100
+        ...or:  SEARCH GAME.DAT GAME.DAT T "PP20"
+
+
+
+@{b}WRITEBIN@{ub} [NAME] [LF|ADR] [LF|LEN] - Equivalents : 'WB', 'WRITEB'
+
+Will attempt to save the memory from address [ADR] and [LEN] bytes
+outwards as [NAME]. Both [ADR] and [LEN] may be specified as the name of
+a loaded file. All errors will be reported.
+@endnode
+
+@node "List-based file-handling" "List-based file-handling"
+This is a new idea, which means that SG keeps track of all loaded files!
+The user may load files, flush a file from memory, flush all files or
+just list all files with their addresses and sizes.
+
+Some commands (like HUNT) supports the name of a file in the filelist
+instead of the start address when searching. If you for instance type
+"HUNT C:ED", SG will start searching from the start of the file C:ED and
+outwards.
+
+If you're ripping from a pack, you may often encounter files named "1",
+"2" and so on. To make SG understand that you are refering to files
+instead of memory locations, type the filenames with a leading
+backslash. I.e: "hunt \1".
+@endnode
+
+@node "Numeric input" "Numeric input"
+The numeric input recognised by Speedy Gonzales looks much like the one
+used by most assemblers. Here it is:
+
+                           [S][T][DIGS]
+
+[S] - Sign. Either '-' for negative or nothing for positive. Please note
+that '+' is _NOT_ accepted.
+
+[T] - Type. '#' or nothing for decimal, '$' for hexadecimal, '%' for
+binary and '@' for octal.
+
+[DIGS] - Digits. Depending on type. Max number of digits are 9 for
+decimal, 8 for hexadecimal, 32 for binary and 10 for octal.
+
+If any numeric input fails syntax check, a brief overview of this
+chapter will be displayed to the user.
+@endnode
+
+@node "DOS Template" "DOS Template"
+Speedy Gonzales recognises three arguments from CLI. These are:
+
+@{b}IOSTREAM@{ub} - Defines the custom IOSTREAM. For instance "AUX:" will cause
+SG to collect all its input and output to and from a remote terminal.
+This could also be used to specify a customised window. Ex :
+"CON:0/0/642/256/MyWindow" would open a window at coordinates 0,0 with
+dimensions 640x256 and title "MyWindow". Please note that this I/O
+stream is only used if the default I/O stream couldn't be opened or the
+NOSTDIO keyword was issued.
+
+@{b}NOSTDIO@{ub} - This is a single keyword, which causes SG to open it's own
+custom I/O stream for input and output. If IOSTREAM isn't defined, this
+will cause SG to open a normal console-window with the dimensions
+640x200.
+
+@{b}SAFE@{ub} - Prevents SG from doing a round-off on the addresses of your
+memory-chunks. Use this if SG crashes on your Amiga.
+
+@{b}?@{ub} - This will cause SG to display a brief summary of this chapter.
+
+SG does also support normal DOS redirection conventions. E.g "SG >AUX:
+<CON:0/0/640/100/Input" will cause SG to get it's input from a custom
+opened window, and all output written to a remote terminal.
+
+Warning! The IOSTREAM argument does _NOT_ follow the ordinary DOS
+argument parser conventions. "SG IOSTREAM 'AUX:'" is legal, but "SG
+IOSTREAM='AUX:'" is _NOT_ understood by SG!
+@endnode
+
+@node "Converting modules" "Converting modules"
+Ripped modules may be converted using Perverter by Kiwi of Effect or
+Pro-Wizard by Gryzor. These tools and their documentation is shipped
+with Speedy Gonzales. Still, I take no responsibility for the
+functionality or distribution of their tools. Read the documentation for
+these converters before using them.
+@endnode
+
+@node "History" "History"
+@{b}V0.8 - Unknown releasedate.@{ub}
+        Sourcesize : Unknown. Objectsize : Unknown.
+
+This was a strange ripper made for my own purposes only. It was
+bootblock installable, and was absolutely automatic. It found a module,
+copied it to a hardcoded fast-address and continued normal boot
+procedure. Thereafter I would load ASM-One and rip it by hand!
+
+* Ripped normal ProTracker modules.
+
+* Based on NSearch V1.0 by Lasse "ALIEN" Magnussen, but I doubled the
+speed of the search-routine.
+
+                                ---
+
+@{b}V1.0 - Released 28th of May 1992.@{ub}
+        Sourcesize : Unknown. Objectsize : Unknown.
+
+Initial release. The user-interface was developed. (Wow!) This version
+weren't spread at all. I just released it to a couple of friends of
+mine, which didn't send it further. (Thanks, guys!)
+
+* Recoded from V0.8.
+
+* Added StarTrekker modules.
+
+* SAVE, PLAY, STOP, INFO, QUIT, MENU, HUNT & CONTINUE were included.
+
+* Uppercased first letter in modulename.
+
+* Displayed location of ripper.
+
+* Added filecomment to modules saved by SG.
+
+                                ---
+
+@{b}V1.1 - Released 3rd of June 1992.@{ub}
+        Sourcesize : about 20 kb. Objectsize : 17 kb.
+
+This version were the first one which reached to the public. I even got
+some feedback... (Hi Pontus! :-) (I really called this one 1.1a, but I
+decided to remove those stupid letters...)
+
+* Converted StartTrekker-modules to ProTracker.
+
+* New input-handler (Lasse Magnussen).
+
+* More shortcuts.
+
+* Added ProPacker modules.
+
+* WShell closegadget gurued. Fixed it. This also causes the closegadgets
+granted by Kickstart 2.0+ and KingCON to work.
+
+* Bugged if you saved to a clean device (df0:). Fixed. (I still don't
+know why this bug got released? Hmm...)
+
+* The filecomment on modules saved by SG never worked. I think it also
+destroyed the file sometimes. Fixed.
+
+* Speeded up all textouput. (Wrote one char at a time in V1.0!)
+
+* Added commands LED and ABOUT.
+
+* Instr $20 showed crap. Removed it.
+
+* Didn't stop loops when stopped module. Fixed. (Tech: I didn't reset
+the audio-registers.)
+
+* Versionstring for the 2.0 Version-command.
+
+* All shortcuts were underlined in the menu.
+
+                                ---
+
+@{b}V1.19 - Finished 4th of December 1993.@{ub}
+        Sourcesize : 26 kb. Objectsize : 22 kb.
+
+Now, SG is about to raise among the wellknown rippers. (In quality, not
+fame... :( ) I became a bit depressed when I saw Jack The Ripper and
+Exotic Ripper, but decided to continue developing anyway. (No hard
+feelings! :-) This version wasn't really released, but since I started
+to recode SG the 4th of December and I wanted to show you which source
+the changes were done in, I split the history info.
+
+* Removed flashing while searching. Saved 20% time. (Now SG uses 3.8
+seconds on 512 kb chip!)
+
+* Displayed filename and length when saving. (Multiripper look-a-like.)
+
+* Removed underlined shortcuts in menu. It was ugly! :-(
+
+* Added DIR command.
+
+* Added ProTracker 100-pattern modules.
+
+* Uses CLI/SHELL-window instead of own window to save precious chip-mem
+from being over-written. This will in theory also cause SG to work well
+in NTSC. (Give me some feedback on that one, will ya?) I thought of
+altering the windowtitle, but couldn't get it to work on kickstart 2.0!
+
+* Added use of BSS-hunk to make the ripper shorter.
+
+* Fixed bug in interrupt, which gurued sometimes. (Thanks to Sveinar
+"Archie" Rasmussen for making me aware of this bug, and to Lasse "Alien"
+Magnussen for finding it!)(Don't I do anything myself?)
+
+* Fixed nasty bug which caused SG to search 10 bytes _behind_ end of
+chipmem. (Crashed on A4000!) (When I fixed the bug, I made the A4000 do
+a hardreset instead.:( Refixed.)
+
+* Added mindblasting argumentreader wich supports both '"' and "'".
+Arguments are much easier now. All directory-related commands with no
+directory given will work in the current directory.
+
+* Added real "cool" about-screen with animation. Afterall, it's just
+fast-mem. (To everyone without extra mem: I'm really sorry, but I was
+SOOOO tired of the about-screen!(Besides, I wanted to test DIED:-)!)
+
+                                ---
+
+@{b}V1.2 - Released at 30th of March 1994.@{ub}
+        Sourcesize : 83 kb. Objectsize : 17 kb.
+
+SG suddenly shrunk drastically in size. Talk about recode! Source is
+gettin' huge! :-( Got even more depressed when I received Exotic Ripper
+V2.21... Fuck! I had to work like hell to get this sucker finished for
+The Gathering '94! Due to this, there will be several bugs... :(
+
+* Totally recoded in an attempt to remove a bug which caused SG to crash
+when run on machines with kick 2.0+ and/or 1+ meg chipram. (As you
+probably understand, I'm not 100% sure about the conditions this bug
+would occur under...)
+
+* Removed all writes inside program segments. This means that SG is
+pure, and may be made resident. (Exchanged BSS-hunk with selfallocated
+data-area.)
+
+* Code became more bugproof. (Better exit-routines)
+
+* Improved text-output. (Again?) My internal output-commands requires
+less arguments, and a Printf() function were included, so SG should
+become smaller...
+
+* Earlier versions collected inputhandle in an illegal way. If you
+started SG with "SG <AUX:" to make SG collect input from a remote
+terminal but still write output to the doswindow, it simply wouldn't
+work. I'm not sure if it crashed, but it's more legal now.
+
+* If SG is started with input from PRT: or some other not-working
+texthandlers, it will open its own window.
+
+* Went back to simple about-screen.
+
+* Menu and about-pages rewritten.
+
+* Added CLIARG "NOSTDIO" to force SG to open it's own IOStream. If
+window couldn't be opened, SG will attempt to use stdout. The same goes
+for input.
+
+* Added CLIARG "IOSTREAM" to set the current IO stream.
+
+* HUNT will now also search through fast-memory. As a rule, all memory
+is searched through; first all chip, then all other memory.
+
+* Removed PLAY, STOP and LED. Rip modules, convert them and use a
+player!
+
+* Bug in my argument-parser caused SG to process only the first argument
+when run with several arguments. Fixed.
+
+* Readded output of location of ripper. Outputs _all_ memory taken by
+SG, except from eventual windows opened.
+
+* Added number of instruments on module-info. Some modules, eg. Promizer
+1.8 and NoisePacker 3.0 (I think) hasn't an absolute number of
+instruments. If the module contains more than 31 instruments, SG will
+only print information for the first 31...
+
+* Also added repeat-indicator and finetune for the samples on
+moduleinfo. This makes SG the ripper with most information on ripped
+modules! :-)
+
+* Added CLIARG "?" for a list of cli-arguments available and their
+purposes.
+
+* Some people seems to make great fun out of inserting strange ASCII
+control functions in their instrument-names, to make rippers go bananas!
+It really did on SG, fixed... :-( I also fix the modulenames, just to be
+sure.
+
+* Added possibility to abort hunting with Ctrl-C. Continue after abort
+will continue from the location SG was aborted.
+
+* Added number-translator. Supports decimal, hexadecimal, binary, octal
+and signed numbers!
+
+* Added address argument for HUNT.
+
+* SAVE much improved. Filename creation is more intelligent than ever,
+and SG checks if the file exists before overwriting it.
+
+* Help is now available on all commands. Type "[COMMAND] ?" to display.
+
+* Added address notifier while hunting. The address will be updated each
+16th kilobyte.
+
+* Added WRITEBIN command for writing memory to disk.
+
+* Disables multitasking while accessing the system memory lists, to
+prevent crashes in later versions of the OS.
+
+* Added WB-startup! For the first time in history, SG wont crash when
+run from WB with icon... :)
+
+* Added IntelliSearch, which finds 31 Instrument Tracker-modules even if
+the ID has been removed!
+
+* Added ProRunner I, Phenomena Packer, UNIC, QuadraComposer and Wanton
+Packer modules.
+
+* Added possibility to break directory-reading via Ctrl-C.
+
+* SG does no longer automatically convert StarTrekker and others to
+ProTracker.
+
+* Rewrote documentation.
+
+* SG will now handle modules with samples larger than 65535 bytes
+correct. (Yes, this is possible on ProTracker 3.10+ and NewTracker!)
+
+* The info Christian Estrup sent me for the ProPacker modules was
+incorrect! The only thing that made SG work with these modules earlier,
+was that the size-calc routine was a modified extract from the
+play-routine...!
+
+* Smarter search on ProPacker modules. Now really searches for the
+modules instead of searching for playroutine, as earlier.
+
+* Added FREAD, FLIST and FFLUSH for list-based file handling. (Read
+doc!) All files are loaded via decrunch-library (61 executable file
+crunchers recognised!!!) and xpk-library (unlimited data file crunchers
+supported!!!) if available. The libraries are not opened before they are
+needed.
+
+* Added flush-command for flushing all disk-based libraries opened by
+SG.
+
+* Added possibility to write the name of a loaded file as an address,
+and the address of the file will automagically be used! Size inputs work
+the same way, but uses the size of the file instead... For filenames
+which looks like a legal number input, insert a '\' before the
+filename.
+
+* Added READBIN command with length argument. By omitting this, the
+entire file will be read.
+
+                                ---
+
+@{b}V1.3 - Released 1st of January 1996.@{ub}
+        Sourcesize : 120 kb.        Objectsize : 24 kb.
+
+Aaaargh! Due to a bug in Trash'Em-One, the entire source got
+overwritten!!! (I have switched to ASM-One by TFA now...) Some of the
+source was left in memory, but some of it had to be rewritten. Bugs may
+appear due to this... :( This gave me a lot of work... The source is
+big, but tidy. (: Found a lot of bugs, I don't think there should be
+more left...
+
+* Discovered a bug which caused SG to crash if run in EXTREME low-memory
+situations. (~1000 bytes couldn't be allocated) Fixed.
+
+* Found a bug in xpk-librarys memory-handling. Xpk decompression
+temporarily removed. (Other programs seems to encounter no problems on
+this, but I'm sure I haven't done anything wrong?)
+
+* SG now rounds off the locations of your memory, so it will search from
+address 0 instead of $420. This may be turned off with cliarg "SAFE" if
+your computer crashes. (Don't understand why Lasse Magnussen wanted
+this? Those first bytes are overwritten anyway?) :-O
+
+* Nasty bug caused SG to crash (or lock up on 68020+) when hunt was
+issued with an odd address. Fixed.
+
+* Expanded maximum size of one argument from 64 to 160 chars, to achieve
+longer paths when saving. (I bought a hard-drive!)
+
+* Added check for too long command lines. Argument parser should be
+bullet proof now. No guarantees, though. :)
+
+* On devices with blocksize or number of blocks larger than 65535, SG
+would come up with far too few bytes free on unit. This fix may cause a
+short pause right before this number is printed, but at least it works
+now!
+
+* FREAD and READBIN without a filename would cause the reply "Can't read
+directories!"? Fixed. (This was actually a side-effect of SG attempting
+to read current directory!)
+
+* WRITEBIN without address and/or size would save 0 bytes from address
+0. Fixed.
+
+* READBIN without an address would load file at address 0. =:( Fixed.
+
+* When run on kickstart 2.0 or higher, SG will print error-texts instead
+of DOS error-codes when something goes wrong during file I/O. (The
+side-effect is that no matter what goes wrong, 1.3-users are stuck with
+some stupid error- code... SG V1.2 had some texts like "file/dir not
+found". Well... Time to upgrade!)
+
+* In previously versions of SG, all input was lowercased. This meant
+that you couldn't save files with uppercased letters in their names.
+This is now fixed. This also implies all entries in memory-list to be
+stored with correct case.
+
+* Writebin and save module issued with a directory as filename would
+result in "File already exists! Overwrite?". Will now respond with
+"object already exists". (On kick 2.0+ only!)
+
+* UNIC/Laxity-tracker are both Laxity's mutations of the
+ProTrackerformat. Updated documentation.
+
+* Added ProRunner V2.0 processed modules.
+
+* Added internal decrunch of RNC (Rob Northern Compressed) version 1
+packed datafiles and executable files. These files may be found in a lot
+of games, such as Bubba&Stix, PushOver, CannonFodder 1 & 2 and Lemmings
+II. Thanks to Lasse Magnussen (again) for disassembling the loader for
+Lemmings II.
+
+* Added CD (current directory) command. Nice when decrunching a lot of
+files from a directory. (No directory displays the current directory.)
+
+* Added fairly advanced dump-function. (HEX, ASCII, ASCIIONLY, offset,
+loaded files, etc.)
+
+* The memory of the current module will be allocated and inserted in the
+memory-list with the modulename or "Found module" if module-format
+doesn't support name. No notification is done if this fails.
+
+* If hunt is specified without any address, SG will start hunting from
+the first fairly large chunk of free memory. This means that all memory
+already in use will be skipped.
+
+* Added SEARCH command with data (1 through 4 bytes) and text-mode
+(string).
+
+* Added FDISK command which allows sectors from a trackdisk unit to be
+read and added to filelist. Unfortunately this command will read the
+disk to chip when run under kickstarts below 2.0.
+
+* Discovered the big truth concerning ProRunner modules. Updated
+documentation.
+
+* Files with sizes larger than 999,999 bytes would sort of garble the
+directory-listing. Should not occur before filesizes of 100,000,000
+bytes now.
+
+* QuadraComposer modules with more than 31 instruments would cause SG to
+crash or atleast fuck up real bad. Fixed now.
+
+* Optimized search-routines.
+
+* Bought myself a '030 card with an MMU. SG is now developed using
+Enforcer and Mungwall (official ex. Commodore debugging tools), and
+should be clinically free from hits of both kinds.
+
+* SG now finally signals correctly which parts of its allocated memory
+that may be paged (virtual).
+
+* Added RNC version 2 crunched datafiles to the decruncher.
+
+* Scratched decrunch-library in favor of xfdmaster-library (also written
+by Georg Hörmann!). (This also implies a poor but adequate
+xpk-support.)
+
+* Improved the decrunch-routines. Should now be more stable and slightly
+faster.
+
+* None of the internal decrunchroutines cleared any caches after
+decrunching. This is now done in a proper way.
+
+* If you ask SG to search within a loaded file, only the file will be
+searched, and not the rest of the memory as earlier. Breaking this
+search and issuing CONTINUE will search through rest of mem though.
+
+* Made the HUNT command also output the actual range searched.
+
+* SG now sets console-modes when writing to its output. This may (or may
+not) cause nicer behaviour when run on external terminals.
+
+* Removed 'HELP' as shortcut for menu, since I'll probably implement an
+AmigaGuide®-function later.
+@endnode
+
+@node "Notes and bugs" "Notes and bugs"
+@{b}NORMAL BUGS@{ub}
+
+* SG doesn't read through PIPE:.
+
+* ProRunner II preprocessed gives false hit inside SG's code. A deeper
+check on this format could easily be made.
+
+* A small pause will occur when SG receives too long command lines. Not
+much to do about it. (This pause _might_ seem pretty long on 68000s...)
+:(
+
+* Running Mungwall or other debugging utilities which fills
+memoryallocations when issuing HUNT without an address will cause the
+largest free memory-block to be overwritten.
+
+* If you give SGs input as a file, YOU must be sure that no command
+lines exceeds 160 bytes. If they do, the rest of the file will be
+skipped.
+
+* When run on displays not capable of displaying 76 coloumns
+side-by-side, SGs output will look terrible. (Atleast mod-info!) This is
+ofcourse not my fault. Try changing font or resolution.
+
+* The Control-C checking often retrig after a break. (?) I _think_ I
+know how to fix.
+
+* The Phenomena Packer search-routine is a bit trigger happy. I'll
+fix... (Well, some day anyway...)
+
+* It is possible to have two files in the file-list with the same name.
+When flushing, the first file is flushed. (Not really bug?)
+
+* The flush command tells me that I saved 264 bytes, even though no
+system- resources was removed. Hmm... Dunno the reason... (By further
+investigation, it seems that this only happens when my startup-sequence
+has been run!?!)
+
+* The argument parser gets tricky sometimes, and won't accept any input
+at all. (Not even command name!) Unfortunately, this happens so seldom,
+it's rather difficult for me to figure out the reason. (Haven't happened
+for a while. Bug accidentally removed? 8)
+
+* "SG >AUX: <AUX:" causes some input problems. Use "SG nostdio iostream
+AUX:" for permanent workaround. I'm not sure if this problem occurs on
+all re- directed I/O to SG.
+
+
+
+@{b}MODULEFORMATS BUGS & NOTES@{ub}
+
+* UNIC/Laxity-tracker modules are faulty recognised as 31 Instrument
+Tracker modules. If any modules ripped as such with SG seems unusable in
+ProTracker, try converting them...
+
+* Some UNIC/Laxity-tracker modules gets 4 bytes too much in length. No
+real problems should occur though.
+
+* The length of Phenomena Packer modules is often calculated as up to
+1024 bytes too long. No problems should occur though.
+
+* ProRunner I and Wanton Packer modules with their ID removed will be
+recognised as 31 Instrument Tracker modules.
+
+* The QuadraComposer positions and highest pattern info doesn't work.
+(Won't be fixed in the nearest future...)
+
+* Some ProTracker modules converted from module-formats with a
+stretchable number of instruments (Quadracomposer and NoisePacker) will
+not be found. This is because the replens of the unused instruments are
+set to 0. The correct value should be 1. (This might also be true for
+some modules converted from 15-instrument to 31-instrument tracker!)
+Trying to work around this would cause a lot of false alarms when
+hunting.
+@endnode
+
+@node "Future features" "Future features"
+@{b}FUTURE FEATURES@{ub}
+
+These appear in approximated order of importance:
+
+* Rip ThePlayer modules.
+
+* Make support for ExoticBoot and CS memory buffers. 8)
+
+* Improve FDISK with progressreport and abort possibilities.
+
+* Attempt to close the output-window given by Workbench.
+
+* If a hunt within a file is broken and continue is requested, SG really
+shouldn't search through rest of mem.
+
+* Write documentation as AmigaGuide®.
+
+* Implement my extract-command as a part of SG.
+
+* Let FDISK read one sector at a time to make abort possible.
+
+* Improve trackdisk errorreports.
+
+* Dump code.
+
+* Make filelist flexible enough to handle segmented objects.
+
+* Add decrunching of RNC version 2 executable crunched files.
+
+* Add READOBJ.
+
+* Execute DOS commands. (Or a shell?)
+
+* Rewrite the piece of code that finds the largest memorychunk for
+searching through chipmem.
+
+* Let FLIST accept a file as argument to list one file only.
+
+* Read icon tooltypes for arguments.
+
+* Play memory as sample.
+
+* TYPE.
+
+* HELP to invoke AmigaGuide®.
+
+* MC command to clear all free memory.
+
+* Add posibility to redirect output to a disk file.
+
+* HDEC which only searches memory and lists found crunched files and DEC
+command to decrunch.
+
+* Fix input reading to allow scripts to be defined.
+
+* Allow READBIN to find suitable memory locations.
+
+* Allow hexadecimal numbers to be specified as 0x????????.
+
+* Checksum on found module, to prevent damaged modules to be saved. (Not
+really useful any longer, since found modules are allocated!)
+
+* DELETE
+
+* RENAME
+
+* Fill memory.
+
+* Copy memory.
+
+* Read tracks to address.
+
+* Jump to adress.
+
+* REJECT command to reject found modules. (Why?)
+
+* Distribute MemSaver for ripping of modules at low locations.
+
+* Possibility to turn off multitasking while searching to gain speed.
+
+* Analyze executables crunched with unknown crunchers (like in
+NoiseHunter).
+
+* "Remove incomplete file?" at write error.
+
+* Scan memory for crunched files.
+
+* Detach if SG received CLIARG "DETACH" from CLI/SHELL. (In that case,
+CLIARG "NOSTDIO" will automatically be activated.) What next? A
+commodity port?!?
+
+* Reinsert ProTracker play-routine. (Do I have to?!)
+@endnode
+
+@node "New moduleformats" "New moduleformats"
+This one's a bitch. I'm eagerly looking for new module-formats. If you
+have new modulepackers or musicprograms which you think SG should be
+able to rip, send them to @{"me" link "Contacting the author" 0} immediately. You will get your disks back.
+@endnode
+
+@node "Contacting the author" "Contacting the author"
+I would like to receive any support, bug-reports, suggestions, comments
+and nice letters.
+
+E-Mail: (Preferably, only valid until summer '96)
+        havardp@mail.stud.ingok.hitos.no
+
+IRC: (Nice alternative)
+        Channels: #amiga, #amigascne, #coders
+        Nick: Howard_MD or Howard-MD
+
+Snailmail: (Last alternative)
+        Håvard Pedersen
+        Kvartsveien 175
+        N-9022  KROKELVDALEN
+        Norway
+
+Phone: (Voice rate, only Norwegians)
+        (+47) 77 63 13 34 (Håvard)
+@endnode
+
+@node "Thanks and acknowledgements" "Thanks and acknowledgements"
+Lasse "ALIEN" Magnussen for beta-testing, suggestions and coding my
+event-handler.
+
+Commodore Business Machines for making the wonderful Amiga!
+
+Christian "ESTRUP/SB" Estrup for supporting me with the ProPacker
+moduleformat.
+
+Hans "NASH" Christian Skattør for beta-testing and suggestions.
+
+Stein "LORD ZERO" R Kjønnøy for spreading.
+
+Pontus Wennergren for suggestions.
+
+Rune Andre "WYSIWYG" Pettersen for ENORMOUS moral support.
+
+Sveinar "ARCHIE" Rasmussen for Bug/beta-testing and suggestions.
+
+Bjørnulf "TURRICAN" Solberg for nice suggestions and phonechats.
+
+Karsten Obarski for doing Master Soundtracker the seed which led to the
+musicprograms existing on the Amiga today.
+
+Vidar "LLOYD" Bang for nice phonechats and techtalk.
+@endnode
+
+@node HeddleyAutoIndex "Index"
+@remark Index auto-generated by Heddley
+Index of database Default
+
+Documents
+
+@{"Commands available" link "Commands available"}
+@{"Contacting the author" link "Contacting the author"}
+@{"Converting modules" link "Converting modules"}
+@{"DOS Template" link "DOS Template"}
+@{"Future features" link "Future features"}
+@{"History" link "History"}
+@{"Legal NO-NO" link "Legal NO-NO"}
+@{"List-based file-handling" link "List-based file-handling"}
+@{"New moduleformats" link "New moduleformats"}
+@{"Notes and bugs" link "Notes and bugs"}
+@{"Numeric input" link "Numeric input"}
+@{"Requirements" link "Requirements"}
+@{"Speedy Gonzales documentation" link "MAIN"}
+@{"Thanks and acknowledgements" link "Thanks and acknowledgements"}
+@{"What is Speedy Gonzales?" link "What is Speedy Gonzales?"}
+@{"Why use Speedy Gonzales?" link "Why use Speedy Gonzales?"}
+
+Buttons
+
+@{"author" link "Contacting the author" 0}
+@{"Commands available" link "Commands available" 0}
+@{"Contacting the author" link "Contacting the author" 0}
+@{"Converting your modules" link "Converting modules" 0}
+@{"DOS templates" link "DOS Template" 0}
+@{"Future features" link "Future features" 0}
+@{"History" link "History" 0}
+@{"Håvard 'HOWARD' Pedersen" link "Contacting the author" 0}
+@{"Legal no-no" link "Legal NO-NO" 0}
+@{"List-based file handling" link "List-based file-handling" 0}
+@{"me" link "Contacting the author" 0}
+@{"New moduleformats" link "New moduleformats" 0}
+@{"Notes and bugs" link "Notes and bugs" 0}
+@{"Number input" link "Numeric input" 0}
+@{"Numeric input" link "Numeric input" 0}
+@{"Requirements" link "Requirements" 0}
+@{"Thanks and acknowledgements" link "Thanks and acknowledgements" 0}
+@{"What is Speedy Gonzales?" link "What is Speedy Gonzales?" 0}
+@{"Why use Speedy Gonzales instead of other rippers?" link "Why use Speedy Gonzales?" 0}
+@endnode
