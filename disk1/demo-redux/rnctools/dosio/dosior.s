@@ -34,7 +34,7 @@
 * AmigaDos to copy the file onto the disk by writing out the file's data
 * block lists, as well as the actual data blocks, on contiguous sectors.
 *------------------------------------------------------------------------------
-dosioR
+dosior
 		dc.l $48E7FFFE,$2C002E01,$28482A49,$2C4A6100,$01684A86,$6606611A,$2F410004,$2E807200
 		dc.l $7400363C,$80006100,$026C4CDF,$7FFF4A80,$4E756100,$00A06670,$2E280144,$2F0745E8
 		dc.l $01386166,$665E2401,$2801264D,$2C07E08E,$E28E6602,$264E6152,$664A5282,$2A016708
@@ -58,4 +58,4 @@ dosioR
 		dc.l $00000000,$00000000,$00000000,$00000000,$74017600,$224E303A
 		dc.w $FFD6
 
-		include	"DiskIOR.S"
+		include	"diskior.s"

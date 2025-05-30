@@ -54,7 +54,7 @@
 *       Master DMA (bit 9, $dff096) must be enabled
 *	The blitter is not used
 *------------------------------------------------------------------------------
-diskioR
+diskior
 		dc.l $48E77FFC,$4E56FFDC,$38000244,$00033D44,$FFDC3D41,$FFDE3D42,$FFE03D43,$FFE22D48
 		dc.l $FFE42D49,$FFE8E458,$02400001,$52403D40,$FFEC7000,$36026770,$701ED641,$B67C06E0
 		dc.l $6E000090,$02810000,$FFFF82FC,$000B0C6E,$0001FFEC,$6702D241,$3D41FFEE,$48413D41

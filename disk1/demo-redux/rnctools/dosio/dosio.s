@@ -60,6 +60,7 @@
 * AmigaDos to copy the file onto the disk by writing out the file's data
 * block lists, as well as the actual data blocks, on contiguous sectors.
 *------------------------------------------------------------------------------
+		cnop	0,4
 dosio
 		dc.l $48E7FFFE,$2C002E01,$28482A49,$2C4A6100,$052C4A86,$6608614E,$2F410004,$6032BC3C
 		dc.l $00016606,$610000E2,$6026BC3C,$00026606,$61000270,$601ABC3C,$0003660A,$61000360

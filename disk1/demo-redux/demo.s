@@ -135,9 +135,7 @@ init_system     ; original address L00020052
                                 MOVE.W  #$3fff,INTENA(A6)                       ; disable all interrupts
                                 LEA.L   level_3_interrupt_handler(PC),A0 
                                 MOVE.L  A0,$0000006c                            ; level 3 interrupt autovector
-                                MOVE.W  #$8012,INTENA(A6)                       ; enable COPER & DSKBLK
-
-
+                                MOVE.W  #$8010,INTENA(A6)                       ; enable COPER & DSKBLK
                                 RTS 
 
 
@@ -2201,12 +2199,32 @@ scroller_next_character ; original address L000215FA
 
 
 
-_load_error             move.w  d0,$dff180
+_load_error_not_found   
+                        and.w   #$0f00,d0
+                        move.w  d0,$dff180
+                        add.w   #$100,d0
+                        jmp     _load_error_not_found
+
+_load_error_other  
+                        move.w  d0,$dff180
                         add.w   #$1,d0
-                        jmp     _load_error
+                        jmp     _load_error_other
 
+_load_success   
+                        and.w   #$00f0,d0
+                        move.w  d0,$dff180
+                        add.w   #$010,d0
+                        jmp     _load_success
 
-filename        dc.b    "df0:jarresque.zx0",0
+        ; ******************************************************************
+        ; RNC DISK LOADER (DOS)
+        ; ******************************************************************
+rnc_loader
+                incdir "rnctools/dosio"
+                include "rnctools/dosio/dosio.s"
+
+                even
+filename        dc.b    'skyriders.zx0',0
                 even
 
                 ; ---------------------- load music -----------------------
@@ -2215,18 +2233,25 @@ filename        dc.b    "df0:jarresque.zx0",0
                 ; in the drive and waits for the correct disk.
                 ;
 load_music      
+                                lea     CUSTOM,a6
+                                move.w  #$3fff,INTENA(a6)
+                                move.w  #$7fff,INTREQ(a6)
+                                move.w  #$7fff,INTREQ(a6)
+                                move.w  #$7fff,DMACON(a6)
+                                ;move.w  #$8360,DMACON(a6) 
                                 move.l  #$0,d0
                                 lea     filename,a0
                                 lea     load_buffer,a1
                                 lea     work_buffer,a2
-                                ;jmp     _load_error
+                                bsr     dosio                   ; rnc_loader
 
-                                jsr     dosioR                          ; rnc_loader
+                                tst     d0
+                                beq     _load_success
 
-                                jmp     _load_error
+                                cmp.w   #29,d0
+                                bcc     _load_error_not_found
+                                jmp     _load_error_other
 
-                                tst.w   d0
-                                bne     _load_error
                                 rts
 
 
@@ -3674,27 +3699,25 @@ pd_message_menu        ; original address L0003CEEA
                                 dc.b    '                                             '  
                                 dc.b    '                                             '  
                                 dc.b    '                                             ' 
+                                even
 
 
 
 
 
 
-        ; ******************************************************************
-        ; RNC DISK LOADER (DOS)
-        ; ******************************************************************
-rnc_loader
-                incdir "rnctools/DosIO"
-                include "rnctools/DosIO/DosIOR.S"
 
 
         IFD TEST_BUILD 
-work_buffer
-mfm_track_buffer        dcb.b   1024*13         ; 13Kb raw mfm track buffer for testing
+        even
+work_buffer             dcb.w   $5000/2,$00
+mfm_track_buffer        ;dcb.b   1024*13         ; 13Kb raw mfm track buffer for testing
         ENDC
 
+
         IFD TEST_BUILD
-load_buffer             dcb.b   1024*200,$00    ; 200Kb Soundtrack module buffer for testing
+        even
+load_buffer             dcb.b   1024*150,$00    ; 200Kb Soundtrack module buffer for testing
         ENDC
 
 
