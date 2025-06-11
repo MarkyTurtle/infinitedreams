@@ -125,6 +125,7 @@ start_demo      ; original address L00020000
                                 BRA.W   main_loop               ; L000202F6
 
 loader_4489
+                ;include "4489Loader/4489_byteloader.s"
                 include "4489Loader/4489_byteloader_code.s"
 
                 ; ------------- Initialise System -----------------
@@ -3685,7 +3686,7 @@ pd_message_menu        ; original address L0003CEEA
 
         IFD TEST_BUILD 
         even
-mfm_track_buffer        dcb.b   1024*13         ; 13Kb raw mfm track buffer for testing
+mfm_track_buffer        dcb.w   $1A00            ; 13Kb raw mfm track buffer for testing
         ENDC
 
         IFD TEST_BUILD
