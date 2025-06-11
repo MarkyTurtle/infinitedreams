@@ -146,21 +146,24 @@ L0001029a               beq.b   read_error              ; L00010306
 L0001029c               movea.l a1,a2
 L0001029e               bsr.b   L0001030a
 L000102a0               swap.w  d3
-L000102a2               cmp.b   d1,d3
-L000102a4               bne.b   read_error              ; L00010306
+L000102a2               cmp.b   d1,d3               ; compare track number
+L000102a4               bne.b   read_error  
 L000102a6               rol.l   #$08,d3
 L000102a8               tst.b   d3
 L000102aa               bne.b   read_track                  ; L0001026a
-L000102ac               moveq   #$37,d7
+
+                ; wait for dskblk
+L000102ac               moveq   #$50,d7                     ; #$37,d7
 L000102ae               bsr.b   wait_300_rasters
-L000102b0               btst.b  #$0001,-$0005(a3)
+L000102b0               btst.b  #$1,$dff01F        ; $0005(a3)         ; DSKBLK finished bit
 L000102b6               dbne.w  d7,L000102ae
-L000102ba               beq.b   read_error              ; L00010306
+L000102ba               ;beq.b   read_error              ; L00010306
+
 L000102bc               bsr.b   reset_disk_dma              ; L0001025a
 L000102be               move.w  #$0010,$0072(a3)
 L000102c4               movea.l a1,a2
 L000102c6               movea.l a1,a3
-L000102c8               moveq   #$0a,d7
+L000102c8               moveq   #$0a,d7                     ; 11 sectors
 L000102ca               bsr.b   L0001030a
 L000102cc               lea.l   $0028(a2),a2
 L000102d0               bsr.b   L0001031c

@@ -136,9 +136,17 @@ init_system     ; original address L00020052
                                 MOVE.W  D0,DMACON(A6)                           ; disable all DMA
                                 MOVE.W  D0,INTREQ(A6)                           ; clear raised interrupt flags
                                 MOVE.W  #$3fff,INTENA(A6)                       ; disable all interrupts
+                                lea     do_nothing_interrupt_handler(pc),a0
+                                move.l  a0,$64.W
+                                move.l  a0,$68.W
+                                move.l  a0,$6c.W
+                                move.l  a0,$70.W
+                                move.l  a0,$74.W
+                                move.l  a0,$78.W
+                                move.l  a0,$7c.W            
                                 LEA.L   level_3_interrupt_handler(PC),A0 
-                                MOVE.L  A0,$0000006c                            ; level 3 interrupt autovector
-                                MOVE.W  #$8022,INTENA(A6)                       ; enable COPER & DSKBLK
+                                MOVE.L  A0,$6c.w                                ; level 3 interrupt autovector
+                                MOVE.W  #$8020,INTENA(A6)                       ; enable COPER & DSKBLK
 
 
                                 RTS 
@@ -459,8 +467,19 @@ menu_ptr_index  ; original address L000203AC -  ;  index to menu typer ptr list.
 
 
 
+                ; ---------------------- Do Nothing Interrupt Handler -------------------
+                ; Inserted into unused interrupt vectors incase I switch on an interrupt
+                ; by mistake. Flashes the screen if it's called.
+do_nothing_interrupt_handler
+                                MOVEM.L D0-D7/A0-A6,-(A7)
 
+                                lea     $dff000,a6
+                                move.w  #$100,d7
+color_loop                      move.w  VHPOSR(a6),COLOR00(a6)
+                                dbf     d7,color_loop
 
+                                MOVEM.L (A7)+,D0-D7/A0-A6
+                                RTE                     
 
                 ; ----------------------- Level 3 Interrupt Handler ----------------
                 ; VBL and COPER interrupt handler routine, intended to be called
