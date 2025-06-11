@@ -1,0 +1,73 @@
+{
+  "bootBlock": {
+    "FileName": ""
+  },
+  "diskNumber": 1,
+  "diskItems": [
+    {
+      "fileName": "titlepic.raw",
+      "fileid": "tpic",
+      "cacheable": false
+    },
+    {
+      "fileName": "flight.zx0",
+      "fileid": "flig",
+      "cacheable": false
+    },
+    {
+      "fileName": "float.zx0",
+      "fileid": "floa",
+      "cacheable": false
+    },
+    {
+      "fileName": "jarresque.zx0",
+      "fileid": "jarr",
+      "cacheable": false
+    },
+    {
+      "fileName": "stratospheric.zx0",
+      "fileid": "stra",
+      "cacheable": false
+    },
+    {
+      "fileName": "thefly.zx0",
+      "fileid": "thef",
+      "cacheable": false
+    },
+    {
+      "fileName": "shaft.zx0",
+      "fileid": "shaf",
+      "cacheable": false
+    },
+    {
+      "fileName": "loveyourmoney.zx0",
+      "fileid": "love",
+      "cacheable": false
+    },
+    {
+      "fileName": "cosmichowmuch.zx0",
+      "fileid": "cosm",
+      "cacheable": false
+    },
+    {
+      "fileName": "notaravesong.zx0",
+      "fileid": "nota",
+      "cacheable": false
+    },
+    {
+      "fileName": "eattheballbearing.zx0",
+      "fileid": "eatt",
+      "cacheable": false
+    },
+    {
+      "fileName": "soundofsilence.zx0",
+      "fileid": "soun",
+      "cacheable": false
+    },
+    {
+      "fileName": "retouche.zx0",
+      "fileid": "reto",
+      "cacheable": false
+    }
+  ]
+}
