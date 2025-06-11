@@ -125,7 +125,7 @@ start_demo      ; original address L00020000
                                 BRA.W   main_loop               ; L000202F6
 
 loader_4489
-                include "4489Loader/loader.s"
+                include "4489Loader/4489_byteloader.s"
 
                 ; ------------- Initialise System -----------------
                 ; Set up Level 3 Interrupt and kill DMA
