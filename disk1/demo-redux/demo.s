@@ -125,7 +125,7 @@ start_demo      ; original address L00020000
                                 BRA.W   main_loop               ; L000202F6
 
 loader_4489
-                include "4489Loader/4489_byteloader.s"
+                include "4489Loader/4489_byteloader_code.s"
 
                 ; ------------- Initialise System -----------------
                 ; Set up Level 3 Interrupt and kill DMA
@@ -2215,6 +2215,19 @@ scroller_next_character ; original address L000215FA
                 ; load a music file from disk, checks the disk number
                 ; in the drive and waits for the correct disk.
                 ;
+        
+;---------------------------------------------------------------------------------------
+; -> d0.l  offset       (0-$dc000)
+; -> d1.l  length       (0-$dc000)
+; -> d2.l  drive        (0-3)
+; -> a0.l  dst address  (anywhere)
+; -> a1.l  mfm address  ($1760 words - sufficient as we snoop load)
+;
+; <- d0.l  == 0         (success)
+; <- d0.l  != 0         (error)
+;
+; <- assume all other registers are trashed
+;---------------------------------------------------------------------------------------
 load_music      ; original address L00021814
                                 movem.l d0-d7/a0-a6,-(a7)
                                 move.l  #$0000CCB0,d0
@@ -2223,6 +2236,8 @@ load_music      ; original address L00021814
                                 lea     LOAD_BUFFER,a0
                                 lea     MFM_BUFFER,a1
                                 jsr     loader_4489
+                                tst.l   d0
+                                bne     decode_error
                                 movem.l (a7)+,d0-d7/a0-a6
                                 rts
 

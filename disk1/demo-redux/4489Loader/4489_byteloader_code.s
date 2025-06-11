@@ -1,42 +1,67 @@
-
-L000101aa               lea.l   $00bfd100,a4
-L000101b0               lea.l   L0001032e(pc),a5                    ;  == $0001032e,a5
-L000101b4               lea.l   $00(a0,d1.L),a6
-L000101b8               moveq   #$78,d3
+;---------------------------------------------------------------------------------------
+; -> d0.l  offset       (0-$dc000)
+; -> d1.l  length       (0-$dc000)
+; -> d2.l  drive        (0-3)
+; -> a0.l  dst address  (anywhere)
+; -> a1.l  mfm address  ($1760 words - sufficient as we snoop load)
+;
+; <- d0.l  == 0         (success)
+; <- d0.l  != 0         (error)
+;
+; <- assume all other registers are trashed
+;---------------------------------------------------------------------------------------
+L000101aa               lea.l   $00bfd100,a4            ; a4 = CIAB PRB (Disk Control)
+L000101b0               lea.l   L0001032e(pc),a5        ; a5 = status word?
+L000101b4               lea.l   $00(a0,d1.L),a6         ; a6 = end of load address
+L000101b8               moveq   #$78,d3                 ; d3 = Deselect All Drives
 L000101ba               bsr.b   L0001020c
-L000101bc               and.b   #$7f,(a4)
-L000101c0               moveq   #-9,d3              ; #$f7,d3
-L000101c2               rol.b   d2,d3
-L000101c4               and.b   d3,(a4)
-L000101c6               divu.w  #$1600,d0
-L000101ca               move.w  d0,d1
-L000101cc               move.w  #$7600,d0
-L000101d0               swap.w  d0
-L000101d2               moveq   #$1b,d7
-L000101d4               bsr.b   L00010240
-L000101d6               btst.b  #$0005,$0f01(a4)
+
+L000101bc               and.b   #$7f,(a4)               ; Select /MTR (Drive Motor ON = 0)
+                ; select drive 0-3
+L000101c0               moveq.l #$f7,d3                  
+L000101c2               rol.b   d2,d3                   ; d3 = Select Drive Bit
+L000101c4               and.b   d3,(a4)                 ; Select Drive
+
+        
+L000101c6               divu.w  #$1600,d0               ; d0 = start track (offset / track size 5632 bytes)
+L000101ca               move.w  d0,d1                   ; d1 low word = start track
+
+L000101cc               move.w  #$7600,d0               ; d0 = 30,208
+L000101d0               swap.w  d0                      ; d0 = start sector byte offset
+
+                ; wait for disk ready or 28*300 raster lines
+L000101d2               moveq   #$1b,d7                 ; d7 = 27 + 1 (loop counter)
+L000101d4               bsr.b   L00010240               ; wait for 300 raster lines
+L000101d6               btst.b  #$0005,$0f01(a4)        ; Test bit 5 (/RDY) of $bfe001
 L000101dc               dbeq.w  d7,L000101d4
-L000101e0               cmpa.l  a0,a6
-L000101e2               beq.b   L00010206
+
+L000101e0               cmpa.l  a0,a6                   ; has all data been loaded?
+L000101e2               beq.b   L00010206               ; loader finished
 L000101e4               moveq   #$06,d4
 L000101e6               or.b    (a4),d4
 L000101e8               move.w  (a5),d2
 L000101ea               bpl.b   L00010218
 L000101ec               add.l   #$01000000,d0
-L000101f2               bmi.b   L00010206
+L000101f2               bmi.b   L00010206               ; loader finished
 L000101f4               moveq   #$00,d2
 L000101f6               moveq   #$55,d7
 L000101f8               btst.b  #$0004,$0f01(a4)
 L000101fe               beq.b   L00010218
 L00010200               bsr.b   L00010236
 L00010202               dbf.w   d7,L000101f8
+
+            ; loader finished
 L00010206               suba.l  a0,a6
-L00010208               move.l  a6,d0
-L0001020a               moveq   #-8,d3              ; #$f8,d3
-L0001020c               or.b    #$f9,(a4)
-L00010210               and.b   #$87,(a4)
-L00010214               or.b    d3,(a4)
+L00010208               move.l  a6,d0               ; if all data loaded then d0 = 0 (success return code)
+L0001020a               moveq.l #$f8,d3             ; deselect all drives
+            ; select/deselect drives
+            ; a4 = CIAB PRB (Disk Control)
+            ; d3 = Drive DeSelect Bits?
+L0001020c               or.b    #$f9,(a4)           ; Deselect /MTR /SEL3 /SEL2 /SEL1 /SEL0 /STEP
+L00010210               and.b   #$87,(a4)           ; Select /SEL3 /SEL2/ SEL1 /SEL0 
+L00010214               or.b    d3,(a4)             ; Deselect Drives Specified in d3
 L00010216               rts
+
 
 
 L00010218               st.b    (a5)
@@ -59,12 +84,14 @@ L00010238               move.b  d4,(a4)
 L0001023a               nop
 L0001023c               addq.b  #$01,d4
 L0001023e               move.b  d4,(a4)
-L00010240               move.w  #$012c,d6
+
+
+L00010240               move.w  #$012c,d6           ; d6 = 300 (loop counter + 1)
 L00010244               lea.l   $00dff024,a3
-L0001024a               move.b  -$001e(a3),d5
-L0001024e               cmp.b   -$001e(a3),d5
-L00010252               beq.b   L0001024e
-L00010254               dbf.w   d6,L0001024a
+L0001024a               move.b  -$001e(a3),d5       ; d5 = raster position
+L0001024e               cmp.b   -$001e(a3),d5       ; has raster changed?
+L00010252               beq.b   L0001024e           ; wait for 1 raster line
+L00010254               dbf.w   d6,L0001024a        ; loop for 300 raster lines
 L00010258               rts
 
 
@@ -83,7 +110,7 @@ L00010282               move.l  a1,-$0004(a3)
 L00010286               move.w  #$9760,(a3)
 L0001028a               move.w  #$9760,(a3)
 L0001028e               moveq   #$37,d7
-L00010290               bsr.b   L00010240
+L00010290               bsr.b   L00010240               ; wait 300 raster lines
 L00010292               tst.l   $0010(a1)
 L00010296               dbne.w  d7,L00010290
 L0001029a               beq.b   L00010306
@@ -96,7 +123,7 @@ L000102a6               rol.l   #$08,d3
 L000102a8               tst.b   d3
 L000102aa               bne.b   L0001026a
 L000102ac               moveq   #$37,d7
-L000102ae               bsr.b   L00010240
+L000102ae               bsr.b   L00010240               ; wait 300 raster lines
 L000102b0               btst.b  #$0001,-$0005(a3)
 L000102b6               dbne.w  d7,L000102ae
 L000102ba               beq.b   L00010306
