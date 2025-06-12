@@ -12,7 +12,7 @@
             "emulatorArgs": [
                 "--hard_drive_0=${workspaceFolder}/uae/dh0",
                 "--automatic_input_grab=1",
-                "--floppy-image-0=${workspaceFolder}/disks/DosDisk1.adf",
+                "--floppy-image-0=${workspaceFolder}/disks/builder/DiskPacked/packdisk.adf",
                 "--video_sync=off"
             ],
             "preLaunchTask": "amigaassembly: build"
@@ -29,7 +29,7 @@
             "emulatorArgs": [
                 "--hard_drive_0=${workspaceFolder}/uae/dh0",
                 "--automatic_input_grab=1",
-                "--floppy-image-0=${workspaceFolder}/disks/DosDisk1.adf",
+                "--floppy-image-0=${workspaceFolder}/disks/builder/DiskPacked/packdisk.adf",
                 "--video_sync=off"
             ],
             "preLaunchTask": "amigaassembly: build"
