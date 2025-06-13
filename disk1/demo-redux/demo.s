@@ -128,6 +128,28 @@ loader_4489
                 ;include "4489Loader/4489_byteloader.s"
                 include "4489Loader/4489_byteloader_code.s"
 
+
+                ; IN:
+                ;       a0.l = protracker module address
+decompress_samples
+                                ; find number of patterns
+                                move.w  #127,d7
+                                move.l  #0,d6
+                                lea     952(a0),a1
+.pattern_loop                   move.b  (a1)+,d5
+                                cmp.b   d5,d6
+                                bcc     .do_next
+                                move.b  d5,d6
+.do_next                        dbf     d7,.pattern_loop
+                    
+                                lea     delta_table,a1
+
+
+
+                                rts
+
+delta_table     dc.b    0,1,2,4,8,16,32,64,128,-64,-32,-16,-8,-4,-2,-1
+
                 ; ------------- Initialise System -----------------
                 ; Set up Level 3 Interrupt and kill DMA
 init_system     ; original address L00020052
@@ -2251,7 +2273,7 @@ scroller_next_character ; original address L000215FA
 
 
                 ; FileID	Disk Offset	PackedSize	FileSize
-disk1_file_table_packed_delta
+disk_1_file_table_packed_delta
 
                 dc.b    'dsk#'
                 dc.l    $00000001,$00000001,$00000001
@@ -2392,6 +2414,10 @@ load_music      ; original address L00021814
                                 jsr     loader_4489
                                 tst.l   d0
                                 bne     decode_error
+
+                                lea     LOAD_BUFFER,a0
+                                jsr     decompress_samples
+
                                 movem.l (a7)+,d0-d7/a0-a6
                                 rts
 
