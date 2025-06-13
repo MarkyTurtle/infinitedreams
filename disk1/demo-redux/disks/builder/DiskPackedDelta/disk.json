@@ -1,0 +1,128 @@
+{
+  "bootBlock": {
+    "FileName": ""
+  },
+  "diskNumber": 1,
+  "diskItems": [
+    {
+      "fileName": "titlepic.raw",
+      "fileid": "tpic",
+      "cacheable": false
+    },
+    {
+      "fileName": "bladerunner.mod.4bit.zx0",
+      "fileid": "blad",
+      "cacheable": false
+    },
+    {
+      "fileName": "breakthrough.mod.4bit.zx0",
+      "fileid": "brea",
+      "cacheable": false
+    },
+    {
+      "fileName": "bright.mod.4bit.zx0",
+      "fileid": "brig",
+      "cacheable": false
+    },
+    {
+      "fileName": "cosmichowmuch.mod.4bit.zx0",
+      "fileid": "cosm",
+      "cacheable": false
+    },
+    {
+      "fileName": "eattheballbearing.mod.4bit.zx0",
+      "fileid": "eatt",
+      "cacheable": false
+    },
+    {
+      "fileName": "flight.mod.4bit.zx0",
+      "fileid": "flig",
+      "cacheable": false
+    },
+    {
+      "fileName": "float.mod.4bit.zx0",
+      "fileid": "floa",
+      "cacheable": false
+    },
+    {
+      "fileName": "jarresque.mod.4bit.zx0",
+      "fileid": "jarr",
+      "cacheable": false
+    },
+    {
+      "fileName": "loveyourmoney.mod.4bit.zx0",
+      "fileid": "love",
+      "cacheable": false
+    },
+    {
+      "fileName": "mentalobstacle.mod.4bit.zx0",
+      "fileid": "ment",
+      "cacheable": false
+    },
+    {
+      "fileName": "naturalreality.mod.4bit.zx0",
+      "fileid": "natu",
+      "cacheable": false
+    },
+    {
+      "fileName": "nevertomuch.mod.4bit.zx0",
+      "fileid": "neve",
+      "cacheable": false
+    },
+    {
+      "fileName": "notaravesong.mod.4bit.zx0",
+      "fileid": "nota",
+      "cacheable": false
+    },
+    {
+      "fileName": "obliterationfin.mod.4bit.zx0",
+      "fileid": "obli",
+      "cacheable": false
+    },
+    {
+      "fileName": "retouche.mod.4bit.zx0",
+      "fileid": "reto",
+      "cacheable": false
+    },
+    {
+      "fileName": "shaft.mod.4bit.zx0",
+      "fileid": "shaf",
+      "cacheable": false
+    },
+    {
+      "fileName": "skyriders.mod.4bit.zx0",
+      "fileid": "skyr",
+      "cacheable": false
+    },
+    {
+      "fileName": "soundofsilence.mod.4bit.zx0",
+      "fileid": "soun",
+      "cacheable": false
+    },
+    {
+      "fileName": "stratospheric.mod.4bit.zx0",
+      "fileid": "stra",
+      "cacheable": false
+    },
+    {
+      "fileName": "summerinsweden.mod.4bit.zx0",
+      "fileid": "summ",
+      "cacheable": false
+    },
+    {
+      "fileName": "techwar.mod.4bit.zx0",
+      "fileid": "tech",
+      "cacheable": false
+    },
+    {
+      "fileName": "thefly.mod.4bit.zx0",
+      "fileid": "thef",
+      "cacheable": false
+    },
+    {
+      "fileName": "zerogravity.mod.4bit.zx0",
+      "fileid": "zero",
+      "cacheable": false
+    }
+  ]
+}

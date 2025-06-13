@@ -1388,17 +1388,11 @@ loader_disk_number              dc.l    $0
                 ; jarr  $00030FB2,$00000000,$0000D1DB
 set_loader_jarresque    ; original address L00020E2C
                                 BSET.B  #LOAD_MODULE,loader_status_bits 
-                                move.l  #16*4,d0                ; file table offset
-                                ;lea     disk_1_file_table,a0
-                                lea     disk_1_file_table_packed,a0
+                                move.l  #16*9,d0                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
                                 move.l  12(a0,d0.w),loader_file_length
-
-                                ;MOVE.W  #$008e,loader_start_track               
-                                ;MOVE.W  #$0011,loader_number_of_tracks          
-                                ;MOVE.L  #LOAD_BUFFER,loader_dest_buffer          
-                                ;MOVE.L  #$00000001,loader_disk_number
                                 RTS 
 
 
@@ -1407,16 +1401,11 @@ set_loader_jarresque    ; original address L00020E2C
                 ; thef	0009D53E	00000000	0001DD64
 set_loader_the_fly      ; original address L00020E5A
                                 BSET.B  #LOAD_MODULE,loader_status_bits  
-                                move.l  #16*6,d0                                ; file table offset
-                                lea     disk_1_file_table,a0
+                                move.l  #16*23,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
-                                move.l  12(a0,d0.w),loader_file_length
-
-                                ;MOVE.W  #$005c,loader_start_track               
-                                ;MOVE.W  #$0015,loader_number_of_tracks          
-                                ;MOVE.L  #LOAD_BUFFER,loader_dest_buffer         
-                                ;MOVE.L  #$00000001,loader_disk_number           
+                                move.l  12(a0,d0.w),loader_file_length          
                                 RTS 
 
 
@@ -1426,16 +1415,11 @@ set_loader_the_fly      ; original address L00020E5A
                 ; stra	00072532	00000000	0002B00C
 set_loader_stratospheric_city; original address L00020E88
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*5,d0                                ; file table offset
-                                lea     disk_1_file_table,a0
+                                move.l  #16*20,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
-                                move.l  12(a0,d0.w),loader_file_length
-
-                                ;MOVE.W  #$003b,loader_start_track      
-                                ;MOVE.W  #$001f,loader_number_of_tracks 
-                                ;MOVE.L  #LOAD_BUFFER,loader_dest_buffer
-                                ;MOVE.L  #$00000001,loader_disk_number  
+                                move.l  12(a0,d0.w),loader_file_length  
                                 RTS 
 
 
@@ -1447,16 +1431,11 @@ set_loader_stratospheric_city; original address L00020E88
                 ; floa	0003721E	00000000	000233AE
 set_loader_float        ; original address L00020EB6
                                 BSET.B  #LOAD_MODULE,loader_status_bits 
-                                move.l  #16*3,d0                                ; file table offset
-                                lea     disk_1_file_table,a0
+                                move.l  #16*8,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
-                                move.l  12(a0,d0.w),loader_file_length
-
-                                ;MOVE.W  #$0073,loader_start_track       
-                                ;MOVE.W  #$0019,loader_number_of_tracks  
-                                ;MOVE.L  #LOAD_BUFFER,loader_dest_buffer 
-                                ;MOVE.L  #$00000001,loader_disk_number   
+                                move.l  12(a0,d0.w),loader_file_length 
                                 RTS 
 
 
@@ -1464,16 +1443,11 @@ set_loader_float        ; original address L00020EB6
                 ; flig	0000CCB0	00000000	0002A56E
 set_loader_flight_sleepy_mix ; original address L00020EE4
                                 BSET.B  #LOAD_MODULE,loader_status_bits 
-                                move.l  #16*2,d0                                ; file table offset
-                                lea     disk_1_file_table,a0
+                                move.l  #16*7,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
                                 move.l  12(a0,d0.w),loader_file_length
-
-                                ;MOVE.W  #$001b,loader_start_track       
-                                ;MOVE.W  #$001e,loader_number_of_tracks  
-                                ;MOVE.L  #LOAD_BUFFER,loader_dest_buffer 
-                                ;MOVE.L  #$00000001,loader_disk_number    
                                 RTS 
 
 
@@ -1483,10 +1457,11 @@ set_loader_flight_sleepy_mix ; original address L00020EE4
                 ; no of tracks: $09
 set_loader_bright       ; original address L00020F12
                                 BSET.B  #LOAD_MODULE,loader_status_bits 
-                                MOVE.W  #$0001,loader_start_track       
-                                MOVE.W  #$0009,loader_number_of_tracks  
-                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer 
-                                MOVE.L  #$00000002,loader_disk_number   
+                                move.l  #16*4,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
+                                move.l  4(a0),loader_disk_number
+                                move.l  4(a0,d0.w),loader_start_offset
+                                move.l  12(a0,d0.w),loader_file_length
                                 RTS 
 
 
@@ -1496,10 +1471,11 @@ set_loader_bright       ; original address L00020F12
                 ; no of tracks: $0e
 set_loader_love_your_money      ; original address L00020F40
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                MOVE.W  #$007e,loader_start_track      
-                                MOVE.W  #$000e,loader_number_of_tracks 
-                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
-                                MOVE.L  #$00000002,loader_disk_number   
+                                move.l  #16*10,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
+                                move.l  4(a0),loader_disk_number
+                                move.l  4(a0,d0.w),loader_start_offset
+                                move.l  12(a0,d0.w),loader_file_length  
                                 RTS 
 
 
@@ -1509,10 +1485,11 @@ set_loader_love_your_money      ; original address L00020F40
                 ; no of tracks: $0c
 set_loader_cosmic_how_much      ; original address L00020F6E
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                MOVE.W  #$0070,loader_start_track      
-                                MOVE.W  #$000c,loader_number_of_tracks 
-                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
-                                MOVE.L  #$00000002,loader_disk_number  
+                                move.l  #16*5,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
+                                move.l  4(a0),loader_disk_number
+                                move.l  4(a0,d0.w),loader_start_offset
+                                move.l  12(a0,d0.w),loader_file_length
                                 RTS 
 
 
@@ -1522,10 +1499,11 @@ set_loader_cosmic_how_much      ; original address L00020F6E
                 ; no of tracks: $0d
 set_loader_not_a_love_song      ; original address L00020F9C
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                MOVE.W  #$000c,loader_start_track      
-                                MOVE.W  #$000d,loader_number_of_tracks 
-                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
-                                MOVE.L  #$00000002,loader_disk_number   
+                                move.l  #16*14,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
+                                move.l  4(a0),loader_disk_number
+                                move.l  4(a0,d0.w),loader_start_offset
+                                move.l  12(a0,d0.w),loader_file_length   
                                 RTS 
 
 
@@ -1535,10 +1513,11 @@ set_loader_not_a_love_song      ; original address L00020F9C
                 ; no of tracks: $19
 set_loader_eat_the_ballbearing ; original address L00020FCA
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                MOVE.W  #$0055,loader_start_track      
-                                MOVE.W  #$0019,loader_number_of_tracks 
-                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
-                                MOVE.L  #$00000002,loader_disk_number  
+                                move.l  #16*6,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
+                                move.l  4(a0),loader_disk_number
+                                move.l  4(a0,d0.w),loader_start_offset
+                                move.l  12(a0,d0.w),loader_file_length
                                 RTS 
 
 
@@ -1548,10 +1527,11 @@ set_loader_eat_the_ballbearing ; original address L00020FCA
                 ; no of tracks: $13
 set_loader_sound_of_silence ; orignal address L00020FF8
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                MOVE.W  #$0040,loader_start_track      
-                                MOVE.W  #$0013,loader_number_of_tracks 
-                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
-                                MOVE.L  #$00000002,loader_disk_number  
+                                move.l  #16*19,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
+                                move.l  4(a0),loader_disk_number
+                                move.l  4(a0,d0.w),loader_start_offset
+                                move.l  12(a0,d0.w),loader_file_length
                                 RTS 
 
 
@@ -1561,10 +1541,11 @@ set_loader_sound_of_silence ; orignal address L00020FF8
                 ; no of tracks: $10
 set_loader_retouche     ; original address L00021026
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                MOVE.W  #$001b,loader_start_track      
-                                MOVE.W  #$0010,loader_number_of_tracks 
-                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
-                                MOVE.L  #$00000002,loader_disk_number  
+                                move.l  #16*16,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
+                                move.l  4(a0),loader_disk_number
+                                move.l  4(a0,d0.w),loader_start_offset
+                                move.l  12(a0,d0.w),loader_file_length  
                                 RTS 
 
 
@@ -1574,10 +1555,11 @@ set_loader_retouche     ; original address L00021026
                 ; no of tracks: $11
 set_loader_techwar      ; original address L00021054
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                MOVE.W  #$002d,loader_start_track      
-                                MOVE.W  #$0011,loader_number_of_tracks 
-                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
-                                MOVE.L  #$00000002,loader_disk_number  
+                                move.l  #16*22,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
+                                move.l  4(a0),loader_disk_number
+                                move.l  4(a0,d0.w),loader_start_offset
+                                move.l  12(a0,d0.w),loader_file_length  
                                 RTS 
 
 
@@ -1587,10 +1569,11 @@ set_loader_techwar      ; original address L00021054
                 ; no of tracks: $11
 set_loader_shaft        ; original address L00021082
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                MOVE.W  #$008e,loader_start_track      
-                                MOVE.W  #$0011,loader_number_of_tracks 
-                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
-                                MOVE.L  #$00000002,loader_disk_number  
+                                move.l  #16*17,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
+                                move.l  4(a0),loader_disk_number
+                                move.l  4(a0,d0.w),loader_start_offset
+                                move.l  12(a0,d0.w),loader_file_length
                                 RTS 
 
 
@@ -1600,10 +1583,11 @@ set_loader_shaft        ; original address L00021082
                 ; no of tracks: $12
 set_loader_mental_obstacle      ; original address L000210B0
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                MOVE.W  #$008d,loader_start_track      
-                                MOVE.W  #$0012,loader_number_of_tracks 
-                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
-                                MOVE.L  #$00000003,loader_disk_number  
+                                move.l  #16*11,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
+                                move.l  4(a0),loader_disk_number
+                                move.l  4(a0,d0.w),loader_start_offset
+                                move.l  12(a0,d0.w),loader_file_length 
                                 RTS 
 
 
@@ -1613,10 +1597,11 @@ set_loader_mental_obstacle      ; original address L000210B0
                 ; no of tracks: $11
 set_loader_blade_runner ; original address L000210DE
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                MOVE.W  #$0002,loader_start_track      
-                                MOVE.W  #$0011,loader_number_of_tracks 
-                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
-                                MOVE.L  #$00000003,loader_disk_number  
+                                move.l  #16*2,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
+                                move.l  4(a0),loader_disk_number
+                                move.l  4(a0,d0.w),loader_start_offset
+                                move.l  12(a0,d0.w),loader_file_length 
                                 RTS 
 
 
@@ -1626,10 +1611,11 @@ set_loader_blade_runner ; original address L000210DE
                 ; no of tracks: $0e
 set_loader_natural_reality      ; original address L0002110C
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                MOVE.W  #$007d,loader_start_track      
-                                MOVE.W  #$000e,loader_number_of_tracks 
-                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
-                                MOVE.L  #$00000003,loader_disk_number  
+                                move.l  #16*12,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
+                                move.l  4(a0),loader_disk_number
+                                move.l  4(a0,d0.w),loader_start_offset
+                                move.l  12(a0,d0.w),loader_file_length  
                                 RTS 
 
 
@@ -1639,10 +1625,11 @@ set_loader_natural_reality      ; original address L0002110C
                 ; no of tracks: $0c
 set_loader_obliteration_fin ; original address L0002113A
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                MOVE.W  #$006f,loader_start_track      
-                                MOVE.W  #$000c,loader_number_of_tracks 
-                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
-                                MOVE.L  #$00000003,loader_disk_number  
+                                move.l  #16*15,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
+                                move.l  4(a0),loader_disk_number
+                                move.l  4(a0,d0.w),loader_start_offset
+                                move.l  12(a0,d0.w),loader_file_length 
                                 RTS 
 
 
@@ -1652,10 +1639,11 @@ set_loader_obliteration_fin ; original address L0002113A
                 ; no of tracks: $1b
 set_loader_skyriders    ; original address L00021168
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                MOVE.W  #$0052,loader_start_track      
-                                MOVE.W  #$001b,loader_number_of_tracks 
-                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
-                                MOVE.L  #$00000003,loader_disk_number  
+                                move.l  #16*18,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
+                                move.l  4(a0),loader_disk_number
+                                move.l  4(a0,d0.w),loader_start_offset
+                                move.l  12(a0,d0.w),loader_file_length  
                                 RTS 
 
 
@@ -1665,10 +1653,11 @@ set_loader_skyriders    ; original address L00021168
                 ; no of tracks: $0d
 set_loader_zero_gravity ; original address L00021196
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                MOVE.W  #$0043,loader_start_track      
-                                MOVE.W  #$000d,loader_number_of_tracks 
-                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
-                                MOVE.L  #$00000003,loader_disk_number  
+                                move.l  #16*24,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
+                                move.l  4(a0),loader_disk_number
+                                move.l  4(a0,d0.w),loader_start_offset
+                                move.l  12(a0,d0.w),loader_file_length
                                 RTS 
 
 
@@ -1678,10 +1667,11 @@ set_loader_zero_gravity ; original address L00021196
                 ; no of tracks: $0d
 set_loader_break_through        ; original address L000211C4
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                MOVE.W  #$0015,loader_start_track      
-                                MOVE.W  #$000d,loader_number_of_tracks 
-                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
-                                MOVE.L  #$00000003,loader_disk_number  
+                                move.l  #16*3,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
+                                move.l  4(a0),loader_disk_number
+                                move.l  4(a0,d0.w),loader_start_offset
+                                move.l  12(a0,d0.w),loader_file_length
                                 RTS 
 
 
@@ -1691,10 +1681,11 @@ set_loader_break_through        ; original address L000211C4
                 ; no of tracks: $0c
 set_loader_summer_in_sweden     ; original address L000211F2
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                MOVE.W  #$0035,loader_start_track      
-                                MOVE.W  #$000c,loader_number_of_tracks 
-                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
-                                MOVE.L  #$00000003,loader_disk_number  
+                                move.l  #16*21,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
+                                move.l  4(a0),loader_disk_number
+                                move.l  4(a0,d0.w),loader_start_offset
+                                move.l  12(a0,d0.w),loader_file_length
                                 RTS 
 
 
@@ -1704,10 +1695,11 @@ set_loader_summer_in_sweden     ; original address L000211F2
                 ; no of tracks: $0f
 set_loader_never_to_much        ; original address L00021220
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                MOVE.W  #$0024,loader_start_track      
-                                MOVE.W  #$000f,loader_number_of_tracks 
-                                MOVE.L  #LOAD_BUFFER,loader_dest_buffer
-                                MOVE.L  #$00000003,loader_disk_number  
+                                move.l  #16*13,d0                                ; file table offset
+                                lea     disk_1_file_table_packed_delta,a0
+                                move.l  4(a0),loader_disk_number
+                                move.l  4(a0,d0.w),loader_start_offset
+                                move.l  12(a0,d0.w),loader_file_length 
                                 RTS 
 
 
@@ -2256,6 +2248,63 @@ scroller_next_character ; original address L000215FA
                                 BNE.B   .blit_wait_9 
                                 MOVE.W  #$0000,scroller_character_counter
                                 RTS 
+
+
+                ; FileID	Disk Offset	PackedSize	FileSize
+disk1_file_table_packed_delta
+
+                dc.b    'dsk#'
+                dc.l    $00000001,$00000001,$00000001
+                dc.b    'tpic'
+                dc.l    $00000590,$00000000,$0000C840
+                dc.b    'blad'
+                dc.l    $0000CDD0,$00000000,$00006735
+                dc.b    'brea'
+                dc.l    $00013505,$00000000,$0000597E
+                dc.b    'brig'
+                dc.l    $00018E83,$00000000,$000035F0
+                dc.b    'cosm'
+                dc.l    $0001C473,$00000000,$000057EB
+                dc.b    'eatt'
+                dc.l    $00021C5E,$00000000,$00008836
+                dc.b    'flig'
+                dc.l    $0002A494,$00000000,$00008CCD
+                dc.b    'floa'
+                dc.l    $00033161,$00000000,$0000735A
+                dc.b    'jarr'
+                dc.l    $0003A4BB,$00000000,$00006204
+                dc.b    'love'
+                dc.l    $000406BF,$00000000,$000056BE
+                dc.b    'ment'
+                dc.l    $00045D7D,$00000000,$0000639C
+                dc.b    'natu'
+                dc.l    $0004C119,$00000000,$00004717
+                dc.b    'neve'
+                dc.l    $00050830,$00000000,$00004D4D
+                dc.b    'nota'
+                dc.l    $0005557D,$00000000,$00006175
+                dc.b    'obli'
+                dc.l    $0005B6F2,$00000000,$0000452F
+                dc.b    'reto'
+                dc.l    $0005FC21,$00000000,$00006982
+                dc.b    'shaf'
+                dc.l    $000665A3,$00000000,$0000777E
+                dc.b    'skyr'
+                dc.l    $0006DD21,$00000000,$00009B5B
+                dc.b    'soun'
+                dc.l    $0007787C,$00000000,$00007223
+                dc.b    'stra'
+                dc.l    $0007EA9F,$00000000,$0000BBC4
+                dc.b    'summ'
+                dc.l    $0008A663,$00000000,$0000401E
+                dc.b    'tech'
+                dc.l    $0008E681,$00000000,$00007700
+                dc.b    'thef'
+                dc.l    $00095D81,$00000000,$000084B4
+                dc.b    'zero'
+                dc.l    $0009E235,$00000000,$000062AA
+                dc.b    'Free'
+                dc.l    $000A44DF,$00000000,$00037B21
 
 
 disk_1_file_table_packed
