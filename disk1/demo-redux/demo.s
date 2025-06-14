@@ -133,6 +133,7 @@ loader_4489
                 ;       a0.l = protracker module address
 decompress_samples
                                 ; find number of patterns
+                                moveq.l #0,d5
                                 move.w  #127,d7
                                 move.l  #0,d6
                                 lea     952(a0),a1
@@ -142,10 +143,53 @@ decompress_samples
                                 move.b  d5,d6
 .do_next                        dbf     d7,.pattern_loop
                     
-                                lea     delta_table,a1
+                                addq.l  #1,d6
+                                mulu    #1024,d6
+                                add.l   #1080,d6        ; sample data offset
+                                add.l   #4,d6           ; skip tag M.K. for 31 sample song
+                                lea     (a0,d6.l),a1    ; sample data offset.
 
+                                ; a0 = protracker module
+                                ; a1 = sample data offset (1st sample)
 
+                                move.l  #30,d7          ; 30+1 samples
+                                move.l  #22,d6          ; 1st sample length offset
+.sample_loop                    moveq.l #0,d0           ; clear sample length in words
+                                move.w  20(a0,d6.l),d0  ; sample length
 
+                                tst.l   d0              ; is sample empty?
+                                beq     .next_sample
+
+                                ; d0.l = sample length (words)
+                                ; a1.l = sample data address
+                                jsr     decompress_sample
+
+.next_sample                    add.l   #30,d6          ; next sample length offset
+                                add.l   d0,a1           ; next sample address
+                                add.l   d0,a1           ; next sample address
+                                dbf     d7,.sample_loop
+
+                                rts
+
+                                ; d0.l = sample length (words)
+                                ; a1.l = sample data address
+decompress_sample               movem.l d0-d7/a0-a6,-(a7)
+                                move.l  d0,d1
+                                asl.l   #1,d1           ; end of sample data buffer
+                                lea     (a1,d0.w),a1
+                                lea     (a1,d1.w),a2      ; end of sample buffer
+                                lea     delta_table,a3  ; sample reconstruction data
+                                sub.l   #1,d0           ; loop counter + 1
+
+.decompress_loop                move.b  -(a1),d3        ; get compressed byte
+                                move.w  d3,d4
+                                and.w   #$000f,d3
+                                move.b  (a3,d3.w),-(a2)
+                                ror.b   #4,d4
+                                and.w   #$000f,d4
+                                move.b  (a3,d4.w),-(a2)
+                                dbf     d0,.decompress_loop
+                                movem.l (a7)+,d0-d7/a0-a6
                                 rts
 
 delta_table     dc.b    0,1,2,4,8,16,32,64,128,-64,-32,-16,-8,-4,-2,-1
@@ -2415,9 +2459,6 @@ load_music      ; original address L00021814
                                 tst.l   d0
                                 bne     decode_error
 
-                                lea     LOAD_BUFFER,a0
-                                jsr     decompress_samples
-
                                 movem.l (a7)+,d0-d7/a0-a6
                                 rts
 
@@ -2442,6 +2483,9 @@ load_packed_music
 
                                 lea     LOAD_BUFFER,a1
                                 jsr     zx0_decompress                                        
+
+                                lea     LOAD_BUFFER,a0
+                                jsr     decompress_samples
 
                                 movem.l (a7)+,d0-d7/a0-a6
                                 rts
