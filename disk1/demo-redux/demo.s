@@ -175,19 +175,33 @@ decompress_samples
                                 ; a1.l = sample data address
 decompress_sample               movem.l d0-d7/a0-a6,-(a7)
                                 move.l  d0,d1
-                                asl.l   #1,d1           ; end of sample data buffer
+                                asl.l   #1,d1             ; end of sample data buffer
                                 lea     (a1,d0.w),a1
-                                lea     (a1,d1.w),a2      ; end of sample buffer
-                                lea     delta_table,a3  ; sample reconstruction data
-                                sub.l   #1,d0           ; loop counter + 1
+                                lea     (a1,d0.w),a2      ; end of sample buffer (words)
+                                lea     delta_table,a3    ; sample reconstruction data
+                                sub.l   #1,d0             ; loop counter + 1
 
-.decompress_loop                move.b  -(a1),d3        ; get compressed byte
+.decompress_loop                moveq.l #0,d3
+                                moveq.l #0,d4
+                                move.b  -(a1),d3        ; get compressed byte
                                 move.w  d3,d4
                                 and.w   #$000f,d3
-                                move.b  (a3,d3.w),-(a2)
+                                
+                                moveq.l #0,d5
+                                moveq.l #0,d6
+                                move.b  (a3,d3.w),d6
+                                sub.b   d6,d5
+                                move.b  d6,-(a2)
+                                
                                 ror.b   #4,d4
                                 and.w   #$000f,d4
-                                move.b  (a3,d4.w),-(a2)
+
+                                moveq.l #0,d5
+                                moveq.l #0,d6
+                                move.b  (a3,d4.w),d6
+                                sub.b   d6,d5
+                                move.b  d6,-(a2)
+                                
                                 dbf     d0,.decompress_loop
                                 movem.l (a7)+,d0-d7/a0-a6
                                 rts
