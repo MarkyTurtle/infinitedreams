@@ -79,17 +79,18 @@ MENU_IDX_pd_message_menu        EQU     $34     ; L0003CEEA - index = $34
 
 
 
-TEST_BUILD SET 1                                        ; Comment this to remove 'testboot'
+;TEST_BUILD SET 1                                        ; Comment this to remove 'testboot'
 
 
-
+     
         ; Set 'Test Build' or 'Live Build' parameters 
         IFD TEST_BUILD
 STACK_ADDRESS   EQU     start_demo                      ; test stack address (start of program)
 LOAD_BUFFER     EQU     load_buffer                     ; file load buffer
 MFM_BUFFER      EQU     mfm_track_buffer
         ELSE
-STACK_ADDRESS   EQU     $00080000                       ; original stack address
+                org     $2000                            
+STACK_ADDRESS   EQU     $00001000                       ; original stack address
 LOAD_BUFFER     EQU     $00040000                       ; file load buffer
 MFM_BUFFER      EQU     $00075000
         ENDC
