@@ -79,7 +79,7 @@ MENU_IDX_pd_message_menu        EQU     $34     ; L0003CEEA - index = $34
 
 
 
-;TEST_BUILD SET 1                                        ; Comment this to remove 'testboot'
+TEST_BUILD SET 1                                        ; Comment this to remove 'testboot'
 
 
      
@@ -125,89 +125,7 @@ start_demo      ; original address L00020000
                                 BSR.W   do_fade_in_top_logo     ; L00020244
                                 BRA.W   main_loop               ; L000202F6
 
-loader_4489
-                ;include "4489Loader/4489_byteloader.s"
-                include "4489Loader/4489_byteloader_code.s"
 
-
-                ; IN:
-                ;       a0.l = protracker module address
-decompress_samples
-                                ; find number of patterns
-                                moveq.l #0,d5
-                                move.w  #127,d7
-                                move.l  #0,d6
-                                lea     952(a0),a1
-.pattern_loop                   move.b  (a1)+,d5
-                                cmp.b   d5,d6
-                                bcc     .do_next
-                                move.b  d5,d6
-.do_next                        dbf     d7,.pattern_loop
-                    
-                                addq.l  #1,d6
-                                mulu    #1024,d6
-                                add.l   #1080,d6        ; sample data offset
-                                add.l   #4,d6           ; skip tag M.K. for 31 sample song
-                                lea     (a0,d6.l),a1    ; sample data offset.
-
-                                ; a0 = protracker module
-                                ; a1 = sample data offset (1st sample)
-
-                                move.l  #30,d7          ; 30+1 samples
-                                move.l  #22,d6          ; 1st sample length offset
-.sample_loop                    moveq.l #0,d0           ; clear sample length in words
-                                move.w  20(a0,d6.l),d0  ; sample length
-
-                                tst.l   d0              ; is sample empty?
-                                beq     .next_sample
-
-                                ; d0.l = sample length (words)
-                                ; a1.l = sample data address
-                                jsr     decompress_sample
-
-.next_sample                    add.l   #30,d6          ; next sample length offset
-                                add.l   d0,a1           ; next sample address
-                                add.l   d0,a1           ; next sample address
-                                dbf     d7,.sample_loop
-
-                                rts
-
-                                ; d0.l = sample length (words)
-                                ; a1.l = sample data address
-decompress_sample               movem.l d0-d7/a0-a6,-(a7)
-                                move.l  d0,d1
-                                asl.l   #1,d1             ; end of sample data buffer
-                                lea     (a1,d0.w),a1
-                                lea     (a1,d0.w),a2      ; end of sample buffer (words)
-                                lea     delta_table,a3    ; sample reconstruction data
-                                sub.l   #1,d0             ; loop counter + 1
-
-.decompress_loop                moveq.l #0,d3
-                                moveq.l #0,d4
-                                move.b  -(a1),d3        ; get compressed byte
-                                move.w  d3,d4
-                                and.w   #$000f,d3
-                                
-                                moveq.l #0,d5
-                                moveq.l #0,d6
-                                move.b  (a3,d3.w),d6
-                                sub.b   d6,d5
-                                move.b  d6,-(a2)
-                                
-                                ror.b   #4,d4
-                                and.w   #$000f,d4
-
-                                moveq.l #0,d5
-                                moveq.l #0,d6
-                                move.b  (a3,d4.w),d6
-                                sub.b   d6,d5
-                                move.b  d6,-(a2)
-                                
-                                dbf     d0,.decompress_loop
-                                movem.l (a7)+,d0-d7/a0-a6
-                                rts
-
-delta_table     dc.b    0,1,2,4,8,16,32,64,128,-64,-32,-16,-8,-4,-2,-1
 
                 ; ------------- Initialise System -----------------
                 ; Set up Level 3 Interrupt and kill DMA
@@ -228,8 +146,6 @@ init_system     ; original address L00020052
                                 LEA.L   level_3_interrupt_handler(PC),A0 
                                 MOVE.L  A0,$6c.w                                ; level 3 interrupt autovector
                                 MOVE.W  #$8020,INTENA(A6)                       ; enable COPER & DSKBLK
-
-
                                 RTS 
 
 
@@ -1461,6 +1377,7 @@ set_pd_message_menu_params ; original address L00020CA8
 loader_start_offset             dc.l    $0
 loader_file_length              dc.l    $0
 loader_disk_number              dc.l    $0
+loader_decompressed_length      dc.l    $0
 
                 ; -------------------- load music: jarresque -------------------
                 ; jarr	0005A5CC	00000000	00017F66
@@ -1469,10 +1386,11 @@ loader_disk_number              dc.l    $0
                 ; jarr  $00030FB2,$00000000,$0000D1DB
 set_loader_jarresque    ; original address L00020E2C
                                 BSET.B  #LOAD_MODULE,loader_status_bits 
-                                move.l  #16*9,d0                ; file table offset
+                                move.l  #16*11,d0                               ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length
                                 RTS 
 
@@ -1482,10 +1400,11 @@ set_loader_jarresque    ; original address L00020E2C
                 ; thef	0009D53E	00000000	0001DD64
 set_loader_the_fly      ; original address L00020E5A
                                 BSET.B  #LOAD_MODULE,loader_status_bits  
-                                move.l  #16*23,d0                                ; file table offset
+                                move.l  #16*19,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length          
                                 RTS 
 
@@ -1496,10 +1415,11 @@ set_loader_the_fly      ; original address L00020E5A
                 ; stra	00072532	00000000	0002B00C
 set_loader_stratospheric_city; original address L00020E88
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*20,d0                                ; file table offset
+                                move.l  #16*23,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length  
                                 RTS 
 
@@ -1512,10 +1432,11 @@ set_loader_stratospheric_city; original address L00020E88
                 ; floa	0003721E	00000000	000233AE
 set_loader_float        ; original address L00020EB6
                                 BSET.B  #LOAD_MODULE,loader_status_bits 
-                                move.l  #16*8,d0                                ; file table offset
+                                move.l  #16*17,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length 
                                 RTS 
 
@@ -1524,10 +1445,11 @@ set_loader_float        ; original address L00020EB6
                 ; flig	0000CCB0	00000000	0002A56E
 set_loader_flight_sleepy_mix ; original address L00020EE4
                                 BSET.B  #LOAD_MODULE,loader_status_bits 
-                                move.l  #16*7,d0                                ; file table offset
+                                move.l  #16*22,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length
                                 RTS 
 
@@ -1538,10 +1460,11 @@ set_loader_flight_sleepy_mix ; original address L00020EE4
                 ; no of tracks: $09
 set_loader_bright       ; original address L00020F12
                                 BSET.B  #LOAD_MODULE,loader_status_bits 
-                                move.l  #16*4,d0                                ; file table offset
+                                move.l  #16*2,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length
                                 RTS 
 
@@ -1552,10 +1475,11 @@ set_loader_bright       ; original address L00020F12
                 ; no of tracks: $0e
 set_loader_love_your_money      ; original address L00020F40
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*10,d0                                ; file table offset
+                                move.l  #16*14,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length  
                                 RTS 
 
@@ -1566,10 +1490,11 @@ set_loader_love_your_money      ; original address L00020F40
                 ; no of tracks: $0c
 set_loader_cosmic_how_much      ; original address L00020F6E
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*5,d0                                ; file table offset
+                                move.l  #16*3,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length
                                 RTS 
 
@@ -1580,10 +1505,11 @@ set_loader_cosmic_how_much      ; original address L00020F6E
                 ; no of tracks: $0d
 set_loader_not_a_love_song      ; original address L00020F9C
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*14,d0                                ; file table offset
+                                move.l  #16*10,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length   
                                 RTS 
 
@@ -1594,10 +1520,11 @@ set_loader_not_a_love_song      ; original address L00020F9C
                 ; no of tracks: $19
 set_loader_eat_the_ballbearing ; original address L00020FCA
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*6,d0                                ; file table offset
+                                move.l  #16*18,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length
                                 RTS 
 
@@ -1608,10 +1535,11 @@ set_loader_eat_the_ballbearing ; original address L00020FCA
                 ; no of tracks: $13
 set_loader_sound_of_silence ; orignal address L00020FF8
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*19,d0                                ; file table offset
+                                move.l  #16*20,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length
                                 RTS 
 
@@ -1622,10 +1550,11 @@ set_loader_sound_of_silence ; orignal address L00020FF8
                 ; no of tracks: $10
 set_loader_retouche     ; original address L00021026
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*16,d0                                ; file table offset
+                                move.l  #16*12,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length  
                                 RTS 
 
@@ -1636,10 +1565,11 @@ set_loader_retouche     ; original address L00021026
                 ; no of tracks: $11
 set_loader_techwar      ; original address L00021054
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*22,d0                                ; file table offset
+                                move.l  #16*13,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length  
                                 RTS 
 
@@ -1650,10 +1580,11 @@ set_loader_techwar      ; original address L00021054
                 ; no of tracks: $11
 set_loader_shaft        ; original address L00021082
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*17,d0                                ; file table offset
+                                move.l  #16*16,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length
                                 RTS 
 
@@ -1664,10 +1595,11 @@ set_loader_shaft        ; original address L00021082
                 ; no of tracks: $12
 set_loader_mental_obstacle      ; original address L000210B0
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*11,d0                                ; file table offset
+                                move.l  #16*6,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length 
                                 RTS 
 
@@ -1678,10 +1610,11 @@ set_loader_mental_obstacle      ; original address L000210B0
                 ; no of tracks: $11
 set_loader_blade_runner ; original address L000210DE
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*2,d0                                ; file table offset
+                                move.l  #16*15,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length 
                                 RTS 
 
@@ -1692,10 +1625,11 @@ set_loader_blade_runner ; original address L000210DE
                 ; no of tracks: $0e
 set_loader_natural_reality      ; original address L0002110C
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*12,d0                                ; file table offset
+                                move.l  #16*4,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length  
                                 RTS 
 
@@ -1706,10 +1640,11 @@ set_loader_natural_reality      ; original address L0002110C
                 ; no of tracks: $0c
 set_loader_obliteration_fin ; original address L0002113A
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*15,d0                                ; file table offset
+                                move.l  #16*5,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length 
                                 RTS 
 
@@ -1720,10 +1655,11 @@ set_loader_obliteration_fin ; original address L0002113A
                 ; no of tracks: $1b
 set_loader_skyriders    ; original address L00021168
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*18,d0                                ; file table offset
+                                move.l  #16*21,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length  
                                 RTS 
 
@@ -1734,10 +1670,11 @@ set_loader_skyriders    ; original address L00021168
                 ; no of tracks: $0d
 set_loader_zero_gravity ; original address L00021196
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*24,d0                                ; file table offset
+                                move.l  #16*9,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length
                                 RTS 
 
@@ -1748,10 +1685,11 @@ set_loader_zero_gravity ; original address L00021196
                 ; no of tracks: $0d
 set_loader_break_through        ; original address L000211C4
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*3,d0                                ; file table offset
+                                move.l  #16*8,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length
                                 RTS 
 
@@ -1762,10 +1700,11 @@ set_loader_break_through        ; original address L000211C4
                 ; no of tracks: $0c
 set_loader_summer_in_sweden     ; original address L000211F2
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*21,d0                                ; file table offset
+                                move.l  #16*1,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length
                                 RTS 
 
@@ -1776,10 +1715,11 @@ set_loader_summer_in_sweden     ; original address L000211F2
                 ; no of tracks: $0f
 set_loader_never_to_much        ; original address L00021220
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*13,d0                                ; file table offset
+                                move.l  #16*7,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
                                 move.l  4(a0,d0.w),loader_start_offset
+                                move.l  8(a0,d0.w),loader_decompressed_length
                                 move.l  12(a0,d0.w),loader_file_length 
                                 RTS 
 
@@ -2333,61 +2273,58 @@ scroller_next_character ; original address L000215FA
 
                 ; FileID	Disk Offset	PackedSize	FileSize
 disk_1_file_table_packed_delta
-
-                dc.b    'dsk#'
-                dc.l    $00000001,$00000001,$00000001
-                dc.b    'tpic'
-                dc.l    $00000590,$00000000,$0000C840
-                dc.b    'blad'
-                dc.l    $0000CDD0,$00000000,$00006735
-                dc.b    'brea'
-                dc.l    $00013505,$00000000,$0000597E
-                dc.b    'brig'
-                dc.l    $00018E83,$00000000,$000035F0
-                dc.b    'cosm'
-                dc.l    $0001C473,$00000000,$000057EB
-                dc.b    'eatt'
-                dc.l    $00021C5E,$00000000,$00008836
-                dc.b    'flig'
-                dc.l    $0002A494,$00000000,$00008CCD
-                dc.b    'floa'
-                dc.l    $00033161,$00000000,$0000735A
-                dc.b    'jarr'
-                dc.l    $0003A4BB,$00000000,$00006204
-                dc.b    'love'
-                dc.l    $000406BF,$00000000,$000056BE
-                dc.b    'ment'
-                dc.l    $00045D7D,$00000000,$0000639C
-                dc.b    'natu'
-                dc.l    $0004C119,$00000000,$00004717
-                dc.b    'neve'
-                dc.l    $00050830,$00000000,$00004D4D
-                dc.b    'nota'
-                dc.l    $0005557D,$00000000,$00006175
-                dc.b    'obli'
-                dc.l    $0005B6F2,$00000000,$0000452F
-                dc.b    'reto'
-                dc.l    $0005FC21,$00000000,$00006982
-                dc.b    'shaf'
-                dc.l    $000665A3,$00000000,$0000777E
-                dc.b    'skyr'
-                dc.l    $0006DD21,$00000000,$00009B5B
-                dc.b    'soun'
-                dc.l    $0007787C,$00000000,$00007223
-                dc.b    'stra'
-                dc.l    $0007EA9F,$00000000,$0000BBC4
+                dc.b    'dsk#'                                  ; file id
+                dc.l    $00000001,$00000001,$00000001           ; Disk Offset, PackedSize, FileSize
                 dc.b    'summ'
-                dc.l    $0008A663,$00000000,$0000401E
-                dc.b    'tech'
-                dc.l    $0008E681,$00000000,$00007700
-                dc.b    'thef'
-                dc.l    $00095D81,$00000000,$000084B4
+                dc.l    $00000590,$00000000,$0000480A
+                dc.b    'brig'
+                dc.l    $00004D9A,$00000000,$00004842
+                dc.b    'cosm'
+                dc.l    $000095DC,$00000000,$00006525
+                dc.b    'natu'
+                dc.l    $0000FB01,$00000000,$0000661F
+                dc.b    'obli'
+                dc.l    $00016120,$00000000,$00006731
+                dc.b    'ment'
+                dc.l    $0001C851,$00000000,$00006AD1
+                dc.b    'neve'
+                dc.l    $00023322,$00000000,$0000754F
+                dc.b    'brea'
+                dc.l    $0002A871,$00000000,$00007B2A
                 dc.b    'zero'
-                dc.l    $0009E235,$00000000,$000062AA
+                dc.l    $0003239B,$00000000,$00007BDC
+                dc.b    'this'
+                dc.l    $00039F77,$00000000,$0000816D
+                dc.b    'jarr'
+                dc.l    $000420E4,$00000000,$00008904
+                dc.b    'reto'
+                dc.l    $0004A9E8,$00000000,$00008A5A
+                dc.b    'tech'
+                dc.l    $00053442,$00000000,$00008C52
+                dc.b    'love'
+                dc.l    $0005C094,$00000000,$00009010
+                dc.b    'blad'
+                dc.l    $000650A4,$00000000,$000095EA
+                dc.b    'shaf'
+                dc.l    $0006E68E,$00000000,$00009F2C
+                dc.b    'floa'
+                dc.l    $000785BA,$00000000,$0000A5BA
+                dc.b    'eatt'
+                dc.l    $00082B74,$00000000,$0000B1BB
+                dc.b    'thef'
+                dc.l    $0008DD2F,$00000000,$0000B24A
+                dc.b    'soun'
+                dc.l    $00098F79,$00000000,$0000B463
+                dc.b    'skyr'
+                dc.l    $000A43DC,$00000000,$0000C447
+                dc.b    'flig'
+                dc.l    $000B0823,$00000000,$0000EC59
+                dc.b    'stra'
+                dc.l    $000BF47C,$00000000,$00012B68
+                dc.b    'demo'
+                dc.l    $000D1FE4,$00000000,$00004F18
                 dc.b    'Free'
-                dc.l    $000A44DF,$00000000,$00037B21
-
-
+                dc.l    $000D6EFC,$00000000,$00005104
 
 
                 ; ---------------------- load music -----------------------
@@ -2413,9 +2350,10 @@ load_music      ; original address L00021814
                                 move.l  loader_start_offset,d0          ; #$0000CCB0,d0
                                 move.l  loader_file_length,d1           ; #$0002A56E,d1
                                 move.l  #$00000000,d2
-                                lea     LOAD_BUFFER+(1024*200),a0
-                                sub.l   d1,a0                           ; load packed file into end ofr buffer
+                                lea     LOAD_BUFFER+(1024*300),a0
+                                sub.l   d1,a0                           ; load packed file into end of buffer
                                 lea     MFM_BUFFER,a1
+
                                 movem.l a0-a1,-(a7)
                                 jsr     loader_4489
                                 movem.l (a7)+,a0-a1
@@ -2423,11 +2361,17 @@ load_music      ; original address L00021814
                                 tst.l   d0
                                 bne     load_error
 
-                                lea     LOAD_BUFFER,a1
-                                jsr     zx0_decompress                                        
+                                ; TODO DECOMPRESS ZXO
+                                lea     LOAD_BUFFER+(1024*200),a1
+                                movem.l a0/a1,-(a7)
+                                jsr     uncompress_zx0
+                                movem.l (a7)+,a0/a1
 
-                                lea     LOAD_BUFFER,a0
-                                jsr     decompress_samples
+                                ; TODO DECOMPRESS DELTA 4
+                                lea     LOAD_BUFFER+(1024*200),a0       ; compressed file start
+                                lea     LOAD_BUFFER,a1                  ; decompressed file destination
+                                move.l  loader_decompressed_length,d0   ; compressed file length
+                                jsr     depackdelta4
 
                                 movem.l (a7)+,d0-d7/a0-a6
                                 rts
@@ -2435,6 +2379,89 @@ load_music      ; original address L00021814
 load_error                      lea     $dff000,a6
 .error                          move.w  VHPOSR(a6),$dff180
                                 jmp     .error
+
+
+                        ; IN:   a0 = delta 4 compressed file start
+                        ;       a1 = decompressed file destination
+                        ;       d0 = compressed file length
+depackdelta4:
+                                move.l  #128-1,d7
+                                move.l  #952,d6
+                                moveq.l  #0,d5           ; highest pattern count
+.hi_pattern_loop
+                                cmp.b   (a0,d6.l),d5
+                                bcc.s   .cont
+                                move.b  (a0,d6.l),d5
+.cont                           add.l   #1,d6
+                                dbf.w   d7,.hi_pattern_loop
+
+                                add.l   #1,d5
+                                mulu    #1024,d5
+                                add.l   #1084,d5        ; d5 = sample offset
+
+                                ; copy song data 
+                                move.l  d5,d7
+                                sub.l   #1,d7
+
+                                movem.l a0/a1,-(a7)
+.song_copy_loop                 move.b  (a0)+,(a1)+
+                                dbf     d7,.song_copy_loop
+                                move.l  a1,a4           ; decompressed start of sample data
+                                movem.l (a7)+,a0/a1
+
+                                ; decode samples
+                                moveq.l #0,d0
+                                moveq.l #0,d1
+                                move.b  5(a0,d5.l),d0
+                                mulu    #256,d0
+                                mulu    #256,d0
+                                move.b  6(a0,d5.l),d1
+                                mulu    #256,d1
+                                add.l   d1,d0
+                                add.b   7(a0,d5.l),d0
+
+                                ; d0 = original sample length
+                                ; a4 = dest sample data
+                                lea     16(a0,d5.l),a2          ; a2 = look up table 4096
+                                lea     4096(a2),a3             ; a3 = compressed sample data
+
+                                ; copy first sample
+                                move.b  (a3)+,d4                ; 1st sample data
+                                move.b  d4,(a4)+
+                                move.l  #0,d5                   ; sampleidx
+
+outer_while                     cmp.l   d0,d5
+                                bpl     exit_loop
+
+                                moveq   #0,d6
+                                move.b  (a3)+,d6                ; look up set index
+                                lsl.w   #4,d6                   ; multiply by 16
+
+                                move.l  #8-1,d7                 ; c = 8
+inner_while_loop
+                                cmp.l   d0,d5
+                                bpl     exit_loop
+
+                                ; get delta 4 byte
+                                move.l  #0,d1
+                                move.b  (a3)+,d1
+                                move.l  d1,d2
+
+                                ; do nibble 1
+                                lsr.w   #4,d1
+                                ;(a2,d6.w)
+
+                                ; do nibble 2
+
+                                dbf     d7,inner_while_loop
+
+
+                                rts
+
+
+
+loader_4489
+                include "4489Loader/4489_byteloader.s"
 
 ;  in:  a0 = start of compressed data
 ;       a1 = start of decompression buffer
@@ -3532,7 +3559,7 @@ mfm_track_buffer        dcb.w   $1A00            ; 13Kb raw mfm track buffer for
 
         IFD TEST_BUILD
         even
-load_buffer             dcb.b   1024*200,$00    ; 200Kb Soundtrack module buffer for testing
+load_buffer             dcb.b   1024*300,$00    ; 200Kb Soundtrack module buffer for testing
         ENDC
 
 
