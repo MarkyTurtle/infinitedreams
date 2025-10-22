@@ -41,7 +41,7 @@ MENU_IDX_pd_message_menu        EQU     $34     ; L0003CEEA - index = $34
 
 
 
-TEST_BUILD SET 1                                        ; Comment this to remove TEST_BUILD 
+;TEST_BUILD SET 1                                        ; Comment this to remove TEST_BUILD 
 
 
      
@@ -3306,7 +3306,7 @@ main_menu       ; original address L0003A7E4
                                 ;        123456789012345678901234567890123456789012345
                                 dc.b    '                                             '
                                 dc.b    '  - THE LUNATICS PRESENT INFINITE DREAMS -   '
-                                dc.b    '                                             '   
+                                dc.b    '            SINGLE DISK VERSION.             '   
                                 dc.b    '                                             '
                                 dc.b    '                                             '               
                                 dc.b    '              ..MUSIC MENU 1..               '           
@@ -3347,7 +3347,7 @@ disk_2_menu
                                 dc.b    '              -----------------              '
                                 dc.b    '             - INFINITE DREAMS -             '
                                 dc.b    '              -----------------              '              
-                                dc.b    '                MUSIC MENU 2.                 '
+                                dc.b    '                MUSIC MENU 2.                '
                                 dc.b    '                -------------                '               
                                 dc.b    '                                             '
                                 dc.b    '  SHAFT..........................SUBCULTURE  '              
