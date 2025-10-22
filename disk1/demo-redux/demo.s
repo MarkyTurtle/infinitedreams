@@ -41,7 +41,7 @@ MENU_IDX_pd_message_menu        EQU     $34     ; L0003CEEA - index = $34
 
 
 
-;TEST_BUILD SET 1                                        ; Comment this to remove TEST_BUILD 
+TEST_BUILD SET 1                                        ; Comment this to remove TEST_BUILD 
 
 
      
