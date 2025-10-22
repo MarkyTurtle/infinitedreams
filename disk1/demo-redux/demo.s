@@ -14,44 +14,6 @@
 
 
 
-        ; Disk Track Storage
-        ;------------------------
-        ; The music disk loader loads in an extra track (no of tracks + 1) 
-        ; There is 5.5Kb loaded per track (5632 bytes per track)
-        ;
-        ; Disk 1        Title                   Start Track     No of Tracks    Last Track (inclusive)  Data loaded (bytes)
-        ;               Loading Picture         $00 (00)        $09+1 (10)      $09 (09)                56,320 (raw gfx)
-        ;               Demo Program            $0b (11)        $07+1 (8)       $12 (18)                45,056 (cruched executable)
-        ;               Jarresque               $8e (142)       $11+1 (18)      $9f (159)               101,376
-        ;               The Fly                 $5c (92)        $15+1 (22)      $71 (113)               123,904
-        ;               Stratospheric City      $3b (59)        $1f+1 (32)      $5a (90)                180,224
-        ;               Float                   $73 (115)       $19+1 (26)      $8c (140)               146,432
-        ;               Flight-Sleepy Mix       $1b (27)        $1e+1 (31)      $39 (57)                174,592
-        ;
-        ; Disk 2        Title                   Start Track     No of Tracks    Last Track (inclusive)  Data loaded (bytes)
-        ;               bootblock & gfx         $00 (00)        $00+1 (01)      $00 (00)                5,632
-        ;               Shaft                   $8e (142)       $11+1 (18)      $9f (159)               101,376
-        ;               Love Your Money         $7e (126)       $0e+1 (15)      $8c (140)               84,480
-        ;               Cosmic How Much         $70 (112)       $0c+1 (13)      $7c (124)               73,216
-        ;               This is not a Rave Song $0c (12)        $0d+1 (14)      $19 (25)                78,848
-        ;               Eat the Ballbearing     $55 (85)        $19+1 (26)      $6e (110)               146,432
-        ;               Sound of Silence        $40 (64)        $13+1 (20)      $54 (84)                112,640
-        ;               Retouche                $1b (27)        $10+1 (17)      $2c (44)                95,744
-        ;               Techwar                 $2d (45)        $11+1 (18)      $3e (62)                101,376
-        ;               Bright                  $01 (01)        $09+1 (10)      $0a (10)                56,320
-        ;
-        ; Disk 3        Title                   Start Track     No of Track     Last Track (inclusive)  Data Loaded (bytes)
-        ;               bootblock & gfx         $00 (00)        $00+1 (01)      $00 (00)                5,632
-        ;               Mental Obstacle         $8d (141)       $12+1 (19)      $9f (159)               107,008
-        ;               Blade Runner            $02 (02)        $11+1 (18)      $13 (19)                101,376
-        ;               Natural Reality         $7d (125)       $0e+1 (15)      $8b (139)               84,480
-        ;               Obiliteration Fin       $6f (111)       $0c+1 (13)      $7b (123)               73,216
-        ;               Skyriders               $52 (82)        $1b+1 (28)      $6d (109)               157,696
-        ;               Zero Gravity            $43 (67)        $0d+1 (14)      $50 (80)                78,848
-        ;               Break THrough           $15 (21)        $0d+1 (14)      $22 (34)                78,848
-        ;               Summer In Sweden        $35 (53)        $0c+1 (13)      $41 (65)                73,216
-        ;               Never to Much           $24 (36)        $0f+1 (16)      $33 (51)                90,112
-        ;
 
                     section     demo,code_c
                     incdir      "include/"
@@ -79,20 +41,24 @@ MENU_IDX_pd_message_menu        EQU     $34     ; L0003CEEA - index = $34
 
 
 
-TEST_BUILD SET 1                                        ; Comment this to remove 'testboot'
+TEST_BUILD SET 1                                        ; Comment this to remove TEST_BUILD 
 
 
      
         ; Set 'Test Build' or 'Live Build' parameters 
         IFD TEST_BUILD
 STACK_ADDRESS   EQU     start_demo                      ; test stack address (start of program)
-LOAD_BUFFER     EQU     load_buffer                     ; file load buffer
+MUSIC_BUFFER    EQU     music_buffer                    ; final depacked and de-delta-ed music module for playing
+DEPACKED_BUFFER EQU     depacked_buffer                 ; depacked module buffer (still delta encoded here)
+LOAD_BUFFER     EQU     load_buffer                     ; zx0 packed file load buffer
 MFM_BUFFER      EQU     mfm_track_buffer
         ELSE
                 org     $2000                            
 STACK_ADDRESS   EQU     $00001000                       ; original stack address
-LOAD_BUFFER     EQU     $00040000                       ; file load buffer
-MFM_BUFFER      EQU     $00075000
+MUSIC_BUFFER    EQU     $00020000                       ; final depacked and de-delta-ed music module for playing
+DEPACKED_BUFFER EQU     $00040000                       ; depacked module buffer (still delta encoded here)
+LOAD_BUFFER     EQU     $00069000                       ; zx0 packed file load buffer (MFM_BUFFER - MAX_ZX0_SIZE) = ($7d000 - $14000 = $69000)
+MFM_BUFFER      EQU     $0007d140                       ; raw 4489 loader MFM buffer
         ENDC
 
 
@@ -422,7 +388,7 @@ main_loop       ; original address L000202F6
                                 move.L  #$1,d0
                                 JSR     _mt_install
 
-                                lea     LOAD_BUFFER,a0
+                                lea     MUSIC_BUFFER,a0
                                 lea     $0,a1
                                 move.l  #$0,d0
                                 JSR     _mt_init
@@ -1389,9 +1355,9 @@ set_loader_jarresque    ; original address L00020E2C
                                 move.l  #16*11,d0                               ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length
                                 RTS 
 
 
@@ -1403,9 +1369,9 @@ set_loader_the_fly      ; original address L00020E5A
                                 move.l  #16*19,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length          
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length          
                                 RTS 
 
 
@@ -1418,9 +1384,9 @@ set_loader_stratospheric_city; original address L00020E88
                                 move.l  #16*23,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length  
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length  
                                 RTS 
 
 
@@ -1448,9 +1414,9 @@ set_loader_flight_sleepy_mix ; original address L00020EE4
                                 move.l  #16*22,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length
                                 RTS 
 
 
@@ -1463,9 +1429,9 @@ set_loader_bright       ; original address L00020F12
                                 move.l  #16*2,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length
                                 RTS 
 
 
@@ -1478,9 +1444,9 @@ set_loader_love_your_money      ; original address L00020F40
                                 move.l  #16*14,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length  
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length  
                                 RTS 
 
 
@@ -1493,9 +1459,9 @@ set_loader_cosmic_how_much      ; original address L00020F6E
                                 move.l  #16*3,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length
                                 RTS 
 
 
@@ -1508,9 +1474,9 @@ set_loader_not_a_love_song      ; original address L00020F9C
                                 move.l  #16*10,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length   
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length   
                                 RTS 
 
 
@@ -1523,9 +1489,9 @@ set_loader_eat_the_ballbearing ; original address L00020FCA
                                 move.l  #16*18,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length
                                 RTS 
 
 
@@ -1538,9 +1504,9 @@ set_loader_sound_of_silence ; orignal address L00020FF8
                                 move.l  #16*20,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length
                                 RTS 
 
 
@@ -1553,9 +1519,9 @@ set_loader_retouche     ; original address L00021026
                                 move.l  #16*12,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length  
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length  
                                 RTS 
 
 
@@ -1568,9 +1534,9 @@ set_loader_techwar      ; original address L00021054
                                 move.l  #16*13,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length  
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length  
                                 RTS 
 
 
@@ -1583,9 +1549,9 @@ set_loader_shaft        ; original address L00021082
                                 move.l  #16*16,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length
                                 RTS 
 
 
@@ -1598,9 +1564,9 @@ set_loader_mental_obstacle      ; original address L000210B0
                                 move.l  #16*6,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length 
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length 
                                 RTS 
 
 
@@ -1613,9 +1579,9 @@ set_loader_blade_runner ; original address L000210DE
                                 move.l  #16*15,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length 
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length 
                                 RTS 
 
 
@@ -1628,9 +1594,9 @@ set_loader_natural_reality      ; original address L0002110C
                                 move.l  #16*4,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length  
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length  
                                 RTS 
 
 
@@ -1643,9 +1609,9 @@ set_loader_obliteration_fin ; original address L0002113A
                                 move.l  #16*5,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length 
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length 
                                 RTS 
 
 
@@ -1658,9 +1624,9 @@ set_loader_skyriders    ; original address L00021168
                                 move.l  #16*21,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length  
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length  
                                 RTS 
 
 
@@ -1673,9 +1639,9 @@ set_loader_zero_gravity ; original address L00021196
                                 move.l  #16*9,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length
                                 RTS 
 
 
@@ -1688,9 +1654,9 @@ set_loader_break_through        ; original address L000211C4
                                 move.l  #16*8,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length
                                 RTS 
 
 
@@ -1703,9 +1669,9 @@ set_loader_summer_in_sweden     ; original address L000211F2
                                 move.l  #16*1,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length
                                 RTS 
 
 
@@ -1718,9 +1684,9 @@ set_loader_never_to_much        ; original address L00021220
                                 move.l  #16*7,d0                                ; file table offset
                                 lea     disk_1_file_table_packed_delta,a0
                                 move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length 
+                                move.l  4(a0,d0.l),loader_start_offset
+                                move.l  8(a0,d0.l),loader_decompressed_length
+                                move.l  12(a0,d0.l),loader_file_length 
                                 RTS 
 
 
@@ -2350,8 +2316,7 @@ load_music      ; original address L00021814
                                 move.l  loader_start_offset,d0          ; #$0000CCB0,d0
                                 move.l  loader_file_length,d1           ; #$0002A56E,d1
                                 move.l  #$00000000,d2
-                                lea     LOAD_BUFFER+(1024*300),a0
-                                sub.l   d1,a0                           ; load packed file into end of buffer
+                                lea     LOAD_BUFFER,a0
                                 lea     MFM_BUFFER,a1
 
                                 movem.l a0-a1,-(a7)
@@ -2361,15 +2326,16 @@ load_music      ; original address L00021814
                                 tst.l   d0
                                 bne     load_error
 
-                                ; TODO DECOMPRESS ZXO
-                                lea     LOAD_BUFFER+(1024*200),a1
+                                ; DECOMPRESS ZXO
+                                lea     LOAD_BUFFER,a0
+                                lea     DEPACKED_BUFFER,a1
                                 movem.l a0/a1,-(a7)
                                 jsr     uncompress_zx0
                                 movem.l (a7)+,a0/a1
 
-                                ; TODO DECOMPRESS DELTA 4
-                                lea     LOAD_BUFFER+(1024*200),a0       ; compressed file start
-                                lea     LOAD_BUFFER,a1                  ; decompressed file destination
+                                ; DECOMPRESS DELTA 4
+                                lea     DEPACKED_BUFFER,a0              ; delta 4 compressed file start
+                                lea     MUSIC_BUFFER,a1                 ; output buffer for decompressed module destination
                                 move.l  loader_decompressed_length,d0   ; compressed file length
                                 jsr     depackdelta4
 
@@ -2381,84 +2347,189 @@ load_error                      lea     $dff000,a6
                                 jmp     .error
 
 
-                        ; IN:   a0 = delta 4 compressed file start
-                        ;       a1 = decompressed file destination
-                        ;       d0 = compressed file length
+
+
+                        ; IN:   a0 = delta4 compressed buffer ptr
+                        ;       a1 = decompressed output buffer ptr
+                        ;       d0 = delta4 compressed file length
 depackdelta4:
-                                move.l  #128-1,d7
-                                move.l  #952,d6
-                                moveq.l  #0,d5           ; highest pattern count
-.hi_pattern_loop
-                                cmp.b   (a0,d6.l),d5
-                                bcc.s   .cont
-                                move.b  (a0,d6.l),d5
-.cont                           add.l   #1,d6
-                                dbf.w   d7,.hi_pattern_loop
+                                movem.l d0-d7/a0-a6,-(a7)
 
-                                add.l   #1,d5
-                                mulu    #1024,d5
-                                add.l   #1084,d5        ; d5 = sample offset
+                                move.l  a0,compressed_module_ptr
+                                move.l  d0,compressed_module_length
+                                move.l  a1,decompressed_module_ptr
 
-                                ; copy song data 
-                                move.l  d5,d7
-                                sub.l   #1,d7
+                                ; a0 = delta4 compressed buffer ptr
+                                jsr     find_sample_offset
+                                move.l  d0,compressed_sample_offset             ; save byte offset to start of compressed sample data (from start of compressed_module_ptr)
+                                
+                                ; a0 = delta4 compressed buffer ptr
+                                ; d0.l = compressed sample byte offset
+                                jsr     get_original_sample_length              ; obtain the original sample length from the compressed sample data
+                                move.l  d0,original_sample_length
 
-                                movem.l a0/a1,-(a7)
-.song_copy_loop                 move.b  (a0)+,(a1)+
-                                dbf     d7,.song_copy_loop
-                                move.l  a1,a4           ; decompressed start of sample data
-                                movem.l (a7)+,a0/a1
+                                ; a0 = delta4 compressed buffer ptr
+                                ; a1 = decompressed output buffer ptr
+                                ; d0.l = compressed sample data start byte offset
+                                move.l  compressed_sample_offset,d0
+                                jsr     copy_song_data
+                                move.l  a0,compressed_sample_ptr
+                                move.l  a1,uncompressed_sample_ptr
 
-                                ; decode samples
-                                moveq.l #0,d0
-                                moveq.l #0,d1
-                                move.b  5(a0,d5.l),d0
-                                mulu    #256,d0
-                                mulu    #256,d0
-                                move.b  6(a0,d5.l),d1
-                                mulu    #256,d1
-                                add.l   d1,d0
-                                add.b   7(a0,d5.l),d0
+                        ; uncompress the sample data
+                                ; a0 = delta4 compressed buffer ptr
+                                ; a1 = decompressed output buffer ptr
+                                ; d0.l = compressed sample data start byte offset
+                                lea     $10(a0),a2                              ; get lookup table ptr (16 bytes from start of compressed sample data) 
+                                move.l  a2,lookup_table_ptr
 
-                                ; d0 = original sample length
-                                ; a4 = dest sample data
-                                lea     16(a0,d5.l),a2          ; a2 = look up table 4096
-                                lea     4096(a2),a3             ; a3 = compressed sample data
+                                lea     $1000(a2),a3                             ; get first sample byte ptr (4096 bytes from start of lookup table data)
+                                move.l  a3,first_compressed_sample_ptr
 
-                                ; copy first sample
-                                move.b  (a3)+,d4                ; 1st sample data
-                                move.b  d4,(a4)+
-                                move.l  #0,d5                   ; sampleidx
+                                move.l  original_sample_length,d7
+                                move.l  d7,d5                                   ; expected max length of decompressed bytes (comparison value)
+                                move.l  #0,d4                                   ; count of decompressed bytes
+                                sub.l   #1,d7                                   ; max loop counter (will exit if -1 on dbf of outer loop)
 
-outer_while                     cmp.l   d0,d5
-                                bpl     exit_loop
+                                move.l  first_compressed_sample_ptr,a0
+                                move.l  uncompressed_sample_ptr,a1
+                                move.l  lookup_table_ptr,a3
 
-                                moveq   #0,d6
-                                move.b  (a3)+,d6                ; look up set index
-                                lsl.w   #4,d6                   ; multiply by 16
+                                ; copy first sample byte
+                                move.l  #0,d3
+                                move.b  (a0)+,d3                                ; d3 is used as the accumulated sample value
+                                move.b  d0,(a1)+
 
-                                move.l  #8-1,d7                 ; c = 8
-inner_while_loop
-                                cmp.l   d0,d5
-                                bpl     exit_loop
+.outer_loop
+                                ; check if decompression completed
+                                cmp.l   d4,d5
+                                beq     .exit_decompression                     ; exit if expected number of bytes decompressed
+                                bcs     .exit_decompression                     ; exit if more than expected number of bytes decompressed
 
-                                ; get delta 4 byte
+                                ; get lookup set byte and offset
+                                move.l  #0,d0           
+                                move.b  (a0)+,d0
+                                mulu    #16,d0                                  ; 16 bytes per delta lookup set
+
+                                move.l  #8-1,d6                                 ; 8 bytes per compressed data frame (16 nibbles of 4bnit deltas)
+.inner_loop_d6          
+                                ; check if decompression completed
+                                cmp.l   d4,d5
+                                beq     .exit_decompression                     ; exit if expected number of bytes decompressed
+                                bcs     .exit_decompression                     ; exit if more than expected number of bytes decompressed
+
+                                ; decompress nibble1
                                 move.l  #0,d1
-                                move.b  (a3)+,d1
-                                move.l  d1,d2
+                                move.b  (a0),d1
+                                lsr.b   #4,d1
+                                add.l   d0,d1                                   ; add delta 4 value to lookup set index
+                                add.b   (a3,d1.l),d3                            ; add lookup table delta value to current sample value
+                                move.b  d3,(a1)+                                ; store decompressed 8 bit value
+                                add.l   #1,d4                                   ; increment decompressed sample count
 
-                                ; do nibble 1
-                                lsr.w   #4,d1
-                                ;(a2,d6.w)
+                                ; check if decompression completed
+                                cmp.l   d4,d5
+                                beq     .exit_decompression                     ; exit if expected number of bytes decompressed
+                                bcs     .exit_decompression                     ; exit if more than expected number of bytes decompressed
 
-                                ; do nibble 2
+                                ; decompress nibble2
+                                move.l  #0,d1
+                                move.b  (a0)+,d1
+                                and.b   #$0f,d1
+                                add.l   d0,d1                                   ; add delta 4 value to lookup set index
+                                add.b   (a3,d1.l),d3                            ; add lookup table delta value to current sample value
+                                move.b  d3,(a1)+                                ; store decompressed 8 bit value
+                                add.l   #1,d4                                   ; increment decompressed sample count
 
-                                dbf     d7,inner_while_loop
-
-
+                                dbf     d6,.inner_loop_d6                       ; loop to decompress 16 nibble frame
+                                bra     .outer_loop                             ; loop until all sample data frames have been decompressed
+.exit_decompression  
+                                movem.l (a7)+,d0-d7/a0-a6
                                 rts
 
 
+
+                        ; IN:   a0 = delta4 compressed buffer ptr
+                        ;       a1 = decompressed output buffer ptr
+                        ;       d0.l = compressed sample data start byte offset
+                        ; OUT:  a0 = compressed sample data start ptr
+                        ;       a1 = decompressed sample data start ptr
+                        ;       d0.l = compressed sample data start byte offset
+copy_song_data
+                                movem.l d1-d7/a2-a6,-(a7)
+
+                                move.l  d0,d7
+                                sub.l   #1,d7
+.copy_loop
+                                move.b  (a0)+,(a1)+
+                                dbf     d7,.copy_loop
+                                
+                                movem.l (a7)+,d1-d7/a2-a6
+                                rts
+
+
+                        ; IN:   a0 = delta 4 compressed buffer ptr
+                        ;       d0.l = byte offset to start of compressed sample data
+                        ; OUT:  d0.l = original sample data length
+get_original_sample_length
+                        movem.l d1-d7/a0-a6,-(a7)
+
+                        move.l  #0,d1
+                        move.b  5(a0,d0.l),d1
+                        rol.l   #8,d1
+                        move.b  6(a0,d0.l),d1
+                        rol.l   #8,d1
+                        move.b  7(a0,d0.l),d1
+
+                        move.l  d1,d0
+
+                        movem.l (a7)+,d1-d7/a0-a6
+                        rts
+
+
+                        ; IN:   a0 = delta 4 compressed buffer ptr
+                        ; OUT:  d0.l = byte offset to start of compressed sample data
+                        ;       d1.l = highest pattern index number found
+find_sample_offset
+                                movem.l d2-d7/a0-a6,-(a7)
+
+                                lea     $3b8(a0),a1                             ; offset 952 decimal = start of pattern play order data
+                                move.l  #128-1,d7                               ; max song length = 128 patterns
+                                move.l  #0,d1
+                                move.l  #0,d2
+.highest_loop                   
+                                move.b  (a1)+,d1                                ; next pattern index number
+                                cmp.b   d1,d2
+                                bcc.s   .not_highest
+.is_highest                     
+                                move.b  d1,d2                                 ; store highest pattern found so far..
+.not_highest
+                                dbf     d7,.highest_loop                        ; loop through all patterns and find the highest index (d2)
+
+                                move.l  #0,d0
+                                move.l  #0,d1
+                                move.b  d2,d0                                   ; store highest pattern number
+                                move.b  d2,d1                                   ; store highest pattern number (d1)
+
+                                mulu    #1024,d0                                ; calc sample start byte offset (d0)
+                                add.l   #1024,d0
+                                add.l   #1084,d0                                
+
+                                movem.l (a7)+,d2-d7/a0-a6
+                                rts
+
+
+
+compressed_module_ptr           dc.l    0                       ; ptr to the start of the compressed module buffer
+compressed_module_length        dc.l    0                       ; byte length of the compressed module
+decompressed_module_ptr         dc.l    0                       ; ptr to the start of the decompressed module buffer
+
+first_compressed_sample_ptr     dc.l    0
+lookup_table_ptr                dc.l    0
+uncompressed_sample_ptr         dc.l    0                       ; ptr to the start of the uncompressed samples in the decompressed module buffer
+compressed_sample_ptr           dc.l    0                       ; ptr to the start of the compressed samples in the delta 4 compresseed module buffer
+original_sample_length          dc.l    0                       ; the byte length of the uncompressed samples
+compressed_sample_offset        dc.l    0                       ; the byte offset to the delta 4 compressed samples in the delta 4 compressed module buffer
 
 loader_4489
                 include "4489Loader/4489_byteloader.s"
@@ -3233,14 +3304,14 @@ menu_ptrs       ; original address L0003A7AC
                 ; menu format = 45 x 17 characters
 main_menu       ; original address L0003A7E4
                                 ;        123456789012345678901234567890123456789012345
-                                dc.b    '    THE LUNATICS PRESENT INFINITE DREAMS     '
-                                dc.b    '    ------------------------------------     '
+                                dc.b    '                                             '
+                                dc.b    '  - THE LUNATICS PRESENT INFINITE DREAMS -   '
                                 dc.b    '                                             '   
                                 dc.b    '                                             '
                                 dc.b    '                                             '               
-                                dc.b    '              DISK1.......MENU               '           
-                                dc.b    '              DISK2.......MENU               '
-                                dc.b    '              DISK3.......MENU               '
+                                dc.b    '              ..MUSIC MENU 1..               '           
+                                dc.b    '              ..MUSIC MENU 2..               '
+                                dc.b    '              ..MUSIC MENU 3..               '
                                 dc.b    '              ....CREDITS.....               '
                                 dc.b    '              ...GREETINGS....               '
                                 dc.b    '              ...ADDRESSES....               '
@@ -3248,24 +3319,24 @@ main_menu       ; original address L0003A7E4
                                 dc.b    '                                             '
                                 dc.b    '      USE MOUSE TO SELECT TUNE TO PLAY       '
                                 dc.b    '                                             '
-                                dc.b    '                               *1992 LUNATICS'   
-                                dc.b    '                                             '
+                                dc.b    '                          *1992-2025 LUNATICS'   
+                                dc.b    '               HTTPS://GITHUB.COM/MARKYTURTLE'
 
 disk_1_menu      ; original address L0003AAE1
                                 ;        123456789012345678901234567890123456789012345
                                 dc.b    '              -----------------              '
-                                dc.b    '              -INFINITE DREAMS-              '
+                                dc.b    '             - INFINITE DREAMS -             '
                                 dc.b    '              -----------------              '              
                                 dc.b    '                                             '
-                                dc.b    '                 DISK 1 MENU                 '
-                                dc.b    '                 -----------                 '               
+                                dc.b    '                MUSIC MENU 1.                '
+                                dc.b    '                -------------                '               
                                 dc.b    '                                             '
                                 dc.b    '  JARRESQUE.......................HOLLYWOOD  '              
                                 dc.b    '  THE.FLY........................SUBCULTURE  '
                                 dc.b    '  STRATOSPHERIC.CITY.............SUBCULTURE  '
                                 dc.b    '  FLOAT..........................SUBCULTURE  ' 
                                 dc.b    '  FLIGHT-SLEEPY MIX..............SUBCULTURE  '
-                                dc.b    '  ...........RETURN TO MAIN MENU..........   ' 
+                                dc.b    '  ...........RETURN TO MAIN MENU...........  ' 
                                 dc.b    '                                             '
                                 dc.b    '                                             '
                                 dc.b    '                                             '
@@ -3274,10 +3345,10 @@ disk_1_menu      ; original address L0003AAE1
 disk_2_menu         
                                  ;        123456789012345678901234567890123456789012345
                                 dc.b    '              -----------------              '
-                                dc.b    '              -INFINITE DREAMS-              '
+                                dc.b    '             - INFINITE DREAMS -             '
                                 dc.b    '              -----------------              '              
-                                dc.b    '                 DISK 2 MENU                 '
-                                dc.b    '                 -----------                 '               
+                                dc.b    '                MUSIC MENU 2.                 '
+                                dc.b    '                -------------                '               
                                 dc.b    '                                             '
                                 dc.b    '  SHAFT..........................SUBCULTURE  '              
                                 dc.b    '  LOVE.YOUR.MONEY................SUBCULTURE  '
@@ -3288,16 +3359,16 @@ disk_2_menu
                                 dc.b    '  RETOUCHE........................HOLLYWOOD  ' 
                                 dc.b    '  TECHWAR.........................HOLLYWOOD  '
                                 dc.b    '  BRIGHT..........................HOLLYWOOD  '
-                                dc.b    '  ...........RETURN TO MAIN MENU..........   ' 
+                                dc.b    '  ...........RETURN TO MAIN MENU...........  ' 
                                 dc.b    '                                             '
 
 disk_3_menu         
                                  ;        123456789012345678901234567890123456789012345
                                 dc.b    '              -----------------              '
-                                dc.b    '              -INFINITE DREAMS-              '
+                                dc.b    '             - INFINITE DREAMS -             '
                                 dc.b    '              -----------------              '              
-                                dc.b    '                 DISK 3 MENU                 '
-                                dc.b    '                 -----------                 '               
+                                dc.b    '                MUSIC MENU 3.                '
+                                dc.b    '                -------------                '               
                                 dc.b    '                                             '
                                 dc.b    '  MENTAL OBSTACLE.....................REEAL  '              
                                 dc.b    '  BLADE RUNNER........................REEAL  '
@@ -3307,27 +3378,27 @@ disk_3_menu
                                 dc.b    '  ZERO GRAVITY....................HOLLYWOOD  '
                                 dc.b    '  BREAK THROUGH...................HOLLYWOOD  ' 
                                 dc.b    '  SUMMER IN SWEDEN...................PHASER  '
-                                dc.b    '  NEVER TO MUCH.....................PHASER   '
-                                dc.b    '  ...........RETURN TO MAIN MENU..........   ' 
+                                dc.b    '  NEVER TO MUCH......................PHASER  '
+                                dc.b    '  ...........RETURN TO MAIN MENU...........  ' 
                                 dc.b    '                                             '
                               
 credits_menu    ; original address L0003B405
                                 ;        123456789012345678901234567890123456789012345
-                                dc.b    '                                             '  
-                                dc.b    '               ...CREDITS...                 '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '       ALL CODING.........SPONGE HEAD        '  
-                                dc.b    '       GFX........................JOE        '  
+                                dc.b    '               ...CREDITS...                 '    
+                                dc.b    '    CODING................SPONGE HEAD        '  
+                                dc.b    '    GFX...........................JOE        '  
                                 dc.b    '                                T.S.M        '  
-                                dc.b    '       MUSIC................HOLLYWOOD        '  
+                                dc.b    '    MUSIC...................HOLLYWOOD        '  
                                 dc.b    '                           SUBCULTURE        '  
                                 dc.b    '                               PHASER        '  
                                 dc.b    '                                REEAL        '  
                                 dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
+                                dc.b    '    SALVADOR    (COMPRESSION TOOLS)          '  
+                                dc.b    '    HEMIYODA    (DELTA COMPRESSION)          '  
+                                dc.b    '    H0FFMAN     (DISK BUILDER & PT TOOLS)    '  
+                                dc.b    '    4489        (REPLACEMENT DISK LOADER)    '  
+                                dc.b    '    PAUL RAINGEARD (VSCODE ASSEMBLY)         ' 
+                                dc.b    '                                             ' 
                                 dc.b    '  ...........RETURN TO MAIN MENU...........  '  
                                 dc.b    '                                             '  
                                    
@@ -3364,17 +3435,17 @@ greetings_2_menu       ; original address L0003B9FF
                                 dc.b    '      SLIPSTREAM-SONIC-SPREADPOINT-STAX      '  
                                 dc.b    '   SUPPLEX-SUPRISE PRODUCTIONS-TALENT-TECH   '  
                                 dc.b    '    TRASH-TRIBE-TRISTAR AND RED SECTOR INC   '  
-                                dc.b    '    THE FLAME ARROWS-THE SPECIAL BROTHERS    '  
+                                dc.b    '          =-=-=-=-=-=-=-=-=-=-=-=-=-         ' 
+                                dc.b    '          - TTE - THE TWITCH ELITE -         '  
+                                dc.b    '          =-=-=-=-=-=-=-=-=-=-=-=-=-         ' 
                                 dc.b    '         VERMIN-VISION-VISION FACTORY        '  
-                                dc.b    '            VISUAL BYTES-VOX DEI             '  
                                 dc.b    '       WIZZCAT-XENTEX-ZITE PRODUCTIONS       '  
-                                dc.b    '                                             '  
                                 dc.b    '  ...........RETURN TO MAIN MENU...........  '  
                                 dc.b    '                                             ' 
 
 addresses_1_menu        ; original address L0003BCFC
                                 ;        123456789012345678901234567890123456789012345
-                                dc.b    '   THE LUNATICS ARE LOOKING FOR SOME MORE    '  
+                                dc.b    '  THE LUNATICS "WERE" LOOKING FOR SOME MORE  '  
                                 dc.b    '   MEMBERS AND COOOL DIVISIONS AROUND THE    '  
                                 dc.b    '  WORLD. TO SET UP A DIVISION WRITE TO THE   '  
                                 dc.b    '           FOLLOWING ADDRESS.....            '  
@@ -3472,25 +3543,6 @@ addresses_5_menu        ; original address L0003C8F0
                                 dc.b    '  .............MORE ADDRESSES..............  ' 
                                 dc.b    '                                             ' 
 
-                                ;        123456789012345678901234567890123456789012345
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             ' 
-
 addresses_6_menu        ; original address L0003CBED          
                                 ;        123456789012345678901234567890123456789012345
                                 dc.b    '    TO JOIN THE SWEDISH DIVISION WRITE TO    '  
@@ -3518,14 +3570,14 @@ pd_message_menu        ; original address L0003CEEA
                                 dc.b    '  TO P.D. COMPANIES AKSING THEM TO RESPECT   '  
                                 dc.b    '  THE AUTHORS COPYRIGHT.....                 '  
                                 dc.b    '                                             '  
-                                dc.b    '  ....I THINK YOU WILL AGREE THAT THIS WAS   '  
                                 dc.b    '  A BIT RICH COMING FROM A GROUP THAT HAD    '  
                                 dc.b    '  MEMBERS SWAPPING WAREZ AROUND THE WORLD.   '  
                                 dc.b    '                                             '  
                                 dc.b    '  WE WERE YOUNG AND NAIVE.......             '  
                                 dc.b    '                                             '  
                                 dc.b    '           .....WISH I STILL WAS.....        '  
-                                dc.b    '                                             '  
+                                dc.b    '                                             ' 
+                                dc.b    '                                             '                                  
                                 dc.b    '                                             '  
                                 dc.b    '                                             '  
                                 dc.b    '                                             '  
@@ -3552,14 +3604,16 @@ pd_message_menu        ; original address L0003CEEA
                                 dc.b    '                                             '  
                                 dc.b    '                                             ' 
 
-        IFD TEST_BUILD 
-        even
-mfm_track_buffer        dcb.w   $1A00            ; 13Kb raw mfm track buffer for testing
-        ENDC
 
         IFD TEST_BUILD
         even
-load_buffer             dcb.b   1024*300,$00    ; 200Kb Soundtrack module buffer for testing
+music_buffer            dcb.b   $21000,$00
+        even
+depacked_buffer         dcb.b   $11000,$00
+        even
+load_buffer             dcb.b   $14000,$00
+        even
+mfm_track_buffer        dcb.w   $1A00            ; 13Kb raw mfm track buffer for testing
         ENDC
 
 
