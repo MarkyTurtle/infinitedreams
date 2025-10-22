@@ -3617,7 +3617,7 @@ mfm_track_buffer        dcb.w   $1A00            ; 13Kb raw mfm track buffer for
         ENDC
 
 
-
+                even
 _DEBUG_COLOUR_RED
             move.w  #$f00,$dff180
             rts
