@@ -2,11 +2,11 @@
 
 ![InfiniteDreams](/images/InfiniteDreamsScreen.png)
 
-A demo that I wrote in 1992, the last one I did for **'The Lunatics UK'**, just before I went off to University and stopped writting anymore demos. It's quite sad looking back that I didn't continue developing on the Amiga. Some of the code looks rushed, particularly the code around the menu handling and loading parameters. I think I had a bit of 'copy & paste'-itis when I wrote this orginally. Maybe one-day I'l refactor it into a nicer data-driven menu system (or maybe not).
+A demo that I wrote in 1992, the last one I did for [**'The Lunatics UK'**](https://demozoo.org/groups/37655/), just before I went off to University and stopped writting anymore demos. It's quite sad looking back that I didn't continue developing on the Amiga. Some of the code looks rushed, particularly the code around the menu handling and loading parameters. I think I had a bit of 'copy & paste'-itis when I wrote this orginally. Maybe one-day I'll refactor it into a nicer data-driven menu system (or maybe not).
 - I have had to disassemble the code because the source has long gone into the great dustbin in the sky. 
-- I have re-documented the code and added a **TEST_BUILD** flag to the code (which is enabled by default) so that the code can be build and executed from within VSCode. 
-- If you use the DMS/ADF images that are included in the archive, you are able to load and listen to the original protracker tunes loaded from the original disks.
-- I have ripped the files from the original disks and placed them in the archive under the 'ripfiles' folder.
+- I have re-documented the code and added a **TEST_BUILD** flag to the code (which is enabled by default) so that the code can be build and executed from within **VSCode** with the **Amiga Assembly** Plug in. 
+- If you use the **DMS/ADF** images that are included in the archive, you will be able to load and listen to the original protracker tunes loaded from the original disks in an emulator, or in VSCode while debugging, etc.
+- I have ripped the files from the original disks and placed them in the archive under the **[ripfiles](/ripfiles/)/** folder.
 
 ## Original Production Credits
 Code: **Spongehead (AKA: me, MarkyTurtle)** <br/>
