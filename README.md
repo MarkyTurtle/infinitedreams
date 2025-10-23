@@ -2,21 +2,29 @@
 
 ![InfiniteDreams](/images/InfiniteDreamsScreen.png)
 
-A demo that I wrote in 1992, the last one I did for 'The Lunatics UK', just before I went off to University and stopped writting anymore demos. It's quite sad looking back that I didn't continue developing on the Amiga.
-<br/>
-I'll have to disassemble the code because the source has long gone into the great dustbin in the sky. (Which I've now done).
-I've re-documented the code and added a TEST_BUILD flag to the code (which is enabled by default) so that the code can be build and executed from within VSCode. 
-If you use the ADF images in the archive, you are able to load and listen to the original protracker tunes from the disks.
-<br/><br/>
-I've also ripped the files from the original disks and placed them in the archive under the  'ripfiles' folder.
-<br/>
+A demo that I wrote in 1992, the last one I did for 'The Lunatics UK', just before I went off to University and stopped writting anymore demos. It's quite sad looking back that I didn't continue developing on the Amiga. Some of the code looks rushed, particularly the code around the menu handling and loading parameters. I think I had a bit of 'copy & paste'-itis when I wrote this orginally. Maybe one-day I'l refactor it into a nicer data-driven menu system (or maybe not).
+- I have had to disassemble the code because the source has long gone into the great dustbin in the sky. 
+- I have re-documented the code and added a **TEST_BUILD** flag to the code (which is enabled by default) so that the code can be build and executed from within VSCode. 
+- If you use the DMS/ADF images that are included in the archive, you are able to load and listen to the original protracker tunes loaded from the original disks.
+- I have ripped the files from the original disks and placed them in the archive under the 'ripfiles' folder.
 
-## Production Credits
-Code: **Spongehead**<br/>
+## Original Production Credits
+Code: **Spongehead (AKA: me, MarkyTurtle)** <br/>
 Graphics: **JOE, T.S.M**<br/>
 Music: **Hollywood, Subculture(Subi), Phaser, Reeal**<br/>
 
-Maybe I'll this will trigger me do develop something new after this project...
+
+## Single Disk Version
+I wanted to see if it would be possible to create a single-disk version of the original demo. So, using modern Compression Tools (zx0 and 4Bit Delta Sample Compression), a new loader, some optimisation tools and a little bit of additional programming, I've managed to fit all of the original content (apart from the original title screen - which should also be do-able with a bit more time). So in that regard I need to give a big shout-out to the following people and projects that made this possible.
+
+- **4498 Loader Project** - I've created a fork and dissasembled it in my repo (I want to replace the timing with TOD delays instead of Raster delays).
+   - [4489 Byte Loader](https://github.com/4489/4489_byteloader)
+- **deladaenc** - 4 bit Delta Sample Encoding/Decoding and module processing.
+   - [deladaenc](https://github.com/Hemiyoda/deladaenc)
+- **djH0ffman and the Twitch Elite**, for community, streaming and inspiration.
+   - [Protacker Tools](https://github.com/djh0ffman/ProTrackerTools)
+   - [TTE Disk Builder](https://github.com/djh0ffman/TTEDiskBuilder)
+     
 
 ## Resources
 I've been looking for better mod player routines for the Amiga, am listing them below:
@@ -28,8 +36,8 @@ I've been looking for better mod player routines for the Amiga, am listing them 
 ## Progress To Date
 - **2025-10-23** - Reorganised the Folder structure. The original source can be found in the 'src-original' folder, along with the DMS images of the original demo.  The single disk source can be found in the folder 'src-singledisk' along with the ADF image of the new single disk version. The only thing missing from the original is the 'Title Screen' image that pops up on the original and the 'Disk X' image that loads when booting from the Disk2 or Disk3 of the original disks into the drive. The code is crying out for some refactoring, much of the menu structure and loading parameters was originally hard-coded into the demo in a 'copy & paste' approach to software development. My Excuse: I was only 17 and couldn't be bothered to implement a better, data-driven solution. Maybe i'll have a tinker in my spare time and improve the code a bit.
      - The visual effects are running from the Level 3 VBL interrupt.
-     - The Menu and Disk Loader run in the main loop
-     - The Protracker Player has been changed to use a CIA player
+     - The Menu and Disk Loader run in the main loop.
+     - The Protracker Player has been changed to use a CIA player.
      - The MFM Disk Loader has been changed to use the 4489 Byte Loader (The original was my first MFM Disk Loader which loaded whole tracks only).
      - zx0 Decompression code has been added from the Salvador Repository as all modules are now compressed using the zx0 compression algorithm.
      - I've written a 4bit Delta Decompression routine in assembler to decompress the modules which have been encocded using the deladaenc library.
