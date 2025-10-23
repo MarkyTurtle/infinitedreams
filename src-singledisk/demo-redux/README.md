@@ -8,34 +8,36 @@ The files have been layed out on the disk as follows below.
 The new loader (4489 byte loader) is able to read files from a byte location on the disk. The table below shows the Disk Offsets and File Lengths for each file on the disk.
 The demo is located at the end, as it has allowed me to re-create the disk and modify the 'demo' code without altering the positions of the module files on the disk.
 
-|FileID|Disk Offset|PackedSize|FileSize|
-|------|-----------|----------|--------|
-|dsk#|00000001|00000001|00000001|
-|summ|00000590|00000000|0000480A|
-|brig|00004D9A|00000000|00004842|
-|cosm|000095DC|00000000|00006525|
-|natu|0000FB01|00000000|0000661F|
-|obli|00016120|00000000|00006731|
-|ment|0001C851|00000000|00006AD1|
-|neve|00023322|00000000|0000754F|
-|brea|0002A871|00000000|00007B2A|
-|zero|0003239B|00000000|00007BDC|
-|this|00039F77|00000000|0000816D|
-|jarr|000420E4|00000000|00008904|
-|reto|0004A9E8|00000000|00008A5A|
-|tech|00053442|00000000|00008C52|
-|love|0005C094|00000000|00009010|
-|blad|000650A4|00000000|000095EA|
-|shaf|0006E68E|00000000|00009F2C|
-|floa|000785BA|00000000|0000A5BA|
-|eatt|00082B74|00000000|0000B1BB|
-|thef|0008DD2F|00000000|0000B24A|
-|soun|00098F79|00000000|0000B463|
-|skyr|000A43DC|00000000|0000C447|
-|flig|000B0823|00000000|0000EC59|
-|stra|000BF47C|00000000|00012B68|
-|demo|000D1FE4|00000000|0000517D|
-|Free|000D7161|00000000|00004E9F|
+|FileID|Description|Disk Offset|FileSize|
+|------|-----------|-----------|--------|
+|dsk#|Disk Number |00000001|00000001|
+|boot|Boot Block  |00000000|000003ff|
+|tble|file table  |00000400|00000190|
+|summ|PT Module   |00000590|0000480A|
+|brig|PT Module   |00004D9A|00004842|
+|cosm|PT Module   |000095DC|00006525|
+|natu|PT Module   |0000FB01|0000661F|
+|obli|PT Module   |00016120|00006731|
+|ment|PT Module   |0001C851|00006AD1|
+|neve|PT Module   |00023322|0000754F|
+|brea|PT Module   |0002A871|00007B2A|
+|zero|PT Module   |0003239B|00007BDC|
+|this|PT Module   |00039F77|0000816D|
+|jarr|PT Module   |000420E4|00008904|
+|reto|PT Module   |0004A9E8|00008A5A|
+|tech|PT Module   |00053442|00008C52|
+|love|PT Module   |0005C094|00009010|
+|blad|PT Module   |000650A4|000095EA|
+|shaf|PT Module   |0006E68E|00009F2C|
+|floa|PT Module   |000785BA|0000A5BA|
+|eatt|PT Module   |00082B74|0000B1BB|
+|thef|PT Module   |0008DD2F|0000B24A|
+|soun|PT Module   |00098F79|0000B463|
+|skyr|PT Module   |000A43DC|0000C447|
+|flig|PT Module   |000B0823|0000EC59|
+|stra|PT Module   |000BF47C|00012B68|
+|demo|Demo Program|000D1FE4|0000517D|
+|Free|Free Space  |000D7161|00004E9F|
 
 
 
