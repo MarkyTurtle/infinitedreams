@@ -2533,6 +2533,7 @@ compressed_sample_offset        dc.l    0                       ; the byte offse
 
 loader_4489
                 include "4489Loader/4489_byteloader.s"
+                ;include "4489Loader/4489_byteloader_code.s"
 
 ;  in:  a0 = start of compressed data
 ;       a1 = start of decompression buffer

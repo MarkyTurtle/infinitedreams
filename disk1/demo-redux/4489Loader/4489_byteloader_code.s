@@ -33,7 +33,7 @@ L000101d0               swap.w  d0                      ; d0.low = start sector 
                 ; wait for disk ready or 28*300 raster lines
 retry_read
 L000101d2               moveq   #$1b,d7                 ; d7 = 27 + 1 (loop counter)
-L000101d4               bsr.b   wait_300_rasters 
+L000101d4               bsr     wait_300_rasters_tod
 L000101d6               btst.b  #$0005,$0f01(a4)        ; Test bit 5 (/RDY) of $bfe001
 L000101dc               dbeq.w  d7,L000101d4
 
@@ -84,7 +84,7 @@ start_read
                         bcc.b   L00010224_bottom
                         subq.b  #$04,d4             ; /SIDE = 0 (TOP head)
 L00010224_bottom        sub.w   d2,d3               ; d3 = cylinders to step
-                        beq.b   read_track_set_side ; read track & set disk side
+                        beq     read_track_set_side ; read track & set disk side
                         bmi.b   L0001022e_loop
                         subq.b  #$02,d4             ; /DIR = inwards
                         neg.w   d3
@@ -92,7 +92,7 @@ L00010224_bottom        sub.w   d2,d3               ; d3 = cylinders to step
 L0001022e_loop          bsr.b   step_heads
                         addq.w  #$01,d3             ; update current cylinder
                         bne.b   L0001022e_loop
-                        bra.b   read_track          ; L0001026a
+                        bra     read_track          ; L0001026a
 
 
                 ; toggle /STEP bit
@@ -104,6 +104,9 @@ step_heads
 
 set_disk_bits
                         move.b  d4,(a4)             ; used to set disk /SIDE during load or part of step heads above.
+                        bra     wait_50_rasters_tod
+                        rts
+
 
                 ; wait for 300 raster lines as a delay
 wait_300_rasters
@@ -113,7 +116,63 @@ L0001024a_outer         move.b  -$001e(a3),d5       ; d5 = raster position
 L0001024e_loop          cmp.b   -$001e(a3),d5       ; has raster changed?
                         beq.b   L0001024e_loop           ; wait for 1 raster line
                         dbf.w   d6,L0001024a_outer        ; loop for 300 raster lines
+
                         rts
+wait_50_rasters_tod
+                movem.l d0-d7/a0-a6,-(a7)
+                LEA.L   $00bfd100,A0                                ; CIAB PRB - as a base register
+                MOVE.L  #$00000000,D0                               ; CIAB - Read TOD value
+                MOVE.B  $0900(A0),D0                                ; CIAB - Read TODHI
+                ASL.L   #$00000008,D0                               ; CIAB - shift bits
+                MOVE.B  $0800(A0),D0                                ; CIAB - Read TODMID
+                ASL.L   #$00000008,D0                               ; CIAB - shift bits
+                MOVE.B  $0700(A0),D0                                ; CIAB - Read TODLOW
+
+                Add.l   #$12,d0                                    ; add 50 (rasters)
+                    
+.wait_loop
+                MOVE.L  #$00000000,D1                               ; CIAB - Read TOD value
+                MOVE.B  $0900(A0),D1                                ; CIAB - Read TODHI
+                ASL.L   #$00000008,D1                               ; CIAB - shift bits
+                MOVE.B  $0800(A0),D1                                ; CIAB - Read TODMID
+                ASL.L   #$00000008,D1                               ; CIAB - shift bits
+                MOVE.B  $0700(A0),D1                                ; CIAB - Read TODLOW
+
+                cmp.l   d0,d1
+                bcs     .wait_loop
+
+                movem.l (a7)+,d0-d7/a0-a6
+                rts
+
+
+wait_300_rasters_tod
+                movem.l d0-d7/a0-a6,-(a7)
+                LEA.L   $00bfd100,A0                                ; CIAB PRB - as a base register
+                MOVE.L  #$00000000,D0                               ; CIAB - Read TOD value
+                MOVE.B  $0900(A0),D0                                ; CIAB - Read TODHI
+                ASL.L   #$00000008,D0                               ; CIAB - shift bits
+                MOVE.B  $0800(A0),D0                                ; CIAB - Read TODMID
+                ASL.L   #$00000008,D0                               ; CIAB - shift bits
+                MOVE.B  $0700(A0),D0                                ; CIAB - Read TODLOW
+
+                Add.l   #$230,d0                                    ; add 300 (rasters)
+                    
+.wait_loop
+                MOVE.L  #$00000000,D1                               ; CIAB - Read TOD value
+                MOVE.B  $0900(A0),D1                                ; CIAB - Read TODHI
+                ASL.L   #$00000008,D1                               ; CIAB - shift bits
+                MOVE.B  $0800(A0),D1                                ; CIAB - Read TODMID
+                ASL.L   #$00000008,D1                               ; CIAB - shift bits
+                MOVE.B  $0700(A0),D1                                ; CIAB - Read TODLOW
+
+                cmp.l   d0,d1
+                bcs     .wait_loop
+
+                movem.l (a7)+,d0-d7/a0-a6
+                rts
+
+
+
 
 reset_disk_dma
                         move.w  #$4000,(a3)             ; DISK DMA OFF
@@ -124,7 +183,7 @@ reset_disk_dma
                 ; do read track
                 ; a1 = mfm buffer
 read_track_set_side
-L00010268               bsr.b   set_disk_bits           ; set disk side - L0001023e
+L00010268               bsr     set_disk_bits           ; set disk side - L0001023e
 
 read_track
 L0001026a               clr.l   $0010(a1)               ; clear long at offset 16-19 (mfm buffer)
@@ -137,7 +196,7 @@ L00010286               move.w  #$9760,(a3)             ; read $1760 (5984 word)
 L0001028a               move.w  #$9760,(a3)
                 ; wait for disk read
 L0001028e               moveq   #$37,d7
-L00010290               bsr.b   wait_300_rasters 
+L00010290               bsr     wait_300_rasters_tod
 L00010292               tst.l   $0010(a1)
 L00010296               dbne.w  d7,L00010290
 
@@ -154,10 +213,10 @@ L000102aa               bne.b   read_track                  ; L0001026a
 
                 ; wait for dskblk
 L000102ac               moveq   #$50,d7                     ; #$37,d7
-L000102ae               bsr.b   wait_300_rasters
+L000102ae               bsr     wait_300_rasters_tod
 L000102b0               btst.b  #$1,$dff01F        ; $0005(a3)         ; DSKBLK finished bit
 L000102b6               dbne.w  d7,L000102ae
-L000102ba               ;beq.b   read_error              ; L00010306
+L000102ba               beq.b   read_error              ; L00010306
 
 L000102bc               bsr.b   reset_disk_dma              ; L0001025a
 L000102be               move.w  #$0010,$0072(a3)
