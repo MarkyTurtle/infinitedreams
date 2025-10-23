@@ -3,6 +3,9 @@
 Single Disk Version has been completed. 
    - [infinitedreams.adf](../diskimages/infinitedreams.adf)
 
+There is about 19KB left on the end of the disk, plenty of room to include the original title screen in future.
+
+
 # Single Disk File Table
 The files have been layed out on the disk as follows below.
 The new loader (4489 byte loader) is able to read files from a byte location on the disk. The table below shows the Disk Offsets and File Lengths for each file on the disk.
