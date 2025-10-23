@@ -111,7 +111,7 @@ init_system     ; original address L00020052
                                 move.l  a0,$7c.W            
                                 LEA.L   level_3_interrupt_handler(PC),A0 
                                 MOVE.L  A0,$6c.w                                ; level 3 interrupt autovector
-                                MOVE.W  #$8020,INTENA(A6)                       ; enable COPER & DSKBLK
+                                MOVE.W  #$8020,INTENA(A6)                       ; enable VBL Interrupt
                                 RTS 
 
 
