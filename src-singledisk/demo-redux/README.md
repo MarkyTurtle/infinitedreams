@@ -1,18 +1,42 @@
-# Demo/Music Disk Program
 
-I've disassembled the original demo code and have removed my old mfm-loader. At the moment I've replaced it with a copy of the 4489 loader (which I've also dissassembled in a separate file), and started to change little areas of the code to get my hand back into 68000 development.
+# Single Disk Version
+Single Disk Version has been completed. 
+   - [infinitedreams.adf](../diskimages/infinitedreams.adf)
 
-## Aims
-My aims for this demo are to:-
+# Single Disk File Table
+The files have been layed out on the disk as follows below.
+The new loader (4489 byte loader) is able to read files from a byte location on the disk. The table below shows the Disk Offsets and File Lengths for each file on the disk.
+The demo is located at the end, as it has allowed me to re-create the disk and modify the 'demo' code without altering the positions of the module files on the disk.
 
- - Crunch the audio and demo from 3 disks down to 1 disk.
-   - This should be possible using modern compression (zx0 for instance) and implementing a 4 bit delta compression for the module samples (I'm currently looking at creating a c# command line utility to implement this).
- - Improve the 4489 loader delay routine. The current implementation waits for raster lines to avoid using the CIA timers and conflicting with user code. Due to the way the demo works, the loader runs while the visual effects are running under interrupt. This is causing the raster delay to take longer than it should, so things like stepping the drive heads are running far too slowly at the moment. Implementing a TOD timer wait should help to reduce the effects of this.
- - Improve the disk layout and file packing. The 4489 loader is a 'byte' loader that can address files by byte offset from the start of the disk. This allows disk files to be packed with no wasted space in sectors on the disk etc. I've implemented a command line utility based on h0ffman's TTEDiskBuilder, converted it to .net core and changed the disk config.json a little and got it to output the disk allocation as a text file.
- - I may update some of the GFX for fun, and some other internals like the menu system just for my own gratification. We'll see.
+FileID|Disk Offset|PackedSize|FileSize
+dsk#|00000001|00000001|00000001
+summ|00000590|00000000|0000480A
+brig|00004D9A|00000000|00004842
+cosm|000095DC|00000000|00006525
+natu|0000FB01|00000000|0000661F
+obli|00016120|00000000|00006731
+ment|0001C851|00000000|00006AD1
+neve|00023322|00000000|0000754F
+brea|0002A871|00000000|00007B2A
+zero|0003239B|00000000|00007BDC
+this|00039F77|00000000|0000816D
+jarr|000420E4|00000000|00008904
+reto|0004A9E8|00000000|00008A5A
+tech|00053442|00000000|00008C52
+love|0005C094|00000000|00009010
+blad|000650A4|00000000|000095EA
+shaf|0006E68E|00000000|00009F2C
+floa|000785BA|00000000|0000A5BA
+eatt|00082B74|00000000|0000B1BB
+thef|0008DD2F|00000000|0000B24A
+soun|00098F79|00000000|0000B463
+skyr|000A43DC|00000000|0000C447
+flig|000B0823|00000000|0000EC59
+stra|000BF47C|00000000|00012B68
+demo|000D1FE4|00000000|0000517D
+Free|000D7161|00000000|00004E9F
 
-## Progress
-2025-06-18 - Gone back to the drawing board with the 4bit delta compression, the utility works but the compression is not so good, so am looking at a different implementation at the moment. This means the build is not really working at the moment.  You can execute the demo but not really load any music.
+
 
 
 

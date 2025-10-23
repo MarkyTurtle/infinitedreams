@@ -24,7 +24,7 @@ I added some action replay cartidge protection to the bootloader and the main pr
 
 Looks like another version can be detected by comparing the Level 7 AutoVector address value of #$c5f00006. 
 
-I'll remove this code from the disassembly as it's a bit unsightly and there's also a dodgy ROM jump to a reset/crash routine.
+I've removed this code from the disassembly as it's a bit unsightly and there's also a dodgy ROM jump to a reset/crash routine.
 
 **example code 1 - Level 7 Vector & odd copper-list addresses**
 ```
