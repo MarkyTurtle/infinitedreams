@@ -11,8 +11,8 @@ The demo is located at the end, as it has allowed me to re-create the disk and m
 |FileID|Description|Disk Offset|FileSize|
 |------|-----------|-----------|--------|
 |dsk#|Disk Number |00000001|00000001|
-|boot|Boot Block  |00000000|000003ff|
-|tble|file table  |00000400|00000190|
+|boot|Boot Block  |00000000|000003FF|
+|tble|File Table  |00000400|00000190|
 |summ|PT Module   |00000590|0000480A|
 |brig|PT Module   |00004D9A|00004842|
 |cosm|PT Module   |000095DC|00006525|
