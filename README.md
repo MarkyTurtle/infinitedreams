@@ -6,12 +6,12 @@ A demo that I wrote in 1992, the last one I did for [**'The Lunatics UK'**](http
 - I have had to disassemble the code because the source has long gone into the great dustbin in the sky. 
 - I have re-documented the code and added a **TEST_BUILD** flag to the code (which is enabled by default) so that the code can be build and executed from within **VSCode** with the **Amiga Assembly** Plug in. 
 - If you use the **DMS/ADF** images that are included in the archive, you will be able to load and listen to the original protracker tunes loaded from the original disks in an emulator, or in VSCode while debugging, etc.
-- I have ripped the files from the original disks and placed them in the archive under the **[ripfiles](/ripfiles/)/** folder.
+- I have ripped the files from the original disks and placed them in the archive under the **[ripfiles](/ripfiles/)** folder.
 
 ## Original Production Credits
-Code: **Spongehead (AKA: me, MarkyTurtle)** <br/>
-Graphics: **JOE, T.S.M**<br/>
-Music: **Hollywood, Subculture(Subi), Phaser, Reeal**<br/>
+Code: [**Spongehead (AKA: me, MarkyTurtle)**](https://demozoo.org/sceners/93477/) <br/>
+Graphics: **[JOE](https://demozoo.org/sceners/63430/), [T.S.M](https://demozoo.org/sceners/105318/)**<br/>
+Music: **[Hollywood](https://demozoo.org/sceners/8634/), [Subculture(Subi)](https://demozoo.org/sceners/21306/), [Phaser](https://demozoo.org/sceners/38102/), [Reeal](https://demozoo.org/sceners/93116/)**<br/>
 
 - [original code folder](/src-original/)
 - [original disk images](/src-original/diskimages/)
