@@ -1106,6 +1106,7 @@ _mt_init:
 	moveq	#1,d2
 	moveq	#31-1,d0
 .5:	move.l	a1,(a2)+
+	move.w	#$0000,(a1)	; clear start of sample data
 	moveq	#0,d1
 	move.w	42(a0),d1
 	cmp.w	d2,d1		; length 0 and 1 define unused samples

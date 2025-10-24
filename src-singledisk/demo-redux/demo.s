@@ -97,10 +97,10 @@ start_demo      ; original address L00020000
                 ; Set up Level 3 Interrupt and kill DMA
 init_system     ; original address L00020052
                                 LEA.L   CUSTOM,A6
+                                MOVE.W  #$3fff,INTENA(A6)                       ; disable all interrupts
                                 MOVE.W  #$7fff,D0
                                 MOVE.W  D0,DMACON(A6)                           ; disable all DMA
                                 MOVE.W  D0,INTREQ(A6)                           ; clear raised interrupt flags
-                                MOVE.W  #$3fff,INTENA(A6)                       ; disable all interrupts
                                 lea     do_nothing_interrupt_handler(pc),a0
                                 move.l  a0,$64.W
                                 move.l  a0,$68.W
@@ -126,7 +126,6 @@ init_display    ; original address L00020080
                                 BSR.W   init_insert_disk_bitplanes      ; L000200D4
                                 LEA.L   copper_list(pc),a0              ; L00022CCA(PC),A0
                                 MOVE.L  A0,COP1LC(A6)
-                                MOVE.W  $00000088,D0                    ; mistake? Trap #02 vector? probably meant $dff088 (copjmp1 strobe)
                                 MOVE.W  #$87ef,DMACON(A6)               ; BLTPRI,DMAEN,BPLEN,COPEN,BLTEN,SPREN,AUD0-3
                                 MOVE.B  CUSTOM+JOY0DAT,mouse_y_value    ; mouse y initial value - $00dff00a,L00020882
                                 RTS 
@@ -236,7 +235,7 @@ init_sprites    ; original address L000201BA
                                 MOVE.W  D0,sprite_1_ptl                 ; L00022D00
                                 SWAP.W  D0
                                 MOVE.W  D0,sprite_1_pth                 ; L00022CFC
-                                MOVE.L  #$00000000,D0
+                                MOVE.L  #null_sprite,D0
                                 MOVE.W  D0,sprite_2_pth                 ; L00022D08 - clear unused sprite ptrs.
                                 MOVE.W  D0,sprite_2_ptl                 ; L00022D04
                                 MOVE.W  D0,sprite_3_pth                 ; L00022D10
@@ -251,6 +250,7 @@ init_sprites    ; original address L000201BA
                                 MOVE.W  D0,sprite_7_ptl                 ; L00022D2C
                                 RTS 
 
+null_sprite:                    dc.l    $0
 
 
 
@@ -335,9 +335,7 @@ main_loop       ; original address L000202F6
                                 BEQ.B   .load_music                             ;   if no, load music
                                                                                 ;   if yes, stop music
 .disable_music          ; stop music playing
-                                BCLR.B  #MUSIC_PLAYING,music_status_bits
-                                ;BSR.W   music_off                                               ; L00021C0A
-                              
+                                BCLR.B  #MUSIC_PLAYING,music_status_bits                             
                                 JSR     _mt_end
 
 .load_music             ; load music
@@ -381,7 +379,6 @@ main_loop       ; original address L000202F6
 
                         ; do music initialisation
 .initialise_music
-                                ;BSR.W   music_init                                              ; L00021B96
                                 JSR _mt_remove
 
                                 lea     $0,a0
