@@ -21,8 +21,8 @@ MFM_BUFFER          EQU $7d140      ; $80000-$2ec0 (required for 4489 loader)
 LOAD_ADDRESS        EQU $73000      ; gives approx 40K compressed size for demo exe
 DEMO_ADDRESS        EQU $2000       ; demo decrunch address
 
-LOAD_LENGTH         EQU $517D       ; size of compressed demo on disk
-DEMO_OFFSET         EQU $d1fe4      ; start of file byte position on disk
+LOAD_LENGTH         EQU $5181       ; size of compressed demo on disk
+DEMO_OFFSET         EQU $D4872     ; start of file byte position on disk
 
         IFD TESTBOOT 
                     jmp     start_boot
