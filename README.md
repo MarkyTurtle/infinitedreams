@@ -27,6 +27,7 @@ I wanted to see if it would be possible to create a single-disk version of the o
 - **deladaenc** - 4 bit Delta Sample Encoding/Decoding and module processing.
    - [deladaenc](https://github.com/Hemiyoda/deladaenc)
 - **djH0ffman and the Twitch Elite**, for community, streaming and inspiration.
+   - Sound Quality Advice regarding the 4bit Delta Compression and Testing on Real Hardware
    - [Protacker Tools](https://github.com/djh0ffman/ProTrackerTools)
    - [TTE Disk Builder](https://github.com/djh0ffman/TTEDiskBuilder)
      
