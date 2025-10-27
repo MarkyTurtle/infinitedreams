@@ -49,7 +49,7 @@ depackdelta4:
                                 ; copy first sample byte
                                 move.l  #0,d3
                                 move.b  (a0)+,d3                                ; d3 is used as the accumulated sample value
-                                move.b  d0,(a1)+
+                                move.b  d3,(a1)+
 
 .outer_loop
                                 ; check if decompression completed
