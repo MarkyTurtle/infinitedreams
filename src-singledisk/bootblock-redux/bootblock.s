@@ -13,7 +13,7 @@
 
 
 
-TESTBOOT SET 1                                              ; Comment this to remove 'testboot'
+;TESTBOOT SET 1                                              ; Comment this to remove 'testboot'
 
 
 STACK_ADDRESS           EQU $1000       ; stack ptr address will grow down from start of boot block
@@ -166,10 +166,9 @@ decrunch_demo
 .raster_wait_2  lea     CUSTOM,a6    
                 cmp.b   #$f0,VHPOSR(A6)
                 bne.b   .raster_wait_2
-
                 bsr     fade_out_titlescreen
-
                 dbf     d7,.raster_wait_2
+
 
                 jmp     DEMO_START_ADDRESS
 
