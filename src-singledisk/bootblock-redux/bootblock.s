@@ -13,7 +13,7 @@
 
 
 
-;TESTBOOT SET 1                                              ; Comment this to remove 'testboot'
+TESTBOOT SET 1                                              ; Comment this to remove 'testboot'
 
 
 STACK_ADDRESS           EQU $1000       ; stack ptr address will grow down from start of boot block
