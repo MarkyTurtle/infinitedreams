@@ -41,6 +41,7 @@ I've been looking for better mod player routines for the Amiga, am listing them 
 - [Ultimate Tracker Support Package](https://aminet.net/package/mus/edit/RSE-UTS)
 
 ## Progress To Date
+- **2025-10-28** - Have created a Single-Disk Version that now includes the original start-up/loading gfx, demo and all tunes on the same disk. ADF image can be found here. [single disk image](/src-singledisk/diskimages/)
 - **2025-10-23** - Reorganised the Folder structure. The original source can be found in the 'src-original' folder, along with the DMS images of the original demo.  The single disk source can be found in the folder 'src-singledisk' along with the ADF image of the new single disk version. The only thing missing from the original is the 'Title Screen' image that pops up on the original and the 'Disk X' image that loads when booting from the Disk2 or Disk3 of the original disks into the drive. The code is crying out for some refactoring, much of the menu structure and loading parameters was originally hard-coded into the demo in a 'copy & paste' approach to software development. My Excuse: I was only 17 and couldn't be bothered to implement a better, data-driven solution. Maybe i'll have a tinker in my spare time and improve the code a bit.
      - The visual effects are running from the Level 3 VBL interrupt.
      - The Menu and Disk Loader run in the main loop.
