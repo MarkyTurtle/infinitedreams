@@ -36,17 +36,13 @@ TPIC_COPPER_ADDR        EQU $3a000       ; absolute address of title pic copper 
 
         IFD TESTBOOT 
                     jmp     start_boot
-
-test_mfm_buffer         dcb.w   $1760,$ffff
-test_load_buffer        dcb.w   $a000,$1111
-test_decrunch_buffer    dcb.w   $1c000,$2222
         ENDC 
 
 
 
                 ; ------------- boot block header -------------
 bootblock_header    dc.b    'DOS',0                     ; DiskType = 'DOS,0'
-                    dc.l    $00000000                   ; bootblock checksum value
+                    dc.l    $010C8415                   ; bootblock checksum value
                     dc.l    $00000001                   ; rootblock (normally 880 ($370) on a standard DOS Disk)
 
 
@@ -56,33 +52,41 @@ start_boot              lea     CUSTOM,a6
                         move.w  #$7fff,d0
                         move.w  #$3fff,INTENA(a6)
                         move.w  d0,INTREQ(a6)
+                        move.w  d0,INTREQ(a6)
                         move.w  d0,DMACON(a6)
 copy_bootloader:
                         lea     boot_loader(pc),a0
                         lea     BOOT_RELOCATE_ADDR,a1
                         move.w  #(bootblockend-boot_loader)/4,d7
-.copy_loop              move.w  (a0)+,(a1)+
+.copy_loop              move.l  (a0)+,(a1)+
                         dbf     d7,.copy_loop
-                        jmp     $00001000
-
+                        jmp     BOOT_RELOCATE_ADDR
 
 
                 ; ------------- relocated boot loader $00001000 -----------
 boot_loader             lea   STACK_ADDRESS,A7
 
+set_vectors         ; set interrupt vectors
+                        move.w  #$6,d7
+                        lea     $64.w,a0
+                        lea     do_nothing_handler(pc),a1
+.set_vector_loop        move.l  a1,(a0)+
+                        dbf     d7,.set_vector_loop
+
 load_file_table     ; load the file table
-                        move.l #FILE_TABLE_OFFSET,d0
-                        move.l #FILE_TABLE_LENGTH,d1
-                        lea    FILE_TABLE_ADDR,a0
-                        lea    MFM_BUFFER,a1
-                        bsr    byteloader
+                        move.l  #FILE_TABLE_OFFSET,d0
+                        move.l  #FILE_TABLE_LENGTH,d1
+                        moveq   #0,d2
+                        lea.l   FILE_TABLE_ADDR,a0                 ; file table load address
+                        lea.l   MFM_BUFFER,a1
+                        bsr     byteloader
                 
 load_title_screen   ; load and display title picture
                         move.l  #'tpic',d0
                         lea     LOAD_ADDRESS,a0
                         lea     TPIC_START_ADDRESS,a1
                         bsr     load_file
-
+q
                     ; set title screen parameters
                         lea     CUSTOM,a6
                         move.l  #$003800d0,DDFSTRT(a6)
@@ -91,8 +95,7 @@ load_title_screen   ; load and display title picture
                         move.l  #$00000000,BPL1MOD(a6)
 
                     ; set copper colours
-                        lea     LOAD_ADDRESS,a0
-                        lea     TPIC_COPPER_ADDR,a1
+                        lea     TPIC_COPPER_ADDR,a0
                         move.w  #31,d7                          ; 32 colours
                         move.l  #$01800000,d0
 .col_loop               move.l  d0,(a0)+
@@ -151,19 +154,22 @@ load_compressed_demo
                     ; fade out title pic
                         move.w  #16,D7
 .raster_wait_2          bsr     raster_wait
+
+                        move.l  d7,-(a7)
                         lea     TPIC_COPPER_ADDR,a0
                         bsr     fade_out_titlescreen
+                        move.l  (a7)+,d7
+
                         dbf     d7,.raster_wait_2
 
-
                         jmp     DEMO_START_ADDRESS
-
 
 raster_wait             lea     CUSTOM,a6    
                         cmp.b   #$f0,VHPOSR(A6)
                         bne.b   raster_wait
                         rts
 
+do_nothing_handler:     rte
 
 
 ; d0 = fileid
@@ -221,8 +227,8 @@ fade_in_titlescreen
                     beq.s   .next_component
                     add.w   d5,d2               ; fade colour component
 .next_component
-                    ror.w   #4,d4
-                    ror.w   #4,d5
+                    rol.w   #4,d4
+                    rol.w   #4,d5
                     dbf.w   d6,.fade_component
 
 .update_color       
@@ -231,41 +237,6 @@ fade_in_titlescreen
                     dbf     d7,.fade_loop
 
                     rts     
-
-
-
-;fade_in_titlescreen move.w  #$001f,D6                           ; 32 colour screen display
-;                    add.l   #2,a1
-;
-;                ; fade colour loop
-;.fade_loop          move.w  (A0)+,D0                            ; d0 = palette colour value
-;                ; fade blue colour component
-;.fade_blue          MOVE.W  D0,D1       
-;                    MOVE.W  (A1),D2                             ; d2 = current fade colour
-;                    MOVE.B  D2,D3
-;                    AND.B   #$0f,D1                             ; mask blue bits (src & dest)
-;                    AND.B   #$0f,D3
-;                    CMP.B   D1,D3
-;                    BEQ.B   .fade_green
-;                    ADD.B   #$01,$01(A1)
-;                ; fade green colour component
-;.fade_green         MOVE.B  D0,D1
-;                    MOVE.B  D2,D3
-;                    AND.B   #$f0,D1
-;                    AND.B   #$f0,D3
-;                    CMP.B   D1,D3
-;                    BEQ.B   .fade_red
-;                    ADD.B   #$10,$01(A1)
-;                ; fade red colour component
-;.fade_red           AND.W   #$0f00,D0
-;                    AND.W   #$0f00,D2
-;                    CMP.W   D0,D2
-;                    BEQ.B   .fade_next
-;                    ADD.B   #$01,$00(A1)
-;                ; fade next colour - loop
-;.fade_next          add.l   #$0000004,a1                   ; increase copper index to next colour value index
-;                    dbf.w   D6,.fade_loop
-;                    RTS 
 
 
 
@@ -297,40 +268,6 @@ fade_out_titlescreen
                     rts    
 
 
-            ; ------------------------- fade out title screen ------------------------
-            ; in: a0 = copper colours address
-;fade_out_titlescreen
-;                lea     copper_colours(pc),a0
-;                move.l  (a0),a0
-;                    moveq  #$00000002,D5                   ; copper colour value index
-;                    moveq  #$0000001f,D6                   ; 32 colour screen
-;                ; fade colour loop
-;.fade_loop          move.w  (A0,D5.W),D0                ; d0 = copper colour value
-;                ; fade blue colour component
-;.fade_blue          MOVE.B  D0,D1
-;                    AND.B   #$0f,D1                         ; mask blue component
-;                    TST.B   D1
-;                    BEQ.B   .fade_green
-;                    SUB.B   #$01,$01(A0,D5.W)
-;                ; fade green colour component
-;.fade_green         MOVE.B  D0,D1
-;                    AND.B   #$f0,D1
-;                    TST.B   D1
-;                    BEQ.B   .fade_red
-;                    SUB.B   #$10,$01(A0,D5.w)
-;                ; fade red colour component
-;.fade_red           AND.W   #$0f00,D0
-;                    TST.W   D0
-;                    BEQ.B   .fade_next
-;                    SUB.W   #$0100,$00(A0,D5.W)
-;                ; fade next colour - loop
-;.fade_next          ADD.W   #$0004,D5
-;                    DBF.W   D6,.fade_loop
-;                    RTS 
-
-
-copper_colours      dc.l    0
-
 ; -> d0.l  offset       (0-$dc000)
 ; -> d1.l  length       (0-$dc000)
 ; -> d2.l  drive        (0-3)
@@ -353,9 +290,6 @@ zx0
 
 bootblockend
 
-                   ;; dcb.b   1024-(bootblockend-bootblock_header)
+                dcb.b   1024-(bootblockend-bootblock_header)
 
 
-; file table
-; 0x400-0x5a0 = 0x1a0 (416 bytes)
-filetable
