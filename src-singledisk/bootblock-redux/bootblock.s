@@ -73,7 +73,7 @@ boot_loader             lea     STACK_ADDRESS,A7
                         bsr     display_title_picture
                         bsr     fade_in_title_picture
                         bsr     load_demo
-                        move.w  #250,d7
+                        move.w  #250,d0
                         bsr     wait_frame_delay
                         bsr     fade_out_title_picture
                         jmp     DEMO_START_ADDRESS
@@ -195,32 +195,24 @@ fade_in_title_picture  ; fade in title pic
 
 
             ; --------------------- raster wait --------------------------
-            ; in: d7.w  number of frames to wait
-wait_frame_delay        sub.w  #1,d7
+            ; in: d0.w  number of frames to wait
+wait_frame_delay        sub.w  #1,d0
 .wait_loop              bsr     raster_wait
-                        dbf     d7,.wait_loop
+                        dbf     d0,.wait_loop
                         rts
 
 
             ; --------------------- raster wait --------------------------
 raster_wait             lea     CUSTOM,a6    
-                        cmp.b   #$f0,VHPOSR(A6)
+                        cmp.b   #250,VHPOSR(A6)
                         bne.b   raster_wait
-.wait                   cmp.b   #$f1,VHPOSR(A6)
-                        bne.b   .wait
+raster_wait_1           cmp.b   #251,VHPOSR(A6)
+                        bne.b   raster_wait_1
                         rts
 
-;raster_wait
-;    lea     CUSTOM,a6    
-;    move.l  VPOSR(a6),d0
-;	cmp.l	#200<<8,d0
-;	bne.b	raster_wait
-;.wait2
-;    move.l  VPOSR(a6),d0
-;	and.l	#$1ff00,d0
-;	cmp.l	#201<<8,d0
-;	bne.b	raster_wait
-;    rts
+
+
+
 
             ; ------------- do nothing interrupt handler -----------------
 do_nothing_handler:     rte
