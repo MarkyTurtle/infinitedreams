@@ -63,118 +63,173 @@ copy_bootloader:
                         jmp     BOOT_RELOCATE_ADDR
 
 
-                ; ------------- relocated boot loader $00001000 -----------
-boot_loader             lea   STACK_ADDRESS,A7
+            ; ---------------------------------------------------------
+            ; ------------- relocated boot loader $00001000 -----------
+            ;----------------------------------------------------------
+boot_loader             lea     STACK_ADDRESS,A7
+                        bsr     set_interrupt_vectors
+                        bsr     load_file_table
+                        bsr     load_title_picture
+                        bsr     display_title_picture
+                        bsr     fade_in_title_picture
+                        bsr     load_demo
+                        move.w  #250,d7
+                        bsr     wait_frame_delay
+                        bsr     fade_out_title_picture
+                        jmp     DEMO_START_ADDRESS
+            ;----------------------------------------------------------
+            ;--------------------- START MAIN DEMO --------------------
+            ;----------------------------------------------------------
 
-set_vectors         ; set interrupt vectors
-                        move.w  #$6,d7
+
+            ; -------------- set interrupt vectors ----------------
+set_interrupt_vectors   move.w  #$6,d7
                         lea     $64.w,a0
                         lea     do_nothing_handler(pc),a1
 .set_vector_loop        move.l  a1,(a0)+
                         dbf     d7,.set_vector_loop
+                        rts
 
-load_file_table     ; load the file table
-                        move.l  #FILE_TABLE_OFFSET,d0
-                        move.l  #FILE_TABLE_LENGTH,d1
-                        moveq   #0,d2
-                        lea.l   FILE_TABLE_ADDR,a0                 ; file table load address
-                        lea.l   MFM_BUFFER,a1
+
+            ; ------------------ load file table -------------------
+load_file_table         move.l  #FILE_TABLE_OFFSET,d0               ; byte offset on disk
+                        move.l  #FILE_TABLE_LENGTH,d1               ; file table byte length on disk
+                        moveq   #0,d2                               ; select drive 0
+                        lea.l   FILE_TABLE_ADDR,a0                  ; file table load address
+                        lea.l   MFM_BUFFER,a1                       ; raw disk mfm track buffer
                         bsr     byteloader
-                
-load_title_screen   ; load and display title picture
-                        move.l  #'tpic',d0
-                        lea     LOAD_ADDRESS,a0
-                        lea     TPIC_START_ADDRESS,a1
+                        rts
+
+
+            ; ------------------- load title picture ------------------
+load_title_picture      move.l  #'tpic',d0                          ; file id
+                        lea     LOAD_ADDRESS,a0                     ; load address
+                        lea     TPIC_START_ADDRESS,a1               ; decompress address
                         bsr     load_file
-q
-                    ; set title screen parameters
+                        rts
+
+
+            ; ------------- load and decompress demo -----------------
+load_demo               move.l  #'demo',d0                          ; file id
+                        lea     LOAD_ADDRESS,a0                     ; load address
+                        lea     DEMO_START_ADDRESS,a1               ; decompress address
+                        bsr     load_file
+                        rts
+
+
+            ; --------------- display title picture -----------------
+            ; set screen parameters and create copper list for
+            ; refreshing colours and bitplane pointers.
+            ; would normally dma fetch, window, modulo and bplcon in 
+            ; the copper but keeping the bootblock below 1024 bytes
+            ; mean't not possible, so values poked directly.
+display_title_picture
+                    ; set title screen display parameters
                         lea     CUSTOM,a6
                         move.l  #$003800d0,DDFSTRT(a6)
                         move.l  #$2c812cc1,DIWSTRT(a6)
                         move.w  #$0000,BPLCON1(a6)
                         move.l  #$00000000,BPL1MOD(a6)
 
-                    ; set copper colours
+                    ; programmatically create copper list
+                    ; start by setting copper colours (32 colour screen)
                         lea     TPIC_COPPER_ADDR,a0
                         move.w  #31,d7                          ; 32 colours
-                        move.l  #$01800000,d0
-.col_loop               move.l  d0,(a0)+
-                        add.l   #$00020000,d0
+                        move.l  #$01800000,d0                   ; colour command (COLOR00), black colour value
+.col_loop               move.l  d0,(a0)+                        ; poke command into copper list
+                        add.l   #$00020000,d0                   ; increment colour register value
                         dbf     d7,.col_loop
 
-                    ; copper bitplane addresses
+                    ; set copper bitplane addresses
                         move.l  #TPIC_START_ADDRESS,d0
                         add.l   #$40,d0
                         move.w  #4,d7                           ; 5 bitplanes
-                        move.w  #BPL1PTH,d1                     ; BPL1PTH
+                        move.w  #BPL1PTH,d1
 .bpl_loop
                         swap.w   d0
-                        move.w  d1,(a0)+
-                        move.w  d0,(a0)+                ; high word
-                        add.w   #2,d1
+                        move.w  d1,(a0)+                ; set bpl(x)pth register value
+                        move.w  d0,(a0)+                ; high word of bitplane address ptr
+                        add.w   #2,d1                   ; increment bpl(x)pt register value
                         swap.w  d0
-                        move.w  d1,(a0)+
-                        move.w  d0,(a0)+                ; low word
-                        add.w   #2,d1
+                        move.w  d1,(a0)+                ; set bpl(x)ptl register value
+                        move.w  d0,(a0)+                ; low word of bitplane address ptr
+                        add.w   #2,d1                   ; increment bpl(x)pt register value
                         add.l   #$2800,d0               ; next bitplane ptr
                         dbf     d7,.bpl_loop
 
-                        move.l  #$01005200,(a0)+        ; 5 bitplane screen
-                        move.l  #$fffffffe,(a0)+        ; copper end wait
+                    ; set 5 bitplane screen
+                        move.l  #$01005200,(a0)+        ; BPLCON0, 5 bitplane screen plus colour burst
+                        move.l  #$fffffffe,(a0)+        ; copper end wait instruction
 
                     ; set copper display for title screen
-                        ;lea     CUSTOM,a6
-                        move.w  #$8180,DMACON(A6)
-                        lea     TPIC_COPPER_ADDR,a0 
+                        lea     TPIC_COPPER_ADDR,a0     
                         move.l  A0,COP1LC(A6)
-                        ;move.w  COPJMP1(A6),D0
+                        move.w  #$8180,DMACON(A6)       ; enable copper DMA
+                        rts
 
-fade_in_title_pic   ; fade in title pic
+
+            ; ------------------ fade out title picture ---------------------
+            ; overwrite image palette with black colour value for
+            ; 32 colour entries. Then fall through to the fade in function
+fade_out_title_picture
+                        move.w  #32-1,d7
+                        lea     TPIC_START_ADDRESS,a0 
+.loop                   move.w  #$0000,(a0)+
+                        dbf     d7,.loop
+
+            ; ------------------- fade in title picture --------------------
+            ; fade in copper list colours to 32 colour entries stored at
+            ; the start of the title picture image data.
+fade_in_title_picture  ; fade in title pic
                         move.w  #16,D7
 .raster_wait_1          bsr     raster_wait
 
                         move.l  d7,-(a7)
                         lea     TPIC_START_ADDRESS,a0 
                         lea     TPIC_COPPER_ADDR,a1
-                        bsr     fade_in_titlescreen
+                        bsr     fade_copper_colours
                         move.l  (a7)+,d7
 
                         dbf     d7,.raster_wait_1
+                        rts
 
 
+            ; --------------------- raster wait --------------------------
+            ; in: d7.w  number of frames to wait
+wait_frame_delay        sub.w  #1,d7
+.wait_loop              bsr     raster_wait
+                        dbf     d7,.wait_loop
+                        rts
 
-                    ; load and execute demo
-load_compressed_demo
-                        move.l  #'demo',d0
-                        lea     LOAD_ADDRESS,a0
-                        lea     DEMO_START_ADDRESS,a1
-                        bsr     load_file
 
-
-                    ; fade out title pic
-                        move.w  #16,D7
-.raster_wait_2          bsr     raster_wait
-
-                        move.l  d7,-(a7)
-                        lea     TPIC_COPPER_ADDR,a0
-                        bsr     fade_out_titlescreen
-                        move.l  (a7)+,d7
-
-                        dbf     d7,.raster_wait_2
-
-                        jmp     DEMO_START_ADDRESS
-
+            ; --------------------- raster wait --------------------------
 raster_wait             lea     CUSTOM,a6    
                         cmp.b   #$f0,VHPOSR(A6)
                         bne.b   raster_wait
+.wait                   cmp.b   #$f1,VHPOSR(A6)
+                        bne.b   .wait
                         rts
 
+;raster_wait
+;    lea     CUSTOM,a6    
+;    move.l  VPOSR(a6),d0
+;	cmp.l	#200<<8,d0
+;	bne.b	raster_wait
+;.wait2
+;    move.l  VPOSR(a6),d0
+;	and.l	#$1ff00,d0
+;	cmp.l	#201<<8,d0
+;	bne.b	raster_wait
+;    rts
+
+            ; ------------- do nothing interrupt handler -----------------
 do_nothing_handler:     rte
 
 
-; d0 = fileid
-; a0 = load address
-; a1 = decomparess address
+            ; --------------- load and decompress file -------------------
+            ; d0 = fileid
+            ; a0 = load address
+            ; a1 = decomparess address
 load_file               movem.l d0-d7/a0-a6,-(a7)
                         move.w  #27-1,d7                        ; size of file table (26 entries)
                         lea     FILE_TABLE_ADDR,a3
@@ -197,75 +252,51 @@ load_file               movem.l d0-d7/a0-a6,-(a7)
                         bsr     byteloader
                         tst.l   d0
                         bne.s   .load_error                     ; some kinda disk error.
-                        movem.l (a7)+,d0-d7/a0-a6
+
+                        movem.l (a7),d0-d7/a0-a6
 
                     ; decompress file to (a1)
                         bsr     zx0_decompress
 
+                        movem.l (a7)+,d0-d7/a0-a6
                         rts
 
 
-
-
+                ; ----------------------- fade copper colours ------------------------
+                ; fade colours in copper list to a target list of colours
                 ; in:   a0 = address of 32 colours (words)
                 ;       a1 = address of copper colour registers set in copper list
-                ; ------------------------- fade in title screen ------------------------
-fade_in_titlescreen
+fade_copper_colours
                     move.w  #32-1,d7
 .fade_loop
-                    move.w  (a0)+,d0
-                    move.w  2(a1),d2            ; current colour
-                    move.w  #$000f,d4
-                    move.w  #$0001,d5
-                    move.w  #$0002,d6           ; 3 colour components to fade in
+                    move.w  (a0)+,d0            ; colour to fade towards
+                    move.w  2(a1),d2            ; current colour from copper list
+                    move.w  #$000f,d4           ; r,g,b mask value
+                    move.w  #$0001,d5           ; r,g,b increment/decrement value 
+                    move.w  #3-1,d6             ; 3 colour components to fade in r,g,b
 .fade_component
-                    move.w  d0,d1
-                    move.w  d2,d3
-                    and.w   d4,d1
-                    and.w   d4,d3
-                    cmp.w   d1,d3
-                    beq.s   .next_component
-                    add.w   d5,d2               ; fade colour component
+                    move.w  d0,d1               ; d1 = copy of fade towards colour
+                    move.w  d2,d3               ; d3 = copy of current colour
+                    and.w   d4,d1               ; mask r,g, or b component
+                    and.w   d4,d3               ; mask r,g, ot b component
+                    cmp.w   d1,d3               ; is current colour component equal to, more than or less than the target colour
+                    beq.s   .next_component     ; is equal so no change required
+                    bgt.s   .fade_down
+.fade_up
+                    add.w   d5,d2               ; fade colour component up (make r,g, or b brighter)
+                    bra     .next_component
+.fade_down
+                    sub.w   d5,d2               ; fade colour component down (make r,g, or b darker)
 .next_component
-                    rol.w   #4,d4
-                    rol.w   #4,d5
-                    dbf.w   d6,.fade_component
+                    rol.w   #4,d4               ; rotate mask to next r,g,b component
+                    rol.w   #4,d5               ; rotate inecrement/decrement value to next r,g,b component
+                    dbf.w   d6,.fade_component  ; do next r,g or b component
 
-.update_color       
-                    move.w  d2,2(a1)            ; store faded colour
-                    addq.l  #4,a1
-                    dbf     d7,.fade_loop
+.update_color       move.w  d2,2(a1)            ; store faded colour bak in copper list
+                    addq.l  #4,a1               ; update ptr to next copper instruction
+                    dbf     d7,.fade_loop       ; fade next colour in copper list
 
                     rts     
-
-
-
-                ; in:   in: a0 = copper colours address
-                ; ------------------------- fade in title screen ------------------------
-fade_out_titlescreen
-                    move.w  #32-1,d7
-.fade_loop
-                    move.w  2(a0),d0             ; current colour from copper list
-                    move.w  #$000f,d4
-                    move.w  #$0001,d5
-                    move.w  #$0002,d6           ; 3 colour components to fade in
-.fade_component
-                    move.w  d0,d1
-                    and.w   d4,d1
-                    tst.w   d1
-                    beq.s   .next_component
-                    sub.w   d5,d0               ; fade colour component
-.next_component
-                    rol.w   #4,d4
-                    rol.w   #4,d5
-                    dbf.w   d6,.fade_component
-
-.update_color       
-                    move.w  d0,2(a0)
-                    addq.l  #4,a0
-                    dbf     d7,.fade_loop
-
-                    rts    
 
 
 ; -> d0.l  offset       (0-$dc000)
@@ -281,6 +312,7 @@ fade_out_titlescreen
 byteloader
                     include './4489Loader/4489_byteloader.s'
 
+
 ;  in:  a0 = start of compressed data
 ;       a1 = start of decompression buffer
 
@@ -288,8 +320,11 @@ byteloader
 zx0
                     include './zx0/unzx0_68000.s'
 
-bootblockend
 
-                dcb.b   1024-(bootblockend-bootblock_header)
+
+                ; ----------------------- pad bytes ------------------------
+                ; pad bootblock file size to 1024 bytes
+bootblockend
+               ; dcb.b   1024-(bootblockend-bootblock_header)
 
 
