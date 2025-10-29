@@ -5,32 +5,31 @@
 ; Basic MFM Boot loader to load the Zx0 Compressed 'demo' file from the Disk.
 ; The executable demo is decompressd to $2000 to $1c000 in memory (with slack space for exe growth)
 ;
+; The code manages to fill every available byte in the boot block 1024 bytes.
+; It could be made shorter but I wanted to make it readable enough.
+;
 
-
-                    section     bootloader,code_c
+                    section     bootloader,code
                     incdir      "include/"
                     include     "hw.i"
 
 
 
-TESTBOOT SET 1                                              ; Comment this to remove 'testboot'
+TESTBOOT SET 1         ; Comment this to remove 'testboot' and build boot block for actual disk.
 
 
 STACK_ADDRESS           EQU $1000       ; stack ptr address will grow down from start of boot block
 BOOT_RELOCATE_ADDR      EQU $1000       ; absolute memory address to relocate the bootblock at.
-
-
 MFM_BUFFER              EQU $7d140      ; $80000-$2ec0 RAW MFM Track Buffer (required for 4489 loader)
-
 FILE_TABLE_ADDR         EQU $1400       ; absolute address for loading the disk file table at.
 FILE_TABLE_OFFSET       EQU $400        ; disk offset to file table (directly following the bootblock)
 FILE_TABLE_LENGTH       EQU $1a0        ; length of file table in bytes
-
 LOAD_ADDRESS            EQU $50000      ; Address to load packed files into (loading screen/demo)
 TPIC_START_ADDRESS      EQU $70000      ; title pic decrunch address.
 DEMO_START_ADDRESS      EQU $2000       ; demo decrunch/execute address.
-
-TPIC_COPPER_ADDR        EQU $3a000       ; absolute address of title pic copper list
+TPIC_COPPER_ADDR        EQU $3a000      ; absolute address of title picture copper list,
+                                        ; stashed out of the way while loading and depacking demo $50000-$70000 and $2000-$1c000 
+                                        ; so can continue to display image while loading and depacking demo.
 
 
 
@@ -40,22 +39,26 @@ TPIC_COPPER_ADDR        EQU $3a000       ; absolute address of title pic copper 
 
 
 
-                ; ------------- boot block header -------------
+
+            ; ------------- boot block header -------------
 bootblock_header    dc.b    'DOS',0                     ; DiskType = 'DOS,0'
-                    dc.l    $010C8415                   ; bootblock checksum value
+                    dc.l    $00000000                   ; bootblock checksum value
                     dc.l    $00000001                   ; rootblock (normally 880 ($370) on a standard DOS Disk)
+            ; ------------- boot block header -------------
 
 
 
-                ; ------------- code entry point ---------------
+
+            ; ------------------- code entry point --------------------
 start_boot              lea     CUSTOM,a6 
                         move.w  #$7fff,d0
                         move.w  #$3fff,INTENA(a6)
                         move.w  d0,INTREQ(a6)
                         move.w  d0,INTREQ(a6)
                         move.w  d0,DMACON(a6)
-copy_bootloader:
-                        lea     boot_loader(pc),a0
+
+                    ; move bootloader code to absolute address $1000 in memory.
+relocate_bootloader:    lea     boot_loader(pc),a0
                         lea     BOOT_RELOCATE_ADDR,a1
                         move.w  #(bootblockend-boot_loader)/4,d7
 .copy_loop              move.l  (a0)+,(a1)+
@@ -77,9 +80,6 @@ boot_loader             lea     STACK_ADDRESS,A7
                         bsr     wait_frame_delay
                         bsr     fade_out_title_picture
                         jmp     DEMO_START_ADDRESS
-            ;----------------------------------------------------------
-            ;--------------------- START MAIN DEMO --------------------
-            ;----------------------------------------------------------
 
 
             ; -------------- set interrupt vectors ----------------
@@ -173,7 +173,7 @@ display_title_picture
             ; 32 colour entries. Then fall through to the fade in function
 fade_out_title_picture
                         move.w  #32-1,d7
-                        lea     TPIC_START_ADDRESS,a0 
+                        lea     TPIC_START_ADDRESS,a0       ; set 32 colour palette to black 
 .loop                   move.w  #$0000,(a0)+
                         dbf     d7,.loop
 
@@ -211,9 +211,6 @@ raster_wait_1           cmp.b   #251,VHPOSR(A6)
                         rts
 
 
-
-
-
             ; ------------- do nothing interrupt handler -----------------
 do_nothing_handler:     rte
 
@@ -221,7 +218,7 @@ do_nothing_handler:     rte
             ; --------------- load and decompress file -------------------
             ; d0 = fileid
             ; a0 = load address
-            ; a1 = decomparess address
+            ; a1 = decompress address
 load_file               movem.l d0-d7/a0-a6,-(a7)
                         move.w  #27-1,d7                        ; size of file table (26 entries)
                         lea     FILE_TABLE_ADDR,a3
@@ -301,22 +298,24 @@ fade_copper_colours
 ; <- d0.l  != 0         (error)
 ;
 ;   call: byteloader
-byteloader
-                    include './4489Loader/4489_byteloader.s'
+byteloader          include './4489Loader/4489_byteloader.s'
 
 
 ;  in:  a0 = start of compressed data
 ;       a1 = start of decompression buffer
-
+;
 ;   call: zx0_decompress
-zx0
-                    include './zx0/unzx0_68000.s'
+zx0                 include './zx0/unzx0_68000.s'
 
 
-
+; make pad bytes when assembling without TESTBOOT for real disk.
+; Ensures the bootblock is 1024 bytes long. Will cause error if code
+; exceeds 1024 bytes, which is a handy check.
+bootblockend
+        IFND TESTBOOT 
                 ; ----------------------- pad bytes ------------------------
                 ; pad bootblock file size to 1024 bytes
-bootblockend
-               ; dcb.b   1024-(bootblockend-bootblock_header)
+                dcb.b   1024-(bootblockend-bootblock_header)
+        ENDC
 
 
