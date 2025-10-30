@@ -23,20 +23,20 @@
 
 
                 ; menu ptr list indexes
-MENU_IDX_main_menu              EQU     $00     ; L0003A7E4 - index = $00
-MENU_IDX_disk_1_menu            EQU     $04     ; L0003AAE1 - index = $04
-MENU_IDX_disk_2_menu            EQU     $08     ; L0003AE0B - index = $08
-MENU_IDX_disk_3_menu            EQU     $0c     ; L0003B108 - index = $0c
-MENU_IDX_credits_menu           EQU     $10     ; L0003B405 - index = $10
-MENU_IDX_greetings_1_menu       EQU     $14     ; L0003B702 - index = $14
-MENU_IDX_greetings_2_menu       EQU     $18     ; L0003B9FF - index = $18
-MENU_IDX_addresses_1_menu       EQU     $1c     ; L0003BCFC - index = $1c
-MENU_IDX_addresses_2_menu       EQU     $20     ; L0003BFF9 - index = $20
-MENU_IDX_addresses_3_menu       EQU     $24     ; L0003C2F6 - index = $24
-MENU_IDX_addresses_4_menu       EQU     $28     ; L0003C5F3 - index = $28
-MENU_IDX_addresses_5_menu       EQU     $2c     ; L0003C8F0 - index = $2c
-MENU_IDX_addresses_6_menu       EQU     $30     ; L0003CBED - index = $30
-MENU_IDX_pd_message_menu        EQU     $34     ; L0003CEEA - index = $34
+MENU_IDX_main_menu              EQU     $00     ; menu index/id = $00
+MENU_IDX_disk_1_menu            EQU     $04     ; menu index/id = $04
+MENU_IDX_disk_2_menu            EQU     $08     ; menu index/id = $08
+MENU_IDX_disk_3_menu            EQU     $0c     ; menu index/id = $0c
+MENU_IDX_credits_menu           EQU     $10     ; menu index/id = $10
+MENU_IDX_greetings_1_menu       EQU     $14     ; menu index/id = $14
+MENU_IDX_greetings_2_menu       EQU     $18     ; menu index/id = $18
+MENU_IDX_addresses_1_menu       EQU     $1c     ; menu index/id = $1c
+MENU_IDX_addresses_2_menu       EQU     $20     ; menu index/id = $20
+MENU_IDX_addresses_3_menu       EQU     $24     ; menu index/id = $24
+MENU_IDX_addresses_4_menu       EQU     $28     ; menu index/id = $28
+MENU_IDX_addresses_5_menu       EQU     $2c     ; menu index/id = $2c
+MENU_IDX_addresses_6_menu       EQU     $30     ; menu index/id = $30
+MENU_IDX_pd_message_menu        EQU     $34     ; menu index/id = $34
 
 
 FILE_TABLE_OFFSET       EQU $400        ; disk offset to file table (directly following the bootblock)
@@ -61,16 +61,16 @@ TEST_BUILD SET 1                                        ; Comment this to remove
         ; Set 'Test Build' or 'Live Build' parameters 
         IFD TEST_BUILD
 STACK_ADDRESS   EQU     start_demo                      ; test stack address (start of program)
-MUSIC_BUFFER    EQU     music_buffer                    ; final depacked and de-delta-ed music module for playing
-DEPACKED_BUFFER EQU     depacked_buffer                 ; depacked module buffer (still delta encoded here)
-LOAD_BUFFER     EQU     load_buffer                     ; zx0 packed file load buffer
+MUSIC_BUFFER    EQU     buffer_low                      ; final depacked module for playing (also doubles as a 120kb buffer for initial zxo load area)
+BUFFER_LOW      EQU     buffer_low
+BUFFER_HIGH     EQU     buffer_high                     ; depacked module buffer (still delta encoded here)
 MFM_BUFFER      EQU     mfm_track_buffer
         ELSE
                 org     $2000                            
 STACK_ADDRESS   EQU     $00001000                       ; original stack address
-MUSIC_BUFFER    EQU     $00020000                       ; final depacked and de-delta-ed music module for playing
-DEPACKED_BUFFER EQU     $00040000                       ; depacked module buffer (still delta encoded here)
-LOAD_BUFFER     EQU     $00069000                       ; zx0 packed file load buffer (MFM_BUFFER - MAX_ZX0_SIZE) = ($7d000 - $14000 = $69000)
+MUSIC_BUFFER    EQU     $00020000                       ; final depacked module for playing (also doubles as a 120kb buffer for initial zxo load area)
+BUFFER_LOW      EQU     $00020000
+BUFFER_HIGH     EQU     $00040000                       ; depacked module buffer (still delta encoded here)
 MFM_BUFFER      EQU     $0007d140                       ; raw 4489 loader MFM buffer
         ENDC
 
@@ -1367,10 +1367,10 @@ set_pd_message_menu_params ; original address L00020CA8
 
 loader_file_id                  dc.l    $0                      ; file id of module to load.
 
-loader_start_offset             dc.l    $0
-loader_file_length              dc.l    $0
-loader_disk_number              dc.l    $0
-loader_decompressed_length      dc.l    $0
+;loader_start_offset             dc.l    $0
+;loader_file_length              dc.l    $0
+;loader_disk_number              dc.l    $0
+;loader_decompressed_length      dc.l    $0
 
                 ; -------------------- load music: jarresque -------------------
 set_loader_jarresque    ; original address L00020E2C
@@ -2088,6 +2088,8 @@ disk_1_file_table_packed_delta
                 dcb.l   4*27                    ; disk file table 4 long words per file entry
 
 
+
+
                 ; ---------------------- load music -----------------------
                 ; mfm track loader.
                 ; load a music file from disk, checks the disk number
@@ -2128,27 +2130,23 @@ load_music                      movem.l d0-d7/a0-a6,-(a7)               ; save a
 .load_file          ; load file from disk to address a0
                                 move.l  FTAB_FILE_OFFSET(a3),d0         ; disk byte offset
                                 move.l  FTAB_FILE_SIZE(a3),d1           ; disk file length
-                                move.l  d1,loader_decompressed_length
                                 moveq   #$00000000,d2                   ; drive 0
-                                lea     LOAD_BUFFER,a0
+                                lea     BUFFER_LOW,a0
                                 lea     MFM_BUFFER,a1
                                 bsr     loader_4489
                                 tst.l   d0                              ; test for load error
                                 bne.s   .load_error                     ; some kinda disk error.
 
-                                ; movem.l (a7)+,d0-d7/a0-a6               ; restore saved registers
-
                                 ; DECOMPRESS ZXO
-                                lea     LOAD_BUFFER,a0
-                                lea     DEPACKED_BUFFER,a1
+                                lea     BUFFER_LOW,a0
+                                lea     BUFFER_HIGH,a1
                                 movem.l a0/a1,-(a7)
                                 jsr     uncompress_zx0
                                 movem.l (a7)+,a0/a1
 
                                 ; DECOMPRESS DELTA 4
-                                lea     DEPACKED_BUFFER,a0              ; delta 4 compressed file start
-                                lea     MUSIC_BUFFER,a1                 ; output buffer for decompressed module destination
-                                move.l  loader_decompressed_length,d0   ; compressed file length
+                                lea     BUFFER_HIGH,a0                  ; delta 4 compressed file start
+                                lea     BUFFER_LOW,a1                   ; output buffer for decompressed module destination
                                 jsr     depackdelta4
 
                                 movem.l (a7)+,d0-d7/a0-a6
@@ -3272,13 +3270,12 @@ pd_message_menu        ; original address L0003CEEA
 
         IFD TEST_BUILD
         even
-music_buffer            dcb.b   $1A000,$00
+buffer_low             dcb.b   1024*120,$00     ; initial load buffer zx0 (75kb largest packed file) / final module buffer (largest module 170kb)
         even
-depacked_buffer         dcb.b   $11000,$00
+buffer_high            dcb.b   1024*120,$00    ; zxo depacked buffer (delta4 depack buffer)
+
         even
-load_buffer             dcb.b   $14000,$00
-        even
-mfm_track_buffer        dcb.w   $1A00            ; 13Kb raw mfm track buffer for testing
+mfm_track_buffer        dcb.w   $1A00           ; 13Kb raw mfm track buffer for testing
         ENDC
 
 
