@@ -54,7 +54,7 @@ FTAB_FILE_SIZE          EQU $C
 
 
 
-;TEST_BUILD SET 1                                        ; Comment this to remove TEST_BUILD 
+TEST_BUILD SET 1                                        ; Comment this to remove TEST_BUILD 
 
 
      
@@ -107,6 +107,10 @@ start_demo                      LEA.L   STACK_ADDRESS,A7
                         ENDC
 
                                 bsr.w   load_file_table 
+
+                                ; initialise mouse input
+                                MOVE.B  CUSTOM+JOY0DAT,mouse_y_value            ; mouse y initial value - $00dff00a,L00020882
+
                                 BRA.W   main_loop
 
 
@@ -155,7 +159,6 @@ init_display                    BSR.W   init_vectorlogo_bitplanes
                                 LEA.L   copper_list(pc),a0
                                 MOVE.L  A0,COP1LC(A6)
                                 MOVE.W  #$87ef,DMACON(A6)                       ; BLTPRI,DMAEN,BPLEN,COPEN,BLTEN,SPREN,AUD0-3
-                                MOVE.B  CUSTOM+JOY0DAT,mouse_y_value            ; mouse y initial value - $00dff00a,L00020882
                                 RTS 
 
 
@@ -344,112 +347,117 @@ top_logo_fade_count
 
 
 
+                ; new main loop, created to clean-up the state-management
+main_loop
+
+                                bra     main_loop
+
 
 
                 ; ****************************************************************
                 ; ***********                 MAIN LOOP                 **********
                 ; ****************************************************************
-main_loop       
-
-                        ; check if need to change music track
-                                BTST.B  #LOAD_MODULE,loader_status_bits         
-                                BEQ.B   .do_menu_processing                     
-
-.do_change_music        ; stop existing track(if playing), then load selected track
-                                BTST.B  #MUSIC_PLAYING,music_status_bits        ; is music playing?
-                                BEQ.B   .load_music                             ;   if no, load music
-                                                                                ;   if yes, stop music
-.disable_music          ; stop music playing
-                                BCLR.B  #MUSIC_PLAYING,music_status_bits                             
-                                JSR     _mt_end
-
-.load_music             ; load music
-                                BSR.W   load_music                                              
-                                BCLR.B  #LOAD_MODULE,loader_status_bits                                                 ; set running status
-
-                                BCLR.B  #MENU_FADING,menu_selection_status_bits                 ; enable menu selection 
-                                BCLR.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     
-                                BSET.B  #$0001,music_status_bits
-
-
-
-.do_menu_processing     ; do menu processing
-                                BTST.B  #MENU_FADING,menu_selection_status_bits                 
-                                BNE.B   .mouse_not_clicked                                      
-                        
-.mouse_test             ; test mouse clicked
-                                BTST.B  #$0006,$00bfe001
-                                BNE.B   .mouse_not_clicked                                      
-
-.mouse_is_clicked       ; do menu item selected processing
-                                BSET.B  #MENU_FADING,menu_selection_status_bits                 ; disable menu selection 
-                                BSET.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     
-                                BSR.W   do_menu_action                                         
-
-.mouse_not_clicked      ; test draw new menu (if required)
-                                BTST.B  #MENU_DISP_DRAW,menu_display_status_bits                
-                                BNE.B   .check_clear_menu                                       
-                                BSR.W   display_menu                                           
-
-                        ; test clear menu display (if required)
-.check_clear_menu
-                                BTST.B  #MENU_DISP_CLEAR,menu_display_status_bits               
-                                BEQ.B   .check_music_init                                       
-                                BSR.W   clear_menu_display                                      
-
-                        ; test menu item selected/loading
-.check_music_init
-                                BTST.B  #$0001,music_status_bits
-                                BEQ.B   .end_main_loop                                          
-
-                        ; do music initialisation
-.initialise_music
-                                JSR     _mt_remove
-
-                                lea     $0,a0
-                                move.L  #$1,d0
-                                JSR     _mt_install
-
-                                lea     MUSIC_BUFFER,a0
-                                lea     $0,a1
-                                move.l  #$0,d0
-                                JSR     _mt_init
-
-                                move.b  #$ff,_mt_Enable
-
-                                BCLR.B  #$0001,music_status_bits
-                                BSET.B  #$0000,music_status_bits
-
-.end_main_loop
-                                BRA.W   main_loop                                                
-
-
-
-                ; menu_selection_status_bits
-MENU_FADING             EQU     $0000           ; bit 0 (1 = menu is fading in/out)
-MENU_MOUSE_PTR_DISABLED EQU     $0001           ; bit 1 (1 = menu pointer updates disabled)
-menu_selection_status_bits      dc.b    $00     ; original address L000203A8
+;main_loop       
+;
+;                        ; check if need to change music track
+;                                BTST.B  #LOAD_MODULE,loader_status_bits         
+;                                BEQ.B   .do_menu_processing                     
+;
+;.do_change_music        ; stop existing track(if playing), then load selected track
+;                                BTST.B  #MUSIC_PLAYING,music_status_bits        ; is music playing?
+;                                BEQ.B   .load_music                             ;   if no, load music
+;                                                                                ;   if yes, stop music
+;.disable_music          ; stop music playing
+;                                BCLR.B  #MUSIC_PLAYING,music_status_bits                             
+;                                JSR     _mt_end
+;
+;.load_music             ; load music
+;                                BSR.W   load_music                                              
+;                                BCLR.B  #LOAD_MODULE,loader_status_bits                                                 ; set running status
+;
+;                                BCLR.B  #MENU_FADING,menu_selection_status_bits                 ; enable menu selection 
+;                                BCLR.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     
+;                                BSET.B  #$0001,music_status_bits
+;
+;
+;
+;.do_menu_processing     ; do menu processing
+;                                BTST.B  #MENU_FADING,menu_selection_status_bits                 
+;                                BNE.B   .mouse_not_clicked                                      
+;                        
+;.mouse_test             ; test mouse clicked
+;                                BTST.B  #$0006,$00bfe001
+;                                BNE.B   .mouse_not_clicked                                      
+;
+;.mouse_is_clicked       ; do menu item selected processing
+;                                BSET.B  #MENU_FADING,menu_selection_status_bits                 ; disable menu selection 
+;                                BSET.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     
+;                                BSR.W   do_menu_action                                         
+;
+;.mouse_not_clicked      ; test draw new menu (if required)
+;                                BTST.B  #MENU_DISP_DRAW,menu_display_status_bits                
+;                                BNE.B   .check_clear_menu                                       
+;                                BSR.W   display_menu                                           
+;
+;                        ; test clear menu display (if required)
+;.check_clear_menu
+;                                BTST.B  #MENU_DISP_CLEAR,menu_display_status_bits               
+;                                BEQ.B   .check_music_init                                       
+;                                BSR.W   clear_menu_display                                      
+;
+;                        ; test menu item selected/loading
+;.check_music_init
+;                                BTST.B  #$0001,music_status_bits
+;                                BEQ.B   .end_main_loop                                          
+;
+;                        ; do music initialisation
+;.initialise_music
+;                                JSR     _mt_remove
+;
+;                                lea     $0,a0
+;                                move.L  #$1,d0
+;                                JSR     _mt_install
+;
+;                                lea     MUSIC_BUFFER,a0
+;                                lea     $0,a1
+;                                move.l  #$0,d0
+;                                JSR     _mt_init
+;
+;                                move.b  #$ff,_mt_Enable
+;
+;                                BCLR.B  #$0001,music_status_bits
+;                                BSET.B  #$0000,music_status_bits
+;
+;.end_main_loop
+;                                BRA.W   main_loop                                                
 
 
 
-LOAD_MODULE             EQU     $0000           ; bit 0 (1 = loading protracker module)
-loader_status_bits      ; original address L000203A9
-                                dc.b    $00     ; bit 0 (1 = loading protrackermodule)
-
-
-                ; menu_display_status_bits
-MENU_DISP_FADE_IN               EQU     $0      ; bit 0 - 1 = Fade Menu In
-MENU_DISP_FADE_OUT              EQU     $1      ; bit 1 - 1 = Fade Menu Out
-MENU_DISP_CLEAR                 EQU     $6      ; bit 6 - 1 = Clear Menu Display
-MENU_DISP_DRAW                  EQU     $7      ; bit 7 - 1 = Draw New Menu
-menu_display_status_bits        dc.b    $00     ; original address L000203AA
-
-MUSIC_PLAYING                   EQU     $0      ; bit 0 - 1 = music playing
-music_status_bits               dc.b    $00     ; original address L000203AB 
-
+;                ; menu_selection_status_bits
+;MENU_FADING             EQU     $0000           ; bit 0 (1 = menu is fading in/out)
+;MENU_MOUSE_PTR_DISABLED EQU     $0001           ; bit 1 (1 = menu pointer updates disabled)
+;menu_selection_status_bits      dc.b    $00     ; original address L000203A8
+;
+;
+;
+;LOAD_MODULE             EQU     $0000           ; bit 0 (1 = loading protracker module)
+;loader_status_bits      ; original address L000203A9
+;                                dc.b    $00     ; bit 0 (1 = loading protrackermodule)
+;
+;
+;                ; menu_display_status_bits
+;MENU_DISP_FADE_IN               EQU     $0      ; bit 0 - 1 = Fade Menu In
+;MENU_DISP_FADE_OUT              EQU     $1      ; bit 1 - 1 = Fade Menu Out
+;MENU_DISP_CLEAR                 EQU     $6      ; bit 6 - 1 = Clear Menu Display
+;MENU_DISP_DRAW                  EQU     $7      ; bit 7 - 1 = Draw New Menu
+;menu_display_status_bits        dc.b    $00     ; original address L000203AA
+;
+;MUSIC_PLAYING                   EQU     $0      ; bit 0 - 1 = music playing
+;music_status_bits               dc.b    $00     ; original address L000203AB 
+;
 menu_ptr_index  ; original address L000203AC -  ;  index to menu typer ptr list.
-                                dc.w    $0000    ; index to the list of menu text pointers (multiple of 4 - longword list)
-
+;                                dc.w    $0000    ; index to the list of menu text pointers (multiple of 4 - longword list)
+;
 
 
                 ; ---------------------- Do Nothing Interrupt Handler -------------------
@@ -466,16 +474,18 @@ color_loop                      move.w  VHPOSR(a6),COLOR00(a6)
                                 MOVEM.L (A7)+,D0-D7/A0-A6
                                 RTE                     
 
+
+
                 ; ----------------------- Level 3 Interrupt Handler ----------------
                 ; VBL and COPER interrupt handler routine, intended to be called
                 ; ones per frame.
-level_3_interrupt_handler ; original address L000203AE
+                ; new level 3 interrupt handler, rewritten for better state management
+level_3_interrupt_handler
                                 MOVEM.L D0-D7/A0-A6,-(A7)
                                 lea     $dff000,a6
                                 MOVE.W  INTREQR(a6),d0
                                 AND.W   #$0020,d0
                                 BEQ.S   .exit_handler  
-
 
                                 BSR.W   text_scroller                   ; Bottom screen text scroller - L0002152E
                                 BSR.W   swap_vector_logo_buffers        ; L000212F8
@@ -486,42 +496,71 @@ level_3_interrupt_handler ; original address L000203AE
                                 BSR.W   calc_logo_lighting              ; L000213D8
                                 BSR.W   fill_vector_logo                ; L00021290
 
-                        ; do fade in menu display (if required)
-.do_menu_fade_in                BTST.B  #MENU_DISP_FADE_IN,menu_display_status_bits             ; L000203AA
-                                BEQ.B   .do_menu_fade_out 
-                                BSR.W   fade_in_menu_display            ; L000205D4 - bit 0 = 1 - fade in menu display
-
-                        ; do fade out menu display (if required)
-.do_menu_fade_out               BTST.B  #MENU_DISP_FADE_OUT,menu_display_status_bits            ; L000203AA - bit 1 = 1 - fade out menu display
-                                BEQ.B   .do_blended_fade                       
-                                BSR.W   fade_out_menu_display                                   ; L00020672 - bit 1 = 1 - menu routine
-
-                        ; blend typer colour where it overlaps with vector logo (alpha blend effect)
-.do_blended_fade                BSR.W   blend_typer_colour_fade                                 ; L00020746
-
-
-
-.do_menu_item_pointers  ; test menu disabled status bits
-                                BTST.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     ; L000203A8
-                                BNE.B   .do_music                                               ; L00020406 
-                        ; update menu item selection pointer display
-                                BSR.W   update_menu_selector_position                           ; L000207EA
-
-
-.do_music                ; test music loaded & ready - original address L00020406
-                                BTST.B  #MUSIC_PLAYING,music_status_bits
-                                BEQ.B   .no_music                                               ; L00020420
-                        ; play/update music
-                                ;BSR.W   play_music                                              ; L00021C2C
-                                move.b  #$ff,_mt_Enable
-                                bra     .exit_handler 
-.no_music
-                                ;move.b  #$00,_mt_Enable
-
-.exit_handler    ; original address L00020424
+.exit_handler    
                                 MOVE.W  #$0020,INTREQ(A6)
                                 MOVEM.L (A7)+,D0-D7/A0-A6
                                 RTE 
+
+
+
+;                ; ----------------------- Level 3 Interrupt Handler ----------------
+;                ; VBL and COPER interrupt handler routine, intended to be called
+;                ; ones per frame.
+;level_3_interrupt_handler 
+;                                MOVEM.L D0-D7/A0-A6,-(A7)
+;                                lea     $dff000,a6
+;                                MOVE.W  INTREQR(a6),d0
+;                                AND.W   #$0020,d0
+;                                BEQ.S   .exit_handler  
+;
+;
+;                                BSR.W   text_scroller                   ; Bottom screen text scroller - L0002152E
+;                                BSR.W   swap_vector_logo_buffers        ; L000212F8
+;                                BSR.W   clear_vector_logo_buffer        ; L000212D2
+;                                BSR.W   spin_logo                       ; L000213EE
+;                                BSR.W   calc_3d_perspective             ; L0002138E
+;                                BSR.W   draw_logo_outline               ; L00021352
+;                                BSR.W   calc_logo_lighting              ; L000213D8
+;                                BSR.W   fill_vector_logo                ; L00021290
+;
+;
+;
+;                        ; do fade in menu display (if required)
+;.do_menu_fade_in                BTST.B  #MENU_DISP_FADE_IN,menu_display_status_bits             ; L000203AA
+;                                BEQ.B   .do_menu_fade_out 
+;                                BSR.W   fade_in_menu_display            ; L000205D4 - bit 0 = 1 - fade in menu display
+;
+;                        ; do fade out menu display (if required)
+;.do_menu_fade_out               BTST.B  #MENU_DISP_FADE_OUT,menu_display_status_bits            ; L000203AA - bit 1 = 1 - fade out menu display
+;                                BEQ.B   .do_blended_fade                       
+;                                BSR.W   fade_out_menu_display                                   ; L00020672 - bit 1 = 1 - menu routine
+;
+;                        ; blend typer colour where it overlaps with vector logo (alpha blend effect)
+;.do_blended_fade                BSR.W   blend_typer_colour_fade                                 ; L00020746
+;
+;
+;
+;.do_menu_item_pointers  ; test menu disabled status bits
+;                                BTST.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     ; L000203A8
+;                                BNE.B   .do_music                                               ; L00020406 
+;                        ; update menu item selection pointer display
+;                                BSR.W   update_menu_selector_position                           ; L000207EA
+;
+;
+;.do_music                ; test music loaded & ready - original address L00020406
+;                                BTST.B  #MUSIC_PLAYING,music_status_bits
+;                                BEQ.B   .no_music                                               ; L00020420
+;                        ; play/update music
+;                                ;BSR.W   play_music                                              ; L00021C2C
+;                                move.b  #$ff,_mt_Enable
+;                                bra     .exit_handler 
+;.no_music
+;                                ;move.b  #$00,_mt_Enable
+;
+;.exit_handler    ; original address L00020424
+;                                MOVE.W  #$0020,INTREQ(A6)
+;                                MOVEM.L (A7)+,D0-D7/A0-A6
+;                                RTE 
 
 
 
@@ -619,8 +658,8 @@ display_menu    ; original address L0002049C
                                 MOVE.W  #$002c,D7                       ; reset line loop counter (next 45 chars)
                                 DBF.W   D6,.print_char_loop             ; do next line loop
 
-                                BSET.B  #MENU_DISP_DRAW,menu_display_status_bits        ; bit 7 - 1 = menu typer completed
-                                BSET.B  #MENU_DISP_FADE_IN,menu_display_status_bits     ; bit 0 - 1 = do fade in menu display
+                                ;BSET.B  #MENU_DISP_DRAW,menu_display_status_bits        ; bit 7 - 1 = menu typer completed
+                                ;BSET.B  #MENU_DISP_FADE_IN,menu_display_status_bits     ; bit 0 - 1 = do fade in menu display
                                 MOVE.W  #$0000,character_x_pos                          ; reset x position
                                 MOVE.W  #$0000,character_y_offset                       ; reset y offset (line position)
                                 RTS 
@@ -676,8 +715,8 @@ fade_in_menu_display    ; original address L000205D4
                                 CMP.B   #$10,fade_counter                               ; L00020742
                                 BNE.B   .fade_in_not_complete                           ; L00020666 
 .set_fade_in_complete
-                                BCLR.B  #MENU_DISP_FADE_IN,menu_display_status_bits      ; set fade in completed (clear bit 0) - L000203AA
-                                BCLR.B  #MENU_FADING,menu_selection_status_bits          ; L000203A8
+                                ;BCLR.B  #MENU_DISP_FADE_IN,menu_display_status_bits      ; set fade in completed (clear bit 0) - L000203AA
+                                ;BCLR.B  #MENU_FADING,menu_selection_status_bits          ; L000203A8
                                 MOVE.W  #$0000,fade_counter                              ; L00020742
 .fade_in_not_complete
                                 RTS 
@@ -734,9 +773,9 @@ fade_out_menu_display   ; original address L00020672
                                 CMP.B   #$10,fade_counter                               ; L00020742
                                 BNE.B   .fade_in_not_complete                           ; L00020736 
 .set_fade_out_complete
-                                BCLR.B  #MENU_DISP_FADE_OUT,menu_display_status_bits            ; set fade out completed (clear bit 1) - L000203AA
-                                BSET.B  #MENU_DISP_CLEAR,menu_display_status_bits               ; (set bit 6) - L000203AA
-                                BCLR.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     ; L000203A8
+                                ;BCLR.B  #MENU_DISP_FADE_OUT,menu_display_status_bits            ; set fade out completed (clear bit 1) - L000203AA
+                                ;BSET.B  #MENU_DISP_CLEAR,menu_display_status_bits               ; (set bit 6) - L000203AA
+                                ;BCLR.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     ; L000203A8
                                 MOVE.W  #$0000,fade_counter                                     ; L00020742
 .set_menu_sprite_ptrs
                                 LEA.L   menu_sprite_left,A0                                     ; L00035FB8,A0
@@ -828,8 +867,8 @@ clear_menu_display      ; original address L000207B6
                                 DBF.W   D7,.clear_loop 
                                 MOVE.W  #$0009,D7
                                 DBF.W   D6,.clear_loop 
-                                BCLR.B  #MENU_DISP_DRAW,menu_display_status_bits        ; L000203AA ; flag - menu cleared status bits
-                                BCLR.B  #MENU_DISP_CLEAR,menu_display_status_bits       ; L000203AA ; flag - menu cleared status bits
+                                ;BCLR.B  #MENU_DISP_DRAW,menu_display_status_bits        ; L000203AA ; flag - menu cleared status bits
+                                ;BCLR.B  #MENU_DISP_CLEAR,menu_display_status_bits       ; L000203AA ; flag - menu cleared status bits
                                 RTS 
 
 
@@ -1014,8 +1053,8 @@ do_main_menu_actions    ; original address L00020938
 
 
 enable_menu_selection
-                                BCLR.B  #MENU_FADING,menu_selection_status_bits                 
-                                BCLR.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     
+                                ;BCLR.B  #MENU_FADING,menu_selection_status_bits                 
+                                ;BCLR.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     
                                 RTS 
 
 
@@ -1143,7 +1182,7 @@ do_greetings_1_menu_actions     ; original address L00020E1C
                 ; set the parameters necessary for the display of the 'main menu'
                 ;
 set_main_menu_params    ; original address L0002124E
-                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                                ;BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
                                 MOVE.W  #$0020,menu_selector_min_y                      ; L00020884
                                 MOVE.W  #$0050,menu_selector_max_y                      ; L00020886
                                 MOVE.W  #MENU_IDX_main_menu,menu_ptr_index              ; L000203AC
@@ -1159,7 +1198,7 @@ set_main_menu_params    ; original address L0002124E
                 ; set the parameters necessary for the display of the 'disk 1 menu'
                 ;
 set_disk_1_menu_params    ; original address L00020990
-                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
                                 MOVE.W  #$0030,menu_selector_min_y                      ; L00020884
                                 MOVE.W  #$0058,menu_selector_max_y                      ; L00020886
                                 MOVE.W  #MENU_IDX_disk_1_menu,menu_ptr_index            ; L000203AC
@@ -1175,7 +1214,7 @@ set_disk_1_menu_params    ; original address L00020990
                 ; set the parameters necessary for the display of the 'disk 2 menu'
                 ;
 set_disk_2_menu_params   ; original address L000209D2
-                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                                ;BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
                                 MOVE.W  #$0028,menu_selector_min_y                      ; L00020884
                                 MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
                                 MOVE.W  #MENU_IDX_disk_2_menu,menu_ptr_index            ; L000203AC
@@ -1191,7 +1230,7 @@ set_disk_2_menu_params   ; original address L000209D2
                 ; set the parameters necessary for the display of the 'disk 3 menu'
                 ;
 set_disk_3_menu_params  ; original address L00020A14
-                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
                                 MOVE.W  #$0028,menu_selector_min_y                      ; L00020884
                                 MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
                                 MOVE.W  #MENU_IDX_disk_3_menu,menu_ptr_index            ; L000203AC
@@ -1207,7 +1246,7 @@ set_disk_3_menu_params  ; original address L00020A14
                 ; set the parameters necessary for the display of the 'credits menu'
                 ;
 set_credits_menu_params ; original address L00020A56
-                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
                                 MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
                                 MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
                                 MOVE.W  #MENU_IDX_credits_menu,menu_ptr_index           ; L000203AC
@@ -1223,7 +1262,7 @@ set_credits_menu_params ; original address L00020A56
                 ; set the parameters necessary for the display of the 'greetings 1 menu'
                 ;
 set_greetz_1_menu_params ; original address L00020A98
-                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
                                 MOVE.W  #$0068,menu_selector_min_y                      ; L00020884
                                 MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
                                 MOVE.W  #MENU_IDX_greetings_1_menu,menu_ptr_index       ; L000203AC
@@ -1239,7 +1278,7 @@ set_greetz_1_menu_params ; original address L00020A98
                 ; set the parameters necessary for the display of the 'greetings 2 menu'
                 ;
 set_greetz_2_menu_params ; original address L00020ADA
-                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
                                 MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
                                 MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
                                 MOVE.W  #MENU_IDX_greetings_2_menu,menu_ptr_index       ; L000203AC
@@ -1255,7 +1294,7 @@ set_greetz_2_menu_params ; original address L00020ADA
                 ; set the parameters necessary for the display of the 'addresses 1 menu'
                 ;
 set_addresses_1_menu_params ; original address L00020B1C
-                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
                                 MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
                                 MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
                                 MOVE.W  #MENU_IDX_addresses_1_menu,menu_ptr_index       ; L000203AC
@@ -1271,7 +1310,7 @@ set_addresses_1_menu_params ; original address L00020B1C
                 ; set the parameters necessary for the display of the 'addresses 2 menu'
                 ;
 set_addresses_2_menu_params ; original address L00020B5E
-                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
                                 MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
                                 MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
                                 MOVE.W  #MENU_IDX_addresses_2_menu,menu_ptr_index       ; L000203AC
@@ -1287,7 +1326,7 @@ set_addresses_2_menu_params ; original address L00020B5E
                 ; set the parameters necessary for the display of the 'addresses 3 menu'
                 ;
 set_addresses_3_menu_params ; original address L00020BA0
-                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                                ;BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
                                 MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
                                 MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
                                 MOVE.W  #MENU_IDX_addresses_3_menu,menu_ptr_index       ; L000203AC
@@ -1303,7 +1342,7 @@ set_addresses_3_menu_params ; original address L00020BA0
                 ; set the parameters necessary for the display of the 'addresses 4 menu'
                 ;
 set_addresses_4_menu_params ; original address L00020BE2
-                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
                                 MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
                                 MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
                                 MOVE.W  #MENU_IDX_addresses_4_menu,menu_ptr_index       ; L000203AC
@@ -1319,7 +1358,7 @@ set_addresses_4_menu_params ; original address L00020BE2
                 ; set the parameters necessary for the display of the 'addresses 5 menu'
                 ;
 set_addresses_5_menu_params ; original address L00020C24
-                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
                                 MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
                                 MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
                                 MOVE.W  #MENU_IDX_addresses_5_menu,menu_ptr_index       ; L000203AC
@@ -1335,7 +1374,7 @@ set_addresses_5_menu_params ; original address L00020C24
                 ; set the parameters necessary for the display of the 'addresses 6 menu'
                 ;
 set_addresses_6_menu_params ; original address L00020C66
-                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
                                 MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
                                 MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
                                 MOVE.W  #MENU_IDX_addresses_6_menu,menu_ptr_index       ; L000203AC
@@ -1351,7 +1390,7 @@ set_addresses_6_menu_params ; original address L00020C66
                 ; set the parameters necessary for the display of the 'pd message menu'
                 ;
 set_pd_message_menu_params ; original address L00020CA8
-                                BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
+                              ;  BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
                                 MOVE.W  #$0078,menu_selector_min_y                      ; L00020884
                                 MOVE.W  #$0078,menu_selector_max_y                      ; L00020886
                                 MOVE.W  #MENU_IDX_pd_message_menu,menu_ptr_index        ; L000203AC 
@@ -1371,156 +1410,156 @@ loader_file_id                  dc.l    $0                      ; file id of mod
 
                 ; -------------------- load music: jarresque -------------------
 set_loader_jarresque    ; original address L00020E2C
-                                BSET.B  #LOAD_MODULE,loader_status_bits 
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits 
                                 move.l  #'jarr',loader_file_id
                                 RTS 
 
                 ; ------------------- load music: the fly --------------------
 set_loader_the_fly      ; original address L00020E5A
-                                BSET.B  #LOAD_MODULE,loader_status_bits  
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits  
                                 move.l  #'thef',loader_file_id  
                                 RTS 
 
                 ; ------------------- load music: stratospheric city --------------------
 set_loader_stratospheric_city; original address L00020E88
-                                BSET.B  #LOAD_MODULE,loader_status_bits
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits
                                 move.l  #'stra',loader_file_id
                                 RTS 
 
                 ; ------------------- load music: float --------------------
 set_loader_float        ; original address L00020EB6
-                                BSET.B  #LOAD_MODULE,loader_status_bits 
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits 
                                 move.l  #'floa',loader_file_id
                                 RTS 
 
                 ; ------------------- load music: flight-sleepy mix --------------------
 set_loader_flight_sleepy_mix ; original address L00020EE4
-                                BSET.B  #LOAD_MODULE,loader_status_bits 
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits 
                                 move.l  #'flig',loader_file_id
                                 RTS 
 
                 ; ------------------- load music: bright --------------------
 set_loader_bright       ; original address L00020F12
-                                BSET.B  #LOAD_MODULE,loader_status_bits 
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits 
                                 move.l  #'brig',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: love your money --------------------
 set_loader_love_your_money      ; original address L00020F40
-                                BSET.B  #LOAD_MODULE,loader_status_bits
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits
                                 move.l  #'love',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: cosmic how much --------------------
 set_loader_cosmic_how_much      ; original address L00020F6E
-                                BSET.B  #LOAD_MODULE,loader_status_bits
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits
                                 move.l  #'cosm',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: this is not a love song --------------------
 set_loader_not_a_love_song      ; original address L00020F9C
-                                BSET.B  #LOAD_MODULE,loader_status_bits
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits
                                 move.l  #'this',loader_file_id  
                                 RTS 
 
 
                 ; ------------------- load music: eat the ballbearing --------------------
 set_loader_eat_the_ballbearing ; original address L00020FCA
-                                BSET.B  #LOAD_MODULE,loader_status_bits
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits
                                 move.l  #'eatt',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: sound of silence --------------------
 set_loader_sound_of_silence ; orignal address L00020FF8
-                                BSET.B  #LOAD_MODULE,loader_status_bits
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits
                                 move.l  #'soun',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: retouche --------------------
 set_loader_retouche     ; original address L00021026
-                                BSET.B  #LOAD_MODULE,loader_status_bits
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits
                                 move.l  #'reto',loader_file_id 
                                 RTS 
 
 
                 ; ------------------- load music: techwar --------------------
 set_loader_techwar      ; original address L00021054
-                                BSET.B  #LOAD_MODULE,loader_status_bits
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits
                                 move.l  #'tech',loader_file_id 
                                 RTS 
 
 
                 ; ------------------- load music: shaft --------------------
 set_loader_shaft        ; original address L00021082
-                                BSET.B  #LOAD_MODULE,loader_status_bits
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits
                                 move.l  #'shaf',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: mental obstacle --------------------
 set_loader_mental_obstacle      ; original address L000210B0
-                                BSET.B  #LOAD_MODULE,loader_status_bits
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits
                                 move.l  #'ment',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: blade runner --------------------
 set_loader_blade_runner ; original address L000210DE
-                                BSET.B  #LOAD_MODULE,loader_status_bits
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits
                                 move.l  #'blad',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: natural reality --------------------
 set_loader_natural_reality      ; original address L0002110C
-                                BSET.B  #LOAD_MODULE,loader_status_bits
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits
                                 move.l  #'natu',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: obliteration fin --------------------
 set_loader_obliteration_fin ; original address L0002113A
-                                BSET.B  #LOAD_MODULE,loader_status_bits
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits
                                 move.l  #'obli',loader_file_id 
                                 RTS 
 
 
                 ; ------------------- load music: obliteration fin --------------------
 set_loader_skyriders    ; original address L00021168
-                                BSET.B  #LOAD_MODULE,loader_status_bits
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits
                                 move.l  #'skyr',loader_file_id 
                                 RTS 
 
 
                 ; ------------------- load music: zero gravity --------------------
 set_loader_zero_gravity ; original address L00021196
-                                BSET.B  #LOAD_MODULE,loader_status_bits
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits
                                 move.l  #'zero',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: break through --------------------
 set_loader_break_through        ; original address L000211C4
-                                BSET.B  #LOAD_MODULE,loader_status_bits
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits
                                 move.l  #'brea',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: summer in sweden --------------------
 set_loader_summer_in_sweden     ; original address L000211F2
-                                BSET.B  #LOAD_MODULE,loader_status_bits
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits
                                 move.l  #'summ',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: never to much --------------------
 set_loader_never_to_much        ; original address L00021220
-                                BSET.B  #LOAD_MODULE,loader_status_bits
+                               ; BSET.B  #LOAD_MODULE,loader_status_bits
                                 move.l  #'neve',loader_file_id
                                 RTS 
 
