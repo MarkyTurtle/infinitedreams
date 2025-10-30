@@ -102,20 +102,22 @@ start_demo                      LEA.L   STACK_ADDRESS,A7
                                 BSR.W   init_display
                                 BSR.W   do_fade_in_top_logo
 
-                                jsr     _DEBUG_COLOURS 
-                                bsr.w   load_file_table 
+                        IFD TEST_BUILD
+                                jsr     _DEBUG_COLOURS          ; if run in emulator then mouse button pause while disk is inserted
+                        ENDC
 
+                                bsr.w   load_file_table 
                                 BRA.W   main_loop
 
 
 
             ; ------------------ load file table -------------------
             ; load file table/directory into file table buffer
-load_file_table                 move.l  #FILE_TABLE_OFFSET,d0               ; byte offset on disk
-                                move.l  #FILE_TABLE_LENGTH,d1               ; file table byte length on disk
-                                moveq   #0,d2                               ; select drive 0
-                                lea.l   disk_file_table,a0                  ; file table load address
-                                lea.l   MFM_BUFFER,a1                       ; raw disk mfm track buffer
+load_file_table                 move.l  #FILE_TABLE_OFFSET,d0                   ; byte offset on disk
+                                move.l  #FILE_TABLE_LENGTH,d1                   ; file table byte length on disk
+                                moveq   #0,d2                                   ; select drive 0
+                                lea.l   disk_file_table,a0                      ; file table load address
+                                lea.l   MFM_BUFFER,a1                           ; raw disk mfm track buffer
                                 bsr     loader_4489
                                 rts
 
@@ -123,8 +125,7 @@ load_file_table                 move.l  #FILE_TABLE_OFFSET,d0               ; by
 
                 ; ------------- Initialise System -----------------
                 ; Set up Level 3 Interrupt and kill DMA
-init_system     ; original address L00020052
-                                LEA.L   CUSTOM,A6
+init_system                     LEA.L   CUSTOM,A6
                                 MOVE.W  #$3fff,INTENA(A6)                       ; disable all interrupts
                                 MOVE.W  #$7fff,D0
                                 MOVE.W  D0,DMACON(A6)                           ; disable all DMA
@@ -145,47 +146,43 @@ init_system     ; original address L00020052
 
 
                 ; ------------ Initialise Display ----------------
-init_display    ; original address L00020080
-                                BSR.W   init_vectorlogo_bitplanes       ; L00020100
-                                BSR.W   init_menu_typer_bitplanes       ; L000200EA
-                                BSR.W   init_top_logo_gfx               ; L00020116
-                                BSR.W   init_scroller_text_display      ; L00020168
-                                BSR.W   init_sprites                    ; L000201BA
-                                BSR.W   init_insert_disk_bitplanes      ; L000200D4
-                                LEA.L   copper_list(pc),a0              ; L00022CCA(PC),A0
+init_display                    BSR.W   init_vectorlogo_bitplanes       
+                                BSR.W   init_menu_typer_bitplanes       
+                                BSR.W   init_top_logo_gfx               
+                                BSR.W   init_scroller_text_display      
+                                BSR.W   init_sprites                    
+                                BSR.W   init_insert_disk_bitplanes      
+                                LEA.L   copper_list(pc),a0
                                 MOVE.L  A0,COP1LC(A6)
-                                MOVE.W  #$87ef,DMACON(A6)               ; BLTPRI,DMAEN,BPLEN,COPEN,BLTEN,SPREN,AUD0-3
-                                MOVE.B  CUSTOM+JOY0DAT,mouse_y_value    ; mouse y initial value - $00dff00a,L00020882
+                                MOVE.W  #$87ef,DMACON(A6)                       ; BLTPRI,DMAEN,BPLEN,COPEN,BLTEN,SPREN,AUD0-3
+                                MOVE.B  CUSTOM+JOY0DAT,mouse_y_value            ; mouse y initial value - $00dff00a,L00020882
                                 RTS 
 
 
                 ; ---------------- initialise insert disk bitplanes ------------------
                 ; set a blank 'insert disk x' message at the bottom of the typer
-init_insert_disk_bitplanes      ; original address L000200D4
-                                MOVE.L  #insert_disk_blank_message,d0   ; #L00036348,D0
-                                MOVE.W  D0,insertdisk_bplptl            ; L00022DE0
+init_insert_disk_bitplanes      MOVE.L  #insert_disk_blank_message,d0   
+                                MOVE.W  D0,insertdisk_bplptl            
                                 SWAP.W  D0
-                                MOVE.W  D0,insertdisk_bplpth            ; L00022DDC
+                                MOVE.W  D0,insertdisk_bplpth            
                                 RTS 
 
 
 
                 ; ------------------ initialise menu typer bitplanes ------------------
                 ; set the copper bitplane ptrs for the menu screen typer text routine.
-init_menu_typer_bitplanes       ; original address L000200EA
-                                MOVE.L  #menu_typer_bitplane,d0         ; #L00022E82,D0
-                                MOVE.W  D0,menu_bplptl                  ; L00022DD0
+init_menu_typer_bitplanes       MOVE.L  #menu_typer_bitplane,d0         
+                                MOVE.W  D0,menu_bplptl                  
                                 SWAP.W  D0
-                                MOVE.W  D0,menu_bpltpth                 ; L00022DCC
+                                MOVE.W  D0,menu_bpltpth                 
                                 RTS 
 
 
                 ; ----------------- initialise vector logo bitplanes -----------------
-init_vectorlogo_bitplanes       ; original address L00020100
-                                MOVE.L  #vector_logo_buffer_1,D0
-                                MOVE.W  D0,vector_bplptl                ; L00022DC8
+init_vectorlogo_bitplanes       MOVE.L  #vector_logo_buffer_1,D0
+                                MOVE.W  D0,vector_bplptl                
                                 SWAP.W  D0
-                                MOVE.W  D0,vector_bplpth                ; L00022DC4
+                                MOVE.W  D0,vector_bplpth                
                                 RTS 
 
 
@@ -195,23 +192,22 @@ init_vectorlogo_bitplanes       ; original address L00020100
                 ; bitplane size ($8e8 = 2280) 320x57
                 ; 4 bitplanes / 16 colours
                 ;
-init_top_logo_gfx       ; original address L00020116
-                                MOVE.L  #top_logo_gfx,d0                ; #L000249A2,D0 
-                                MOVE.W  D0,toplogo_bpl1ptl              ; L00022D7C
+init_top_logo_gfx               MOVE.L  #top_logo_gfx,d0                 
+                                MOVE.W  D0,toplogo_bpl1ptl              
                                 SWAP.W  D0
-                                MOVE.W  D0,toplogo_bpl1pth              ; L00022D78
+                                MOVE.W  D0,toplogo_bpl1pth              
                                 MOVE.L  #top_logo_gfx+(40*57),D0
-                                MOVE.W  D0,toplogo_bpl2ptl              ; L00022D84
+                                MOVE.W  D0,toplogo_bpl2ptl              
                                 SWAP.W  D0
-                                MOVE.W  D0,toplogo_bpl2pth              ; L00022D80
+                                MOVE.W  D0,toplogo_bpl2pth              
                                 MOVE.L  #top_logo_gfx+(80*57),D0
-                                MOVE.W  D0,toplogo_bpl3ptl              ; L00022D8C
+                                MOVE.W  D0,toplogo_bpl3ptl              
                                 SWAP.W  D0
-                                MOVE.W  D0,toplogo_bpl3pth              ; L00022D88
+                                MOVE.W  D0,toplogo_bpl3pth              
                                 MOVE.L  #top_logo_gfx+(120*57),D0
-                                MOVE.W  D0,toplogo_bpl4ptl              ; L00022D94
+                                MOVE.W  D0,toplogo_bpl4ptl              
                                 SWAP.W  D0
-                                MOVE.W  D0,toplogo_bpl4pth              ; L00022D90
+                                MOVE.W  D0,toplogo_bpl4pth              
                                 RTS 
 
 
@@ -228,23 +224,22 @@ init_top_logo_gfx       ; original address L00020116
                 ; NB: the original code allocated way too much memory per bitplane,
                 ; almost twice as much. This has now been fixed here.
                 ;
-init_scroller_text_display ; original address L00020168
-                                MOVE.L  #scroll_text_bpl_0_start+6,D0
-                                MOVE.W  D0,scrolltext_bpl1ptl                   ; L00022E5C
+init_scroller_text_display      MOVE.L  #scroll_text_bpl_0_start+6,D0
+                                MOVE.W  D0,scrolltext_bpl1ptl                   
                                 SWAP.W  D0
-                                MOVE.W  D0,scrolltext_bpl1pth                   ; L00022E58
+                                MOVE.W  D0,scrolltext_bpl1pth                   
                                 MOVE.L  #scroll_text_bpl_1_start+6,D0
-                                MOVE.W  D0,scrolltext_bpl2ptl                   ; L00022E64
+                                MOVE.W  D0,scrolltext_bpl2ptl                   
                                 SWAP.W  D0
-                                MOVE.W  D0,scrolltext_bpl2pth                   ; L00022E60
+                                MOVE.W  D0,scrolltext_bpl2pth                   
                                 MOVE.L  #scroll_text_bpl_2_start+6,D0
-                                MOVE.W  D0,scrolltext_bpl3ptl                   ; L00022E6C
+                                MOVE.W  D0,scrolltext_bpl3ptl                   
                                 SWAP.W  D0
-                                MOVE.W  D0,scrolltext_bpl3pth                   ; L00022E68
+                                MOVE.W  D0,scrolltext_bpl3pth                   
                                 MOVE.L  #scroll_text_bpl_3_start+6,D0
-                                MOVE.W  D0,scrolltext_bpl4ptl                   ; L00022E74
+                                MOVE.W  D0,scrolltext_bpl4ptl                   
                                 SWAP.W  D0
-                                MOVE.W  D0,scrolltext_bpl4pth                   ; L00022E70
+                                MOVE.W  D0,scrolltext_bpl4pth                   
                                 RTS 
 
 
@@ -254,29 +249,31 @@ init_scroller_text_display ; original address L00020168
                 ; Sprites 0 & Sprite 1 - used for the menu option selector arrows.
                 ; Sprites 2-7 - unused
                 ;
-init_sprites    ; original address L000201BA
-                                MOVE.L  #menu_sprite_left,D0            ; L00035FB8,D0
-                                MOVE.W  D0,sprite_0_ptl                 ; L00022CF8
-                                SWAP.W  D0
-                                MOVE.W  D0,sprite_0_pth                 ; L00022CF4
-                                MOVE.L  #menu_sprite_right,D0           ; L00035FDC,D0
-                                MOVE.W  D0,sprite_1_ptl                 ; L00022D00
-                                SWAP.W  D0
-                                MOVE.W  D0,sprite_1_pth                 ; L00022CFC
-                                MOVE.L  #null_sprite,D0
-                                MOVE.W  D0,sprite_2_pth                 ; L00022D08 - clear unused sprite ptrs.
-                                MOVE.W  D0,sprite_2_ptl                 ; L00022D04
-                                MOVE.W  D0,sprite_3_pth                 ; L00022D10
-                                MOVE.W  D0,sprite_3_ptl                 ; L00022D0C
-                                MOVE.W  D0,sprite_4_pth                 ; L00022D18
-                                MOVE.W  D0,sprite_4_ptl                 ; L00022D14
-                                MOVE.W  D0,sprite_5_pth                 ; L00022D20
-                                MOVE.W  D0,sprite_5_ptl                 ; L00022D1C
-                                MOVE.W  D0,sprite_6_pth                 ; L00022D28
-                                MOVE.W  D0,sprite_6_ptl                 ; L00022D24
-                                MOVE.W  D0,sprite_7_pth                 ; L00022D30
-                                MOVE.W  D0,sprite_7_ptl                 ; L00022D2C
-                                RTS 
+init_sprites                    move.l  #menu_sprite_left,d0            
+                                move.w  d0,sprite_0_ptl                 
+                                swap.w  d0
+                                move.w  d0,sprite_0_pth                 
+                                move.l  #menu_sprite_right,d0           
+                                move.w  d0,sprite_1_ptl                 
+                                swap.w  d0
+                                move.w  d0,sprite_1_pth 
+                        ; set empty sprite in remaining sprite ptrs                
+                                move.l  #null_sprite,d0
+                                move.l  d0,d1
+                                swap.w  d1
+                                move.w  d1,sprite_2_pth                 
+                                move.w  d0,sprite_2_ptl                 
+                                move.w  d1,sprite_3_pth                 
+                                move.w  d0,sprite_3_ptl                 
+                                move.w  d1,sprite_4_pth                 
+                                move.w  d0,sprite_4_ptl                 
+                                move.w  d1,sprite_5_pth                 
+                                move.w  d0,sprite_5_ptl                 
+                                move.w  d1,sprite_6_pth                 
+                                move.w  d0,sprite_6_ptl                 
+                                move.w  d1,sprite_7_pth                 
+                                move.w  d0,sprite_7_ptl                 
+                                rts 
 
 null_sprite:                    dc.l    $0
 
@@ -287,22 +284,22 @@ null_sprite:                    dc.l    $0
                 ; fades in the logo at the top of the screen 'Lunatics Infinite Dreams'
                 ; loops 20 times.
                 ;
-do_fade_in_top_logo     ; original address L00020244
-.fade_loop              ; original address L00020244
-.wait_raster            ; original address L00020244
+do_fade_in_top_logo     
+.fade_loop 
+.wait_raster  
                                 CMP.B   #$f0,$0006(A6)
-                                BNE.B   .wait_raster                    ; L00020244
-                                CMP.W   #$0014,top_logo_fade_count      ; L000202F4
+                                BNE.B   .wait_raster                    
+                                CMP.W   #$0014,top_logo_fade_count      
                                 BEQ.B   .exit
-                                BSR.W   fade_in_top_logo                ; L00020268
-                                ADD.W   #$0001,top_logo_fade_count      ; L000202F4
-                                BRA.W   .fade_loop                      ; L00020244
+                                BSR.W   fade_in_top_logo                
+                                ADD.W   #$0001,top_logo_fade_count      
+                                BRA.W   .fade_loop                      
 .exit                           RTS 
 
 
 fade_in_top_logo        ; original address L00020268
-                                LEA.L   copper_top_logo_colors,a0       ; L00022D32,A0
-                                LEA.L   top_logo_colours,a1             ; L000202D4,A1
+                                LEA.L   copper_top_logo_colors,a0       
+                                LEA.L   top_logo_colours,a1             
                                 MOVE.W  #$0002,D6
                                 MOVE.W  #$000f,D7
 .fade_loop
@@ -314,7 +311,7 @@ fade_in_top_logo        ; original address L00020268
                                 AND.W   #$000f,D1
                                 AND.W   #$000f,D3
                                 CMP.W   D1,D3
-                                BEQ.W   .fade_green                     ; L0002029A 
+                                BEQ.W   .fade_green                      
                                 ADD.W   #$0001,$00(A0,D6.W)
 .fade_green
                                 MOVE.W  D0,D1
@@ -322,7 +319,7 @@ fade_in_top_logo        ; original address L00020268
                                 AND.W   #$00f0,D1
                                 AND.W   #$00f0,D3
                                 CMP.W   D1,D3
-                                BEQ.W   .fade_red                       ; L000202B2 
+                                BEQ.W   .fade_red                       
                                 ADD.W   #$0010,$00(A0,D6.W)
 .fade_red
                                 MOVE.W  D0,D1
@@ -330,18 +327,18 @@ fade_in_top_logo        ; original address L00020268
                                 AND.W   #$0f00,D1
                                 AND.W   #$0f00,D3
                                 CMP.W   D1,D3
-                                BEQ.W   .fade_next                      ; L000202CA 
+                                BEQ.W   .fade_next                       
                                 ADD.W   #$0100,$00(A0,D6.W)
 .fade_next
                                 ADD.W   #$0004,D6
-                                DBF.W   D7,.fade_loop                   ; L0002027C_loop
+                                DBF.W   D7,.fade_loop                   
                                 RTS 
 
-top_logo_colours        ; original address L000202D4
+top_logo_colours        
                                 dc.w    $0000,$0dde,$0ccd,$0aad,$099c,$0779,$0557,$0445
                                 dc.w    $0222,$08DA,$03A6,$0083,$0FFF,$0F0F,$0F00,$0779 
-top_logo_fade_count     ; original address L000202F4
-                                dc.w    $0000   ; $0014
+top_logo_fade_count     
+                                dc.w    $0000
 
 
 
@@ -352,7 +349,7 @@ top_logo_fade_count     ; original address L000202F4
                 ; ****************************************************************
                 ; ***********                 MAIN LOOP                 **********
                 ; ****************************************************************
-main_loop       ; original address L000202F6
+main_loop       
 
                         ; check if need to change music track
                                 BTST.B  #LOAD_MODULE,loader_status_bits         
@@ -367,47 +364,47 @@ main_loop       ; original address L000202F6
                                 JSR     _mt_end
 
 .load_music             ; load music
-                                BSR.W   load_music                                              ; L00021814
+                                BSR.W   load_music                                              
                                 BCLR.B  #LOAD_MODULE,loader_status_bits                                                 ; set running status
 
-                                BCLR.B  #MENU_FADING,menu_selection_status_bits                 ; enable menu selection ; L000203A8
-                                BCLR.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     ; L000203A8
+                                BCLR.B  #MENU_FADING,menu_selection_status_bits                 ; enable menu selection 
+                                BCLR.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     
                                 BSET.B  #$0001,music_status_bits
 
 
 
 .do_menu_processing     ; do menu processing
-                                BTST.B  #MENU_FADING,menu_selection_status_bits                 ; L000203A8
-                                BNE.B   .mouse_not_clicked                                      ; L00020362 
+                                BTST.B  #MENU_FADING,menu_selection_status_bits                 
+                                BNE.B   .mouse_not_clicked                                      
                         
 .mouse_test             ; test mouse clicked
                                 BTST.B  #$0006,$00bfe001
-                                BNE.B   .mouse_not_clicked                                      ; L00020362 
+                                BNE.B   .mouse_not_clicked                                      
 
 .mouse_is_clicked       ; do menu item selected processing
-                                BSET.B  #MENU_FADING,menu_selection_status_bits                 ; disable menu selection ; L000203A8
-                                BSET.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     ; L000203A8
-                                BSR.W   do_menu_action                                          ; L0002088E
+                                BSET.B  #MENU_FADING,menu_selection_status_bits                 ; disable menu selection 
+                                BSET.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     
+                                BSR.W   do_menu_action                                         
 
 .mouse_not_clicked      ; test draw new menu (if required)
-                                BTST.B  #MENU_DISP_DRAW,menu_display_status_bits                ; L000203AA
-                                BNE.B   .check_clear_menu                                       ; L00020370 
-                                BSR.W   display_menu                                            ; L0002049C
+                                BTST.B  #MENU_DISP_DRAW,menu_display_status_bits                
+                                BNE.B   .check_clear_menu                                       
+                                BSR.W   display_menu                                           
 
                         ; test clear menu display (if required)
 .check_clear_menu
-                                BTST.B  #MENU_DISP_CLEAR,menu_display_status_bits               ; L000203AA
-                                BEQ.B   .check_music_init                                       ; L0002037E 
-                                BSR.W   clear_menu_display                                      ; L000207B6
+                                BTST.B  #MENU_DISP_CLEAR,menu_display_status_bits               
+                                BEQ.B   .check_music_init                                       
+                                BSR.W   clear_menu_display                                      
 
                         ; test menu item selected/loading
 .check_music_init
                                 BTST.B  #$0001,music_status_bits
-                                BEQ.B   .end_main_loop                                          ; L000203A4
+                                BEQ.B   .end_main_loop                                          
 
                         ; do music initialisation
 .initialise_music
-                                JSR _mt_remove
+                                JSR     _mt_remove
 
                                 lea     $0,a0
                                 move.L  #$1,d0
@@ -424,7 +421,7 @@ main_loop       ; original address L000202F6
                                 BSET.B  #$0000,music_status_bits
 
 .end_main_loop
-                                BRA.W   main_loop                                               ; L000202F6 
+                                BRA.W   main_loop                                                
 
 
 
