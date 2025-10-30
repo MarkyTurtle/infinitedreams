@@ -39,6 +39,19 @@ MENU_IDX_addresses_6_menu       EQU     $30     ; L0003CBED - index = $30
 MENU_IDX_pd_message_menu        EQU     $34     ; L0003CEEA - index = $34
 
 
+FILE_TABLE_OFFSET       EQU $400        ; disk offset to file table (directly following the bootblock)
+FILE_TABLE_LENGTH       EQU $1a0        ; length of file table in bytes
+
+                ; Offset        Description
+                ; 0             FileID	
+                ; 4             Byte Offset to file start
+                ; 8             PackedSize (unused $0)	
+                ; C             File Size in Bytes
+FTAB_FILE_ID            EQU $0
+FTAB_FILE_OFFSET        EQU $4
+FTAB_FILE_PACKED        EQU $8
+FTAB_FILE_SIZE          EQU $C
+
 
 
 TEST_BUILD SET 1                                        ; Comment this to remove TEST_BUILD 
@@ -84,12 +97,27 @@ MFM_BUFFER      EQU     $0007d140                       ; raw 4489 loader MFM bu
                 ; cartidges and eithe disable the freeze of reset/crash
                 ; the computer.
                 ;
-start_demo      ; original address L00020000
-                                LEA.L   STACK_ADDRESS,A7
-                                BSR.W   init_system             ; L00020052
-                                BSR.W   init_display            ; L00020080
-                                BSR.W   do_fade_in_top_logo     ; L00020244
-                                BRA.W   main_loop               ; L000202F6
+start_demo                      LEA.L   STACK_ADDRESS,A7
+                                BSR.W   init_system
+                                BSR.W   init_display
+                                BSR.W   do_fade_in_top_logo
+
+                                jsr     _DEBUG_COLOURS 
+                                bsr.w   load_file_table 
+
+                                BRA.W   main_loop
+
+
+
+            ; ------------------ load file table -------------------
+            ; load file table/directory into file table buffer
+load_file_table                 move.l  #FILE_TABLE_OFFSET,d0               ; byte offset on disk
+                                move.l  #FILE_TABLE_LENGTH,d1               ; file table byte length on disk
+                                moveq   #0,d2                               ; select drive 0
+                                lea.l   disk_file_table,a0                  ; file table load address
+                                lea.l   MFM_BUFFER,a1                       ; raw disk mfm track buffer
+                                bsr     loader_4489
+                                rts
 
 
 
@@ -491,7 +519,7 @@ level_3_interrupt_handler ; original address L000203AE
                                 move.b  #$ff,_mt_Enable
                                 bra     .exit_handler 
 .no_music
-                                move.b  #$00,_mt_Enable
+                                ;move.b  #$00,_mt_Enable
 
 .exit_handler    ; original address L00020424
                                 MOVE.W  #$0020,INTREQ(A6)
@@ -1337,353 +1365,166 @@ set_pd_message_menu_params ; original address L00020CA8
                                 RTS 
 
 
+loader_file_id                  dc.l    $0                      ; file id of module to load.
+
 loader_start_offset             dc.l    $0
 loader_file_length              dc.l    $0
 loader_disk_number              dc.l    $0
 loader_decompressed_length      dc.l    $0
 
                 ; -------------------- load music: jarresque -------------------
-                ; jarr	0005A5CC	00000000	00017F66
-                ;
-                ; packed
-                ; jarr  $00030FB2,$00000000,$0000D1DB
 set_loader_jarresque    ; original address L00020E2C
                                 BSET.B  #LOAD_MODULE,loader_status_bits 
-                                move.l  #16*11,d0                               ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length
+                                move.l  #'jarr',loader_file_id
                                 RTS 
-
-
 
                 ; ------------------- load music: the fly --------------------
-                ; thef	0009D53E	00000000	0001DD64
 set_loader_the_fly      ; original address L00020E5A
                                 BSET.B  #LOAD_MODULE,loader_status_bits  
-                                move.l  #16*19,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length          
+                                move.l  #'thef',loader_file_id  
                                 RTS 
-
-
-
 
                 ; ------------------- load music: stratospheric city --------------------
-                ; stra	00072532	00000000	0002B00C
 set_loader_stratospheric_city; original address L00020E88
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*23,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length  
+                                move.l  #'stra',loader_file_id
                                 RTS 
-
-
 
                 ; ------------------- load music: float --------------------
-                ; disk number:  $01
-                ; start track:  $73
-                ; no of tracks: $19
-                ; floa	0003721E	00000000	000233AE
 set_loader_float        ; original address L00020EB6
                                 BSET.B  #LOAD_MODULE,loader_status_bits 
-                                move.l  #16*17,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.w),loader_start_offset
-                                move.l  8(a0,d0.w),loader_decompressed_length
-                                move.l  12(a0,d0.w),loader_file_length 
+                                move.l  #'floa',loader_file_id
                                 RTS 
-
 
                 ; ------------------- load music: flight-sleepy mix --------------------
-                ; flig	0000CCB0	00000000	0002A56E
 set_loader_flight_sleepy_mix ; original address L00020EE4
                                 BSET.B  #LOAD_MODULE,loader_status_bits 
-                                move.l  #16*22,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length
+                                move.l  #'flig',loader_file_id
                                 RTS 
 
-
                 ; ------------------- load music: bright --------------------
-                ; disk number:  $02
-                ; start track:  $01
-                ; no of tracks: $09
 set_loader_bright       ; original address L00020F12
                                 BSET.B  #LOAD_MODULE,loader_status_bits 
-                                move.l  #16*2,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length
+                                move.l  #'brig',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: love your money --------------------
-                ; disk number:  $02
-                ; start track:  $7e
-                ; no of tracks: $0e
 set_loader_love_your_money      ; original address L00020F40
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*14,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length  
+                                move.l  #'love',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: cosmic how much --------------------
-                ; disk number:  $02
-                ; start track:  $70
-                ; no of tracks: $0c
 set_loader_cosmic_how_much      ; original address L00020F6E
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*3,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length
+                                move.l  #'cosm',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: this is not a love song --------------------
-                ; disk number:  $02
-                ; start track:  $0c
-                ; no of tracks: $0d
 set_loader_not_a_love_song      ; original address L00020F9C
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*10,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length   
+                                move.l  #'this',loader_file_id  
                                 RTS 
 
 
                 ; ------------------- load music: eat the ballbearing --------------------
-                ; disk number:  $02
-                ; start track:  $55
-                ; no of tracks: $19
 set_loader_eat_the_ballbearing ; original address L00020FCA
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*18,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length
+                                move.l  #'eatt',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: sound of silence --------------------
-                ; disk number:  $02
-                ; start track:  $40
-                ; no of tracks: $13
 set_loader_sound_of_silence ; orignal address L00020FF8
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*20,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length
+                                move.l  #'soun',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: retouche --------------------
-                ; disk number:  $02
-                ; start track:  $1b
-                ; no of tracks: $10
 set_loader_retouche     ; original address L00021026
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*12,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length  
+                                move.l  #'reto',loader_file_id 
                                 RTS 
 
 
                 ; ------------------- load music: techwar --------------------
-                ; disk number:  $02
-                ; start track:  $2d
-                ; no of tracks: $11
 set_loader_techwar      ; original address L00021054
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*13,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length  
+                                move.l  #'tech',loader_file_id 
                                 RTS 
 
 
                 ; ------------------- load music: shaft --------------------
-                ; disk number:  $02
-                ; start track:  $8e
-                ; no of tracks: $11
 set_loader_shaft        ; original address L00021082
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*16,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length
+                                move.l  #'shaf',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: mental obstacle --------------------
-                ; disk number:  $03
-                ; start track:  $8d
-                ; no of tracks: $12
 set_loader_mental_obstacle      ; original address L000210B0
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*6,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length 
+                                move.l  #'ment',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: blade runner --------------------
-                ; disk number:  $03
-                ; start track:  $02
-                ; no of tracks: $11
 set_loader_blade_runner ; original address L000210DE
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*15,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length 
+                                move.l  #'blad',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: natural reality --------------------
-                ; disk number:  $03
-                ; start track:  $7d
-                ; no of tracks: $0e
 set_loader_natural_reality      ; original address L0002110C
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*4,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length  
+                                move.l  #'natu',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: obliteration fin --------------------
-                ; disk number:  $03
-                ; start track:  $6f
-                ; no of tracks: $0c
 set_loader_obliteration_fin ; original address L0002113A
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*5,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length 
+                                move.l  #'obli',loader_file_id 
                                 RTS 
 
 
                 ; ------------------- load music: obliteration fin --------------------
-                ; disk number:  $03
-                ; start track:  $52
-                ; no of tracks: $1b
 set_loader_skyriders    ; original address L00021168
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*21,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length  
+                                move.l  #'skyr',loader_file_id 
                                 RTS 
 
 
                 ; ------------------- load music: zero gravity --------------------
-                ; disk number:  $03
-                ; start track:  $43
-                ; no of tracks: $0d
 set_loader_zero_gravity ; original address L00021196
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*9,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length
+                                move.l  #'zero',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: break through --------------------
-                ; disk number:  $03
-                ; start track:  $15
-                ; no of tracks: $0d
 set_loader_break_through        ; original address L000211C4
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*8,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length
+                                move.l  #'brea',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: summer in sweden --------------------
-                ; disk number:  $03
-                ; start track:  $35
-                ; no of tracks: $0c
 set_loader_summer_in_sweden     ; original address L000211F2
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*1,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length
+                                move.l  #'summ',loader_file_id
                                 RTS 
 
 
                 ; ------------------- load music: never to much --------------------
-                ; disk number:  $03
-                ; start track:  $24
-                ; no of tracks: $0f
 set_loader_never_to_much        ; original address L00021220
                                 BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #16*7,d0                                ; file table offset
-                                lea     disk_1_file_table_packed_delta,a0
-                                move.l  4(a0),loader_disk_number
-                                move.l  4(a0,d0.l),loader_start_offset
-                                move.l  8(a0,d0.l),loader_decompressed_length
-                                move.l  12(a0,d0.l),loader_file_length 
+                                move.l  #'neve',loader_file_id
                                 RTS 
 
 
@@ -2234,62 +2075,17 @@ scroller_next_character ; original address L000215FA
                                 RTS 
 
 
-                ; FileID	Disk Offset	PackedSize	FileSize
+                even
+                ; disk file table 4 long words per file entry
+                ; Offset        Description
+                ; 0             FileID	
+                ; 4             Byte Offset to file start
+                ; 8             PackedSize (unused $0)	
+                ; C             File Size in Bytes
+                ;       
+disk_file_table
 disk_1_file_table_packed_delta
-                dc.b    'dsk#'                                  ; file id
-                dc.l    $00000001,$00000001,$00000001           ; Disk Offset, PackedSize, FileSize
-                dc.b    'summ'
-                dc.l    $000005A0,$00000000,$0000480A
-                dc.b    'brig'
-                dc.l    $00004DAA,$00000000,$00004842
-                dc.b    'cosm'
-                dc.l    $000095EC,$00000000,$00006525
-                dc.b    'natu'
-                dc.l    $0000FB11,$00000000,$0000661F
-                dc.b    'obli'
-                dc.l    $00016130,$00000000,$00006731
-                dc.b    'ment'
-                dc.l    $0001C861,$00000000,$00006AD1
-                dc.b    'neve'
-                dc.l    $00023332,$00000000,$0000754F
-                dc.b    'brea'
-                dc.l    $0002A881,$00000000,$00007B2A
-                dc.b    'zero'
-                dc.l    $000323AB,$00000000,$00007BDC
-                dc.b    'this'
-                dc.l    $00039F87,$00000000,$0000816D
-                dc.b    'jarr'
-                dc.l    $000420F4,$00000000,$00008904
-                dc.b    'reto'
-                dc.l    $0004A9F8,$00000000,$00008A5A
-                dc.b    'tech'
-                dc.l    $00053452,$00000000,$00008C52
-                dc.b    'love'
-                dc.l    $0005C0A4,$00000000,$00009010
-                dc.b    'blad'
-                dc.l    $000650B4,$00000000,$000095EA
-                dc.b    'shaf'
-                dc.l    $0006E69E,$00000000,$00009F2C
-                dc.b    'floa'
-                dc.l    $000785CA,$00000000,$0000A5BA
-                dc.b    'eatt'
-                dc.l    $00082B84,$00000000,$0000B1BB
-                dc.b    'thef'
-                dc.l    $0008DD3F,$00000000,$0000B24A
-                dc.b    'soun'
-                dc.l    $00098F89,$00000000,$0000B463
-                dc.b    'skyr'
-                dc.l    $000A43EC,$00000000,$0000C447
-                dc.b    'flig'
-                dc.l    $000B0833,$00000000,$0000EC59
-                dc.b    'stra'
-                dc.l    $000BF48C,$00000000,$00012B68
-                dc.b    'tpic'
-                dc.l    $000D1FF4,$00000000,$0000287E
-                dc.b    'demo'
-                dc.l    $000D4872,$00000000,$00004F18
-                dc.b    'Free'
-                dc.l    $000D99EA,$00000000,$00005104
+                dcb.l   4*27                    ; disk file table 4 long words per file entry
 
 
                 ; ---------------------- load music -----------------------
@@ -2310,20 +2106,37 @@ disk_1_file_table_packed_delta
 ;
 ; <- assume all other registers are trashed
 ;---------------------------------------------------------------------------------------
-load_music      ; original address L00021814
-                                movem.l d0-d7/a0-a6,-(a7)
-                                move.l  loader_start_offset,d0          ; #$0000CCB0,d0
-                                move.l  loader_file_length,d1           ; #$0002A56E,d1
-                                move.l  #$00000000,d2
+
+
+            ; loader_file_id = file id to load
+load_music                      movem.l d0-d7/a0-a6,-(a7)               ; save all registers
+
+                                move.l  loader_file_id,d0               ; get file id to load
+                                move.w  #27-1,d7                        ; size of file table (27 entries)
+                                lea     disk_file_table,a3              ; disk file table, see infinitedreams.adf.filetable.txt
+
+.find_file              ; find file id (d0) in file table
+                                cmp.l   (a3),d0                         ; have we found the fileid?
+                                beq     .load_file                      ; ...yes, then load it.
+                                lea     $10(a3),a3                      ; try next file table entry
+                                dbra    d7,.find_file                   ; check next table entry.
+
+.load_error         ; load error
+                                move.w  #$f00,$dff180                   ; turn screen red
+                                bra.s   .load_error                     ; loop forever.
+
+.load_file          ; load file from disk to address a0
+                                move.l  FTAB_FILE_OFFSET(a3),d0         ; disk byte offset
+                                move.l  FTAB_FILE_SIZE(a3),d1           ; disk file length
+                                move.l  d1,loader_decompressed_length
+                                moveq   #$00000000,d2                   ; drive 0
                                 lea     LOAD_BUFFER,a0
                                 lea     MFM_BUFFER,a1
+                                bsr     loader_4489
+                                tst.l   d0                              ; test for load error
+                                bne.s   .load_error                     ; some kinda disk error.
 
-                                movem.l a0-a1,-(a7)
-                                jsr     loader_4489
-                                movem.l (a7)+,a0-a1
-
-                                tst.l   d0
-                                bne     load_error
+                                ; movem.l (a7)+,d0-d7/a0-a6               ; restore saved registers
 
                                 ; DECOMPRESS ZXO
                                 lea     LOAD_BUFFER,a0
@@ -2340,6 +2153,38 @@ load_music      ; original address L00021814
 
                                 movem.l (a7)+,d0-d7/a0-a6
                                 rts
+
+
+
+;load_music
+;                                movem.l d0-d7/a0-a6,-(a7)                          
+;                                move.l  loader_start_offset,d0          ; #$0000CCB0,d0
+;                                move.l  loader_file_length,d1           ; #$0002A56E,d1
+;                                move.l  #$00000000,d2
+;                                lea     LOAD_BUFFER,a0
+;                                lea     MFM_BUFFER,a1
+;
+;                                movem.l a0-a1,-(a7)
+;                                jsr     loader_4489
+;                                movem.l (a7)+,a0-a1
+;
+;                                tst.l   d0
+;                                bne     load_error
+;
+;                                ; DECOMPRESS ZXO
+;                                lea     LOAD_BUFFER,a0
+;                                lea     DEPACKED_BUFFER,a1
+;                                movem.l a0/a1,-(a7)
+;                                jsr     uncompress_zx0
+;                                movem.l (a7)+,a0/a1
+;
+;                                ; DECOMPRESS DELTA 4
+;                                lea     DEPACKED_BUFFER,a0              ; delta 4 compressed file start
+;                                lea     MUSIC_BUFFER,a1                 ; output buffer for decompressed module destination
+;                                jsr     depackdelta4
+;
+;                                movem.l (a7)+,d0-d7/a0-a6
+;                                rts
 
 load_error                      lea     $dff000,a6
 .error                          move.w  VHPOSR(a6),$dff180
@@ -3427,7 +3272,7 @@ pd_message_menu        ; original address L0003CEEA
 
         IFD TEST_BUILD
         even
-music_buffer            dcb.b   $21000,$00
+music_buffer            dcb.b   $1A000,$00
         even
 depacked_buffer         dcb.b   $11000,$00
         even

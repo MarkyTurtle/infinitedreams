@@ -7,18 +7,18 @@
 ; - Loads and executed the main program 'demo' from the disk.
 ;
 
-                    section     bootloader,code
+                    section     bootloader,code_c
                     incdir      "include/"
                     include     "hw.i"
 
 
-TESTBOOT SET 1         ; Comment this to remove 'testboot' and build boot block for actual disk.
+;TESTBOOT SET 1         ; Comment this to remove 'testboot' and build boot block for actual disk.
 
 
 STACK_ADDRESS           EQU $1000       ; stack ptr address will grow down from start of boot block
 BOOT_RELOCATE_ADDR      EQU $1000       ; absolute memory address to relocate the bootblock at.
 MFM_BUFFER              EQU $7d140      ; $80000-$2ec0 RAW MFM Track Buffer (required for 4489 loader)
-FILE_TABLE_ADDR         EQU $1400       ; absolute address for loading the disk file table at.
+FILE_TABLE_ADDR         EQU $1500       ; absolute address for loading the disk file table at.
 FILE_TABLE_OFFSET       EQU $400        ; disk offset to file table (directly following the bootblock)
 FILE_TABLE_LENGTH       EQU $1a0        ; length of file table in bytes
 LOAD_ADDRESS            EQU $50000      ; Address to load packed files into (loading screen/demo)
@@ -67,7 +67,7 @@ relocate_bootloader:    lea     boot_loader(pc),a0
             ; ------------- relocated boot loader $00001000 -----------
             ;----------------------------------------------------------
 boot_loader             lea     STACK_ADDRESS,A7
-                        ;bsr     set_interrupt_vectors
+                        bsr     set_interrupt_vectors
                         bsr     load_file_table
                         bsr     load_title_picture
                         bsr     display_title_picture
@@ -79,13 +79,13 @@ boot_loader             lea     STACK_ADDRESS,A7
                         jmp     DEMO_START_ADDRESS
 
 
-;            ; -------------- set interrupt vectors ----------------
-;set_interrupt_vectors   move.w  #$6,d7
-;                        lea     $64.w,a0
-;                        lea     do_nothing_handler(pc),a1
-;.set_vector_loop        move.l  a1,(a0)+
-;                        dbf     d7,.set_vector_loop
-;                        rts
+            ; -------------- set interrupt vectors ----------------
+set_interrupt_vectors   move.w  #$6,d7
+                        lea     $64.w,a0
+                        lea     do_nothing_handler(pc),a1
+.set_vector_loop        move.l  a1,(a0)+
+                        dbf     d7,.set_vector_loop
+                        rts
 
 
             ; ------------------ load file table -------------------
@@ -143,7 +143,7 @@ display_title_picture
                         move.w  #4,d7                           ; 5 bitplanes
                         move.w  #BPL1PTH,d1
 .bpl_loop
-                        swap.w   d0
+                        swap.w  d0
                         move.w  d1,(a0)+                ; set bpl(x)pth register value
                         move.w  d0,(a0)+                ; high word of bitplane address ptr
                         add.w   #2,d1                   ; increment bpl(x)pt register value

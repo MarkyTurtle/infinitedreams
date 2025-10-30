@@ -2,12 +2,10 @@
 
                         ; IN:   a0 = delta4 compressed buffer ptr
                         ;       a1 = decompressed output buffer ptr
-                        ;       d0 = delta4 compressed file length
 depackdelta4:
                                 movem.l d0-d7/a0-a6,-(a7)
 
                                 move.l  a0,compressed_module_ptr
-                                move.l  d0,compressed_module_length
                                 move.l  a1,decompressed_module_ptr
 
                                 ; a0 = delta4 compressed buffer ptr
@@ -172,7 +170,6 @@ find_sample_offset
 
 
 compressed_module_ptr           dc.l    0                       ; ptr to the start of the compressed module buffer
-compressed_module_length        dc.l    0                       ; byte length of the compressed module
 decompressed_module_ptr         dc.l    0                       ; ptr to the start of the decompressed module buffer
 
 first_compressed_sample_ptr     dc.l    0
