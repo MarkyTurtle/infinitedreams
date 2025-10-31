@@ -76,6 +76,15 @@ MFM_BUFFER      EQU     $0007d140                       ; raw 4489 loader MFM bu
 
 
 
+        ; State machine states
+        ; Can't decide whether to have one or two state machines at the moment.
+        ; Either a separate menu & music player state machines or just combine into one.
+        ; separation may give me more reusability for other projects down the line.
+        ; Think I'll try two state machines and see how that goes.
+STATE_MUSIC_INIT        EQU     $10
+STATE_MUSIC_STOP        EQU     $20
+STATE_MUSIC_PLAY        EQU     $30
+STATE_MUSIC_START       EQU     $40
 
 
 
@@ -97,21 +106,22 @@ MFM_BUFFER      EQU     $0007d140                       ; raw 4489 loader MFM bu
                 ; cartidges and eithe disable the freeze of reset/crash
                 ; the computer.
                 ;
-start_demo                      LEA.L   STACK_ADDRESS,A7
-                                BSR.W   init_system
-                                BSR.W   init_display
-                                BSR.W   do_fade_in_top_logo
+start_demo                      lea.l   STACK_ADDRESS,a7
+                                bsr.w   init_system
+                                bsr.w   init_display
+                                bsr.w   do_fade_in_top_logo
 
                         IFD TEST_BUILD
-                                jsr     _DEBUG_COLOURS          ; if run in emulator then mouse button pause while disk is inserted
+                                jsr     _DEBUG_COLOURS                          ; if run in emulator then mouse button pause while disk is inserted
                         ENDC
 
                                 bsr.w   load_file_table 
+                                bsr.w   menu_statemachine_init
 
                                 ; initialise mouse input
-                                MOVE.B  CUSTOM+JOY0DAT,mouse_y_value            ; mouse y initial value - $00dff00a,L00020882
+                                move.b  CUSTOM+JOY0DAT,mouse_y_value            ; mouse y initial value - $00dff00a,L00020882
 
-                                BRA.W   main_loop
+                                bra.w   main_loop
 
 
 
@@ -345,12 +355,105 @@ top_logo_fade_count
 
 
 
+STATE_MENU_NULL         EQU     $0                      ; null state - do nothing state
+STATE_MENU_INIT         EQU     $1
+STATE_MENU_FADEOUT      EQU     $2
+STATE_MENU_CREATE       EQU     $3
+STATE_MENU_FADEIN       EQU     $4
+STATE_MENU_ACTIVE       EQU     $5
 
 
+menu_mainloop_state_machine
+                movem.l d0-d7/a0-a6,-(a7)
+
+                lea.l   menu_mainloop_state,a0
+                move.l  (a0),a0
+                cmp.l   #0,a0
+                beq.s   .exit
+                jsr     (a0)
+
+.exit           movem.l (a7)+,d0-d7/a0-a6
+                rts
+
+menu_interrupt_state_machine
+                movem.l d0-d7/a0-a6,-(a7)
+
+                lea.l   menu_interrupt_state,a0
+                move.l  (a0),a0
+                cmp.l   #0,a0
+                beq.s   .exit
+                jsr     (a0)
+
+.exit           movem.l (a7)+,d0-d7/a0-a6
+                rts
+
+menu_statemachine_init
+                move.w  #STATE_MENU_INIT,menu_current_state
+                bsr     menu_set_state
+                rts
+
+menu_set_state
+                lea.l   menu_state_table,a0
+                move.w  menu_current_state,d0
+                lsl.w   #3,d0                                           ; multiply state by 8 to get menu_state_table index
+                move.l  (a0,d0.w),menu_mainloop_state                   ; set main line state handler routine
+                move.l  4(a0,d0.w),menu_interrupt_state                 ; set interrups state handler routine
+                rts
+
+
+menu_current_state      dc.w    STATE_MENU_INIT                         ; current state id
+menu_mainloop_state     dc.l    $0                                      ; function ptr to current state handler (called from main_loop)
+menu_interrupt_state    dc.l    $0                                      ; function ptr to current state handler (called from interrupt handler)
+
+
+menu_state_table        
+                        ; do nothing state
+                        dc.l    $0
+                        dc.l    $0
+                        ; menu init state
+                        dc.l    menu_state_initialise
+                        dc.l    $0
+                        ; menu fade out state
+                        dc.l    menu_state_fadeout
+                        dc.l    $0
+                        ; menu create state
+                        dc.l    menu_state_create
+                        dc.l    $0
+                        ; menu fade in state
+                        dc.l    menu_state_fadein
+                        dc.l    $0
+                        ; menu active state
+                        dc.l    menu_active_state
+                        dc.l    $0
+
+
+                ; ------------------------- state menu init -------------------
+                ; The menu system initial state. Sets up the menu system for
+                ; action.
+menu_state_initialise
+                        rts
+
+menu_state_fadeout
+                        rts
+
+menu_state_create
+                        rts
+
+menu_state_fadein
+                        rts           
+
+menu_active_state
+                        rts
+
+
+                ; ****************************************************************
+                ; ***********                 MAIN LOOP                 **********
+                ; ****************************************************************
                 ; new main loop, created to clean-up the state-management
 main_loop
-
+                                bsr     menu_mainloop_state_machine
                                 bra     main_loop
+
 
 
 
@@ -495,6 +598,9 @@ level_3_interrupt_handler
                                 BSR.W   draw_logo_outline               ; L00021352
                                 BSR.W   calc_logo_lighting              ; L000213D8
                                 BSR.W   fill_vector_logo                ; L00021290
+
+
+                                bsr     menu_interrupt_state_machine
 
 .exit_handler    
                                 MOVE.W  #$0020,INTREQ(A6)
