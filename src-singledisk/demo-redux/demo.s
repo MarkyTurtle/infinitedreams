@@ -441,15 +441,43 @@ menu_state_table
                 ; - Transition to: MENU_CREATE
                 ;
 menu_state_init_ml
+
+                        move.l  #main_menu_definition,menu_current_ptr
+
+                        ; initialise menu selector sprite positions from menu definition data.
+                        move.l  menu_current_ptr,a0
+                        move.w  $4(a0),d0               ; 1st selectable line
+                        mulu    #8,d0                   ; pixel start of 1st line = 8 x line number
+                        move.w  d0,menu_selector_y
+                        move.w  d0,menu_selector_min_y
+
+                        move.w  $6(a0),d1               ; number of selectable lines
+                        mulu    #8,d1
+                        add.w   d0,d1                   ; pixel start of last line = 1stline + (8 x number of lines)
+                        move.w  d1,menu_selector_max_y
+
+                        move.w  $8(a0),d0
+                        mulu    #7,d0                   ; 7 pixels wide characters
+                        lsr.w   #1,d0                   ; divide total by 2
+                        move.b  d0,left_sprite_hpos1
+                        move.b  #$01,left_sprite_hpos2
+
+                        move.w  $a(a0),d1
+                        mulu    #7,d1
+                        lsr.w   #1,d1
+                        add.w   d0,d1
+                        move.b  d1,right_sprite_hpos1
+                        move.b  #$01,right_sprite_hpos2
+
                         ; initialise first menu for display here.
-                        MOVE.W  #$0020,menu_selector_y
-                        MOVE.W  #$0020,menu_selector_min_y
-                        MOVE.W  #$0050,menu_selector_max_y
+                        ;MOVE.W  #$0020,menu_selector_y
+                        ;MOVE.W  #$0020,menu_selector_min_y
+                        ;MOVE.W  #$0050,menu_selector_max_y
                         MOVE.W  #MENU_IDX_main_menu,menu_ptr_index
-                        MOVE.B  #$6c,left_sprite_hpos1
-                        MOVE.B  #$01,left_sprite_hpos2
-                        MOVE.B  #$a9,right_sprite_hpos1
-                        MOVE.B  #$01,right_sprite_hpos2
+                        ;MOVE.B  #$6c,left_sprite_hpos1
+                        ;MOVE.B  #$01,left_sprite_hpos2
+                        ;MOVE.B  #$a9,right_sprite_hpos1
+                        ;MOVE.B  #$01,right_sprite_hpos2
 
                         ; transition to next state                      
                         move.w  #STATE_MENU_CREATE,menu_current_state
@@ -780,6 +808,24 @@ level_3_interrupt_handler
 
 
 
+
+                ; IN:   a0.l - text to type ptr
+                ;       d0.l - characters wide
+                ;       d1.l - lines high
+display_text_new
+                move.l  a0,a3
+                move.l  d0,d7
+                move.l  d1,d6
+
+                move.w  #0,character_x_pos
+                move.w  #0,character_y_offset
+
+                lea.l   menu_typer_bitplane,a0
+                lea.l   menu_font_gfx,a2
+                bsr     display_text
+                rts
+
+
                 ; ------------------------ display menu -------------------------
                 ; Routine to display menu text on the screen. The menu is 
                 ; displayed in a 1 bitplane screen, overlayed on a vector
@@ -801,6 +847,12 @@ display_menu    ; original address L0002049C
                                 MOVE.W  #$002c,D7                               ; 44+1 characters wide
                                 MOVE.W  #$0010,D6                               ; 16+1 lines tall
 
+                ; IN:   a0 - typer bitplane
+                ;       a2 - font_gfx
+                ;       a3 - display text
+                ;       d7 - type (x) characters wide
+                ;       d6 - type (x) characters tall 
+display_text
                 ; print character loop -L000204C2
 .print_char_loop
                                 MOVE.L  #$00000000,D0
@@ -1053,17 +1105,14 @@ blend_typer_colour_fade ; original address L00020746
                 ; -------------------- clear menu display ---------------------
                 ; uses the processor to clear the 1 bitplane 320x135 pixel
                 ; menu display.
-clear_menu_display      ; original address L000207B6
-                                LEA.L   menu_typer_bitplane,a0          ; L00022E82,A0
+clear_menu_display              LEA.L   menu_typer_bitplane,a0
                                 MOVE.W  #$0009,D7                       ; loop counter 9+1
-                                MOVE.W  #$0087,D6                       ; loop counter 135+1
+                                MOVE.W  #$0087,D6
                                 MOVE.L  #$00000000,D0
 .clear_loop                     MOVE.L  D0,(A0)+
                                 DBF.W   D7,.clear_loop 
                                 MOVE.W  #$0009,D7
                                 DBF.W   D6,.clear_loop 
-                                ;BCLR.B  #MENU_DISP_DRAW,menu_display_status_bits        ; L000203AA ; flag - menu cleared status bits
-                                ;BCLR.B  #MENU_DISP_CLEAR,menu_display_status_bits       ; L000203AA ; flag - menu cleared status bits
                                 RTS 
 
 
@@ -2805,76 +2854,6 @@ menu_sprite_right       ; original address L00035FDC ; 16x7 pixels
 
 
 
-                ; ---------------------- insert disk 1 message -------------------------
-                ; bitplane display for 'insert disk 1' 
-insert_disk_1_message   ; original address L00036000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$01FA,$33EF,$DF3F,$00F9,$F9F6,$601E,$0000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$360C,$198C
-                                dc.w    $00CC,$6306,$6006,$0000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$0063,$B60C,$198C,$00CC,$6306,$6006,$0000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$F3CF,$9F0C
-                                dc.w    $00CC,$61E7,$C006,$0000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$0063,$706C,$198C,$00CC,$6036,$6006,$0000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$306C,$198C
-                                dc.w    $00CC,$6036,$6006,$0000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$01FB,$17CF,$D98C,$00F9,$FBE6,$601F,$8000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000
-
-
-
-                ; ---------------------- insert disk 2 message -------------------------
-                ; bitplane display for 'insert disk 2' 
-insert_disk_2_message   ; original address L00036118
-                                dc.w    $0000,$0000 
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$01FA,$33EF,$DF3F 
-                                dc.w    $00F9,$F9F6,$601F,$0000,$0000,$0000,$0000,$0000 
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 
-                                dc.w    $0000,$0063,$360C,$198C,$00CC,$6306,$6001,$8000 
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$B60C,$198C 
-                                dc.w    $00CC,$6306,$6001,$8000,$0000,$0000,$0000,$0000 
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 
-                                dc.w    $0000,$0063,$F3CF,$9F0C,$00CC,$61E7,$C00F,$0000 
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$706C,$198C 
-                                dc.w    $00CC,$6036,$6018,$0000,$0000,$0000,$0000,$0000 
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 
-                                dc.w    $0000,$0063,$306C,$198C,$00CC,$6036,$6018,$0000 
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000 
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$01FB,$17CF,$D98C 
-                                dc.w    $00F9,$FBE6,$601F,$8000,$0000,$0000,$0000,$0000 
-                                dc.w    $0000,$0000
-
-
-
-                ; ---------------------- insert disk 3 message -------------------------
-                ; bitplane display for 'insert disk 3' 
-insert_disk_3_message   ; original address L00036230
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$01FA,$33EF,$DF3F,$00F9,$F9F6,$601F,$0000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$360C,$198C
-                                dc.w    $00CC,$6306,$6001,$8000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$0063,$B60C,$198C,$00CC,$6306,$6001,$8000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$F3CF,$9F0C
-                                dc.w    $00CC,$61E7,$C007,$0000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$0063,$706C,$198C,$00CC,$6036,$6001,$8000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0063,$306C,$198C
-                                dc.w    $00CC,$6036,$6001,$8000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
-                                dc.w    $0000,$01FB,$17CF,$D98C,$00F9,$FBE6,$601F,$0000
-                                dc.w    $0000,$0000,$0000,$0000,$0000,$0000
 
 
 
@@ -3248,25 +3227,64 @@ logo_line_table ; original address L0003A690
                 ; ------------------------ menu screen pointer list ---------------------
                 ; a list of memory pointers to the text for each menu in the music disk
 menu_ptrs       ; original address L0003A7AC
-                                dc.l    main_menu               ; L0003A7E4 - index = $00
-                                dc.l    disk_1_menu             ; L0003AAE1 - index = $04
-                                dc.l    disk_2_menu             ; L0003AE0B - index = $08
-                                dc.l    disk_3_menu             ; L0003B108 - index = $0c
-                                dc.l    credits_menu            ; L0003B405 - index = $10
-                                dc.l    greetings_1_menu        ; L0003B702 - index = $14
-                                dc.l    greetings_2_menu        ; L0003B9FF - index = $18
-                                dc.l    addresses_1_menu        ; L0003BCFC - index = $1c
-                                dc.l    addresses_2_menu        ; L0003BFF9 - index = $20
-                                dc.l    addresses_3_menu        ; L0003C2F6 - index = $24
-                                dc.l    addresses_4_menu        ; L0003C5F3 - index = $28
-                                dc.l    addresses_5_menu        ; L0003C8F0 - index = $2c
-                                dc.l    addresses_6_menu        ; L0003CBED - index = $30
-                                dc.l    pd_message_menu         ; L0003CEEA - index = $34
+                                dc.l    main_menu_text                          ; index = $00
+                                dc.l    music_menu_1_text                       ; index = $04
+                                dc.l    music_menu_2_text                       ; index = $08
+                                dc.l    music_menu_3_text                       ; index = $0c
+                                dc.l    credits_menu_text                       ; index = $10
+                                dc.l    greetings_menu_1_text                   ; index = $14
+                                dc.l    greetings_menu_2_text                   ; index = $18
+                                dc.l    addresses_menu_1_text                   ; index = $1c
+                                dc.l    addresses_menu_2_text                   ; index = $20
+                                dc.l    addresses_menu_3_text                   ; index = $24
+                                dc.l    addresses_menu_4_text                   ; index = $28
+                                dc.l    addresses_menu_5_text                   ; index = $2c
+                                dc.l    addresses_menu_6_text                   ; index = $30
+                                dc.l    pd_message_menu_text                    ; index = $34
 
 
-                ; menu format = 45 x 17 characters
-main_menu       ; original address L0003A7E4
-                                ;        123456789012345678901234567890123456789012345
+
+
+
+                ;---------------------------------------------------------------------------------------------------------------------
+                ; DATA DRIVEN MENU SYSTEM
+                ;---------------------------------------------------------------------------------------------------------------------
+
+
+                        ;----------------------------------------
+                        ; menu callback: Load a music module 
+                        ; in: a0 = function parameters ptr
+menu_load_module:
+                                lea     $dff180,a6
+                                move.w  VHPOSR(a6),COLOR00(a6)
+                                jmp     menu_load_module
+                                rts
+
+
+
+MNUCMD_MENU     EQU     $0              ; selecting this option displays another menu.
+MNUCMD_FUNCTION EQU     $1              ; execute function
+
+menu_current_ptr                dc.l    main_menu_definition                    ; ptr to current menu for/being displayed
+
+
+                        ; -------------------------------------------------
+                        ; -------------- MAIN MENU DEFINITION -------------
+                        ;--------------------------------------------------
+main_menu_definition            dc.l    main_menu_text
+                                dc.w    5                                               ; 1st selectable line number (0 index)
+                                dc.w    7                                               ; number of selectable options
+                                dc.w    13,16                                           ; left selector char pos, options char width.
+                                dc.l    MNUCMD_MENU,music_menu_1_definition,$0          ; option 1, display menu
+                                dc.l    MNUCMD_MENU,music_menu_2_definition,$0          ; option 2, display menu
+                                dc.l    MNUCMD_MENU,music_menu_3_definition,$0          ; option 3, display menu
+                                dc.l    MNUCMD_MENU,credits_menu_definition,$0          ; option 4, display menu
+                                dc.l    MNUCMD_MENU,greetings_menu_1_definition,$0      ; option 5, display menu
+                                dc.l    MNUCMD_MENU,addresses_menu_1_definition,$0      ; option 6, display menu
+                                dc.l    MNUCMD_MENU,pd_message_menu_definition,$0       ; option 7, display menu
+
+                                ; menu format = 45 x 17 characters
+main_menu_text                  ;        123456789012345678901234567890123456789012345
                                 dc.b    '                                             '
                                 dc.b    '  - THE LUNATICS PRESENT INFINITE DREAMS -   '
                                 dc.b    '            SINGLE DISK VERSION.             '   
@@ -3284,9 +3302,24 @@ main_menu       ; original address L0003A7E4
                                 dc.b    '                                             '
                                 dc.b    '                          *1992-2025 LUNATICS'   
                                 dc.b    '               HTTPS://GITHUB.COM/MARKYTURTLE'
+                                even
 
-disk_1_menu      ; original address L0003AAE1
-                                ;        123456789012345678901234567890123456789012345
+
+                        ; -------------------------------------------------
+                        ; ------------ MUSIC MENU 1 DEFINITION ------------
+                        ;--------------------------------------------------
+music_menu_1_definition         dc.l    music_menu_1_text
+                                dc.w    7                                               ; 1st selectable line number (0 index)
+                                dc.w    6                                               ; number of selectable options
+                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 1, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 2, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 3, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 4, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 5, load music
+                                dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 6, display menu
+
+music_menu_1_text               ;        123456789012345678901234567890123456789012345
                                 dc.b    '              -----------------              '
                                 dc.b    '             - INFINITE DREAMS -             '
                                 dc.b    '              -----------------              '              
@@ -3304,9 +3337,28 @@ disk_1_menu      ; original address L0003AAE1
                                 dc.b    '                                             '
                                 dc.b    '                                             '
                                 dc.b    '                                             '
+                                even
 
-disk_2_menu         
-                                 ;        123456789012345678901234567890123456789012345
+
+                        ; -------------------------------------------------
+                        ; ------------ MUSIC MENU 2 DEFINITION ------------
+                        ;--------------------------------------------------
+music_menu_2_definition         dc.l    music_menu_2_text
+                                dc.w    6                                               ; 1st selectable line number (0 index)
+                                dc.w    10                                              ; number of selectable options
+                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 1, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 2, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 3, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 4, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 5, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 6, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 7, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 8, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 9, load music
+                                dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 10, display menu
+
+music_menu_2_text               ;        123456789012345678901234567890123456789012345
                                 dc.b    '              -----------------              '
                                 dc.b    '             - INFINITE DREAMS -             '
                                 dc.b    '              -----------------              '              
@@ -3324,9 +3376,28 @@ disk_2_menu
                                 dc.b    '  BRIGHT..........................HOLLYWOOD  '
                                 dc.b    '  ...........RETURN TO MAIN MENU...........  ' 
                                 dc.b    '                                             '
+                                even
 
-disk_3_menu         
-                                 ;        123456789012345678901234567890123456789012345
+
+                        ; -------------------------------------------------
+                        ; ------------ MUSIC MENU 3 DEFINITION ------------
+                        ;--------------------------------------------------
+music_menu_3_definition         dc.l    music_menu_3_text
+                                dc.w    6                                               ; 1st selectable line number (0 index)
+                                dc.w    10                                              ; number of selectable options
+                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 1, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 2, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 3, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 4, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 5, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 6, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 7, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 8, load music
+                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 9, load music
+                                dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 10, display menu
+
+music_menu_3_text               ;        123456789012345678901234567890123456789012345
                                 dc.b    '              -----------------              '
                                 dc.b    '             - INFINITE DREAMS -             '
                                 dc.b    '              -----------------              '              
@@ -3344,9 +3415,19 @@ disk_3_menu
                                 dc.b    '  NEVER TO MUCH......................PHASER  '
                                 dc.b    '  ...........RETURN TO MAIN MENU...........  ' 
                                 dc.b    '                                             '
-                              
-credits_menu    ; original address L0003B405
-                                ;        123456789012345678901234567890123456789012345
+                                even
+
+
+                        ; -------------------------------------------------
+                        ; ------------ CREDITS MENU DEFINITION ------------
+                        ;--------------------------------------------------
+credits_menu_definition         dc.l    credits_menu_text
+                                dc.w    15                                              ; 1st selectable line number (0 index)
+                                dc.w    1                                               ; number of selectable options
+                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 1, display menu
+
+credits_menu_text               ;        123456789012345678901234567890123456789012345
                                 dc.b    '               ...CREDITS...                 '    
                                 dc.b    '    CODING................SPONGE HEAD        '  
                                 dc.b    '    GFX...........................JOE        '  
@@ -3364,9 +3445,20 @@ credits_menu    ; original address L0003B405
                                 dc.b    '                                             ' 
                                 dc.b    '  ...........RETURN TO MAIN MENU...........  '  
                                 dc.b    '                                             '  
-                                   
-greetings_1_menu       ; original address L0003B702
-                                 ;        123456789012345678901234567890123456789012345
+                                even
+
+
+                        ; -------------------------------------------------
+                        ; ---------- GREETINGS MENU 1 DEFINITION ----------
+                        ;--------------------------------------------------
+greetings_menu_1_definition     dc.l    greetings_menu_1_text
+                                dc.w    14                                              ; 1st selectable line number (0 index)
+                                dc.w    2                                               ; number of selectable options
+                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.l    MNUCMD_MENU,greetings_menu_2_definition,$0      ; option 1, display menu
+                                dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 2, display menu
+
+greetings_menu_1_text           ;        123456789012345678901234567890123456789012345
                                 dc.b    '   ADDONIC-AGILE-AGNOSTIC FRONT AND PANIC    '  
                                 dc.b    '   ALCATRAZ-ALCHEMY-ALLIANCE-ALPHA FLIGHT    '  
                                 dc.b    '    AMAZE-ANAL INTRUDERS-ANARCHY-ANTHROX     '  
@@ -3384,10 +3476,18 @@ greetings_1_menu       ; original address L0003B702
                                 dc.b    '  ..............MORE GREETZ................  '  
                                 dc.b    '  ...........RETURN TO MAIN MENU...........  '  
                                 dc.b    '                                             '       
+                                even
 
-greetings_2_menu       ; original address L0003B9FF
-                                 ;        123456789012345678901234567890123456789012345
-                                ;        123456789012345678901234567890123456789012345
+                        ; -------------------------------------------------
+                        ; ---------- GREETINGS MENU 2 DEFINITION ----------
+                        ;--------------------------------------------------
+greetings_menu_2_definition     dc.l    greetings_menu_2_text
+                                dc.w    15                                              ; 1st selectable line number (0 index)
+                                dc.w    1                                               ; number of selectable options
+                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 1, display menu
+
+greetings_menu_2_text           ;        123456789012345678901234567890123456789012345
                                 dc.b    '   NEMISIS-NOXIOUS-ORIGIN-PALACE-PARADISE    '  
                                 dc.b    '   PARAGON-PHANTASM-PHANTASY-PHASE-PLASMA    '  
                                 dc.b    '  POLARIS-PURE METAL CODERS-QUARTEX-QUARTZ   '  
@@ -3405,9 +3505,19 @@ greetings_2_menu       ; original address L0003B9FF
                                 dc.b    '       WIZZCAT-XENTEX-ZITE PRODUCTIONS       '  
                                 dc.b    '  ...........RETURN TO MAIN MENU...........  '  
                                 dc.b    '                                             ' 
+                                even
 
-addresses_1_menu        ; original address L0003BCFC
-                                ;        123456789012345678901234567890123456789012345
+
+                        ; -------------------------------------------------
+                        ; ---------- ADDRESSES MENU 1 DEFINITION ----------
+                        ;--------------------------------------------------
+addresses_menu_1_definition     dc.l    addresses_menu_1_text
+                                dc.w    15                                              ; 1st selectable line number (0 index)
+                                dc.w    1                                               ; number of selectable options
+                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.l    MNUCMD_MENU,addresses_menu_2_definition,$0      ; option 1, display menu
+
+addresses_menu_1_text           ;        123456789012345678901234567890123456789012345
                                 dc.b    '  THE LUNATICS "WERE" LOOKING FOR SOME MORE  '  
                                 dc.b    '   MEMBERS AND COOOL DIVISIONS AROUND THE    '  
                                 dc.b    '  WORLD. TO SET UP A DIVISION WRITE TO THE   '  
@@ -3425,9 +3535,19 @@ addresses_1_menu        ; original address L0003BCFC
                                 dc.b    '                                             '  
                                 dc.b    '  .............MORE ADDRESSES..............  '  
                                 dc.b    '                                             ' 
+                                even
 
-addresses_2_menu        ; original address L0003BFF9
-                                ;        123456789012345678901234567890123456789012345
+
+                        ; -------------------------------------------------
+                        ; ---------- ADDRESSES MENU 2 DEFINITION ----------
+                        ;--------------------------------------------------
+addresses_menu_2_definition     dc.l    addresses_menu_2_text
+                                dc.w    15                                              ; 1st selectable line number (0 index)
+                                dc.w    1                                               ; number of selectable options
+                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.l    MNUCMD_MENU,addresses_menu_3_definition,$0      ; option 1, display menu
+                               
+addresses_menu_2_text           ;        123456789012345678901234567890123456789012345
                                 dc.b    '   TO JOIN THE UK DIVISION WRITE TO ONE OF   '  
                                 dc.b    '           THE FOLLOWING ADDRESSES:-         ' 
                                 dc.b    '                                             '   
@@ -3445,9 +3565,19 @@ addresses_2_menu        ; original address L0003BFF9
                                 dc.b    '                                             '  
                                 dc.b    '  .............MORE ADDRESSES..............  '  
                                 dc.b    '                                             ' 
-             
-addresses_3_menu        ; original address L0003C2F6
-                                ;        123456789012345678901234567890123456789012345 
+                                even
+
+
+                        ; -------------------------------------------------
+                        ; ---------- ADDRESSES MENU 3 DEFINITION ----------
+                        ;--------------------------------------------------
+addresses_menu_3_definition     dc.l    addresses_menu_3_text
+                                dc.w    15                                              ; 1st selectable line number (0 index)
+                                dc.w    1                                               ; number of selectable options
+                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.l    MNUCMD_MENU,addresses_menu_4_definition,$0      ; option 1, display menu
+                                                               
+addresses_menu_3_text           ;        123456789012345678901234567890123456789012345 
                                 dc.b    '    TO JOIN THE AUSTRIAN DIVISION WRITE TO   '  
                                 dc.b    '       ONE OF THE FOLLOWING ADDRESSES:-      '  
                                 dc.b    '                                             '  
@@ -3465,9 +3595,20 @@ addresses_3_menu        ; original address L0003C2F6
                                 dc.b    '                                             '  
                                 dc.b    '  .............MORE ADDRESSES..............  '    
                                 dc.b    '                                             '                                 
+                                even
 
-addresses_4_menu        ; original address L0003C5F3
-                                ;        123456789012345678901234567890123456789012345
+
+  
+                        ; -------------------------------------------------
+                        ; ---------- ADDRESSES MENU 4 DEFINITION ----------
+                        ;--------------------------------------------------
+addresses_menu_4_definition     dc.l    addresses_menu_4_text
+                                dc.w    15                                              ; 1st selectable line number (0 index)
+                                dc.w    1                                               ; number of selectable options
+                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.l    MNUCMD_MENU,addresses_menu_5_definition,$0      ; option 1, display menu
+                                                              
+addresses_menu_4_text           ;        123456789012345678901234567890123456789012345
                                 dc.b    '     TO JOIN THE DUTCH DIVISION WRITE TO     '  
                                 dc.b    '          THE FOLLOWING ADDRESS:-            '  
                                 dc.b    '                                             '  
@@ -3485,9 +3626,19 @@ addresses_4_menu        ; original address L0003C5F3
                                 dc.b    '                                             '  
                                 dc.b    '  .............MORE ADDRESSES..............  ' 
                                 dc.b    '                                             ' 
+                                even
 
-addresses_5_menu        ; original address L0003C8F0
-                                ;        123456789012345678901234567890123456789012345
+
+                        ; -------------------------------------------------
+                        ; ---------- ADDRESSES MENU 5 DEFINITION ----------
+                        ;--------------------------------------------------
+addresses_menu_5_definition     dc.l    addresses_menu_5_text
+                                dc.w    15                                              ; 1st selectable line number (0 index)
+                                dc.w    1                                               ; number of selectable options
+                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.l    MNUCMD_MENU,addresses_menu_5_definition,$0      ; option 1, display menu
+                                 
+addresses_menu_5_text           ;        123456789012345678901234567890123456789012345
                                 dc.b    '  TO JOIN THE AUSTRALIAN DIVISION WRITE TO   '  
                                 dc.b    '           THE FOLLOWING ADDRESS:-           '  
                                 dc.b    '                                             '  
@@ -3505,9 +3656,19 @@ addresses_5_menu        ; original address L0003C8F0
                                 dc.b    '                                             '  
                                 dc.b    '  .............MORE ADDRESSES..............  ' 
                                 dc.b    '                                             ' 
+                                even
 
-addresses_6_menu        ; original address L0003CBED          
-                                ;        123456789012345678901234567890123456789012345
+
+                        ; -------------------------------------------------
+                        ; ---------- ADDRESSES MENU 6 DEFINITION ----------
+                        ;--------------------------------------------------
+addresses_menu_6_definition     dc.l    addresses_menu_6_text
+                                dc.w    15                                              ; 1st selectable line number (0 index)
+                                dc.w    1                                               ; number of selectable options
+                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 1, display menu
+
+addresses_menu_6_text           ;        123456789012345678901234567890123456789012345
                                 dc.b    '    TO JOIN THE SWEDISH DIVISION WRITE TO    '  
                                 dc.b    '          THE FOLLOWING ADDRESS:-            '  
                                 dc.b    '                                             '  
@@ -3525,9 +3686,19 @@ addresses_6_menu        ; original address L0003CBED
                                 dc.b    '                                             '  
                                 dc.b    '  ..........RETURN TO MAIN MENU ...........  '   
                                 dc.b    '                                             ' 
+                                even
 
-pd_message_menu        ; original address L0003CEEA 
-                                ;        123456789012345678901234567890123456789012345
+
+                        ; -------------------------------------------------
+                        ; ---------- PD MESSAGE MENU DEFINITION -----------
+                        ;--------------------------------------------------
+pd_message_menu_definition      dc.l    pd_message_menu_text
+                                dc.w    15                                              ; 1st selectable line number (0 index)
+                                dc.w    1                                               ; number of selectable options
+                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 1, display menu
+                              
+pd_message_menu_text            ;        123456789012345678901234567890123456789012345
                                 dc.b    '                                             ' 
                                 dc.b    '  THIS PAGE ORIGINALLY CONTAINED A MESSAGE   '  
                                 dc.b    '  TO P.D. COMPANIES AKSING THEM TO RESPECT   '  
@@ -3543,9 +3714,10 @@ pd_message_menu        ; original address L0003CEEA
                                 dc.b    '                                             '                                  
                                 dc.b    '                                             '  
                                 dc.b    '                                             '  
-                                dc.b    '                                             '  
                                 dc.b    '  ..........RETURN TO MAIN MENU ...........  '  
- 
+                                dc.b    '                                             '  
+                                even
+
 
                                 ; spare screen template for text typer/menu 45 x 17 characters
                                 ;        123456789012345678901234567890123456789012345
