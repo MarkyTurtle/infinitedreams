@@ -416,39 +416,76 @@ menu_state_table
                         dc.l    $0
                         dc.l    $0
                         ; menu init state
-                        dc.l    menu_state_initialise
-                        dc.l    $0
+                        dc.l    menu_state_init_ml
+                        dc.l    menu_state_init_int
                         ; menu fade out state
-                        dc.l    menu_state_fadeout
-                        dc.l    $0
+                        dc.l    menu_state_fadeout_ml
+                        dc.l    menu_state_fadeout_int
                         ; menu create state
-                        dc.l    menu_state_create
-                        dc.l    $0
+                        dc.l    menu_state_create_ml
+                        dc.l    menu_state_create_int
                         ; menu fade in state
-                        dc.l    menu_state_fadein
-                        dc.l    $0
+                        dc.l    menu_state_fadein_ml
+                        dc.l    menu_state_fadein_int
                         ; menu active state
-                        dc.l    menu_active_state
-                        dc.l    $0
+                        dc.l    menu_active_state_ml
+                        dc.l    menu_active_state_int
 
 
-                ; ------------------------- state menu init -------------------
+                ; ------------------ state menu init -------------------
                 ; The menu system initial state. Sets up the menu system for
                 ; action.
-menu_state_initialise
+menu_state_init_ml
+                        ; initialise first menu for display here.
+                        move.w #MENU_IDX_main_menu,menu_ptr_index
+                        ; transition to next state                      
+                        move.w  #STATE_MENU_CREATE,menu_current_state
+                        bsr     menu_set_state
+                        rts
+menu_state_init_int
                         rts
 
-menu_state_fadeout
+                ; ----------------- state menu fade out ----------------
+menu_state_fadeout_ml
+                        rts
+menu_state_fadeout_int
+                        rts                   
+
+                ; ------------------ state menu create -----------------
+menu_state_create_ml
+                        BSR.W   clear_menu_display
+                        BSR.W   display_menu
+                        ; transition to next state
+                        move.w  #STATE_MENU_FADEIN,menu_current_state
+                        bsr     menu_set_state
                         rts
 
-menu_state_create
+menu_state_create_int
                         rts
 
-menu_state_fadein
+
+                ; ----------------- state menu fade in ----------------
+menu_state_fadein_ml
                         rts           
+menu_state_fadein_int
+                        BSR.W   blend_typer_colour_fade
+                        BSR.W   fade_in_menu_display
+                        tst.l   d0
+                        beq.s   .transition_state
+                        rts 
 
-menu_active_state
+.transition_state       ; transition to next state
+                        move.w  #STATE_MENU_ACTIVE,menu_current_state
+                        bsr     menu_set_state
                         rts
+
+
+                ; ------------------ state menu active ----------------
+menu_active_state_ml
+                        rts
+menu_active_state_int
+                        rts
+
 
 
                 ;-----------------------------------------------------------------
@@ -800,48 +837,41 @@ character_y_offset ; original address L000205D2 - y - offset (multiple of bytes 
                         ; This routine does set the colour used by the alpha routine in the
                         ; menu_text_fade_colour_copy variable.
                         ;
-fade_in_menu_display    ; original address L000205D4
-                                CMP.B   #$03,fade_speed_counter                         ; L00020743
-                                BNE.W   .exit_fade_in                                   ; L00020668 
-                                MOVE.B  #$00,fade_speed_counter                         ; L00020743
-                                LEA.L   copper_menu_fade_colour,a0                      ; L00022DAE,A0
+fade_in_menu_display            LEA.L   copper_menu_fade_colour,a0 
                                 MOVE.W  $0002(A0),D0                                    ; get current colour from copper list
 .calc_blue_component
                                 MOVE.W  D0,D1
                                 AND.W   #$000f,D1
                                 CMP.W   #$000f,D1
-                                BEQ.B   .calc_green_component                           ; L00020604 
+                                BEQ.B   .calc_green_component 
                                 ADD.W   #$0001,$0002(A0)                                ; update colour reg in copper list
 .calc_green_component
                                 MOVE.W  D0,D1
                                 AND.W   #$00f0,D1
                                 CMP.W   #$00f0,D1
-                                BEQ.B   .calc_red_component                             ; L00020616 
+                                BEQ.B   .calc_red_component  
                                 ADD.W   #$0010,$0002(A0)                                ; update colour reg in copper list
 .calc_red_component
                                 MOVE.W  D0,D1
                                 AND.W   #$0f00,D1
                                 CMP.W   #$0f00,D1
-                                BEQ.B   .set_blend_copy_colour                          ; L00020628 
+                                BEQ.B   .set_blend_copy_colour  
                                 ADD.W   #$0100,$0002(A0)                                ; update colour reg in copper list
 .set_blend_copy_colour   ; set the copy of the colour for the blend fade routine
-                                MOVE.W  menu_text_fade_colour_copy,d0                   ; L00020744,D0
+                                MOVE.W  menu_text_fade_colour_copy,d0 
                                 CMP.W   #$0fff,D0
-                                BEQ.B   .update_fade_count                              ; L0002063C 
-                                ADD.W   #$0111,menu_text_fade_colour_copy               ; increment current fade colour - L00020744
+                                BEQ.B   .update_fade_count 
+                                ADD.W   #$0111,menu_text_fade_colour_copy               ; increment current fade colour
 .update_fade_count
-                                ADD.B   #$01,fade_counter                               ; L00020742
-                                CMP.B   #$10,fade_counter                               ; L00020742
-                                BNE.B   .fade_in_not_complete                           ; L00020666 
-.set_fade_in_complete
-                                ;BCLR.B  #MENU_DISP_FADE_IN,menu_display_status_bits      ; set fade in completed (clear bit 0) - L000203AA
-                                ;BCLR.B  #MENU_FADING,menu_selection_status_bits          ; L000203A8
-                                MOVE.W  #$0000,fade_counter                              ; L00020742
-.fade_in_not_complete
-                                RTS 
+                                ADD.B   #$01,fade_counter
+                                CMP.B   #$10,fade_counter
+                                BNE.B   .fade_in_not_complete
 
-.exit_fade_in
-                                ADD.B   #$01,fade_speed_counter                 ; L00020743
+.set_fade_in_complete           moveq   #0,d0                                           ; z = 1 - Fade has completed
+                                rts
+
+                                MOVE.W  #$0000,fade_counter                              
+.fade_in_not_complete           moveq   #-1,d0                                          ; z = 0 - Fade has NOT completed
                                 RTS 
 
 
