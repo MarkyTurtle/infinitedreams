@@ -432,12 +432,25 @@ menu_state_table
                         dc.l    menu_active_state_int
 
 
+
                 ; ------------------ state menu init -------------------
-                ; The menu system initial state. Sets up the menu system for
-                ; action.
+                ; The menu system initial state. 
+                ; Sets up the menu system for action.
+                ;
+                ; - Set the initial menu for display
+                ; - Transition to: MENU_CREATE
+                ;
 menu_state_init_ml
                         ; initialise first menu for display here.
-                        move.w #MENU_IDX_main_menu,menu_ptr_index
+                        MOVE.W  #$0020,menu_selector_y
+                        MOVE.W  #$0020,menu_selector_min_y
+                        MOVE.W  #$0050,menu_selector_max_y
+                        MOVE.W  #MENU_IDX_main_menu,menu_ptr_index
+                        MOVE.B  #$6c,left_sprite_hpos1
+                        MOVE.B  #$01,left_sprite_hpos2
+                        MOVE.B  #$a9,right_sprite_hpos1
+                        MOVE.B  #$01,right_sprite_hpos2
+
                         ; transition to next state                      
                         move.w  #STATE_MENU_CREATE,menu_current_state
                         bsr     menu_set_state
@@ -445,16 +458,51 @@ menu_state_init_ml
 menu_state_init_int
                         rts
 
-                ; ----------------- state menu fade out ----------------
+
+                ; ----------------- state menu fade out -----------------
+                ; Fade out the Menu Display.
+                ;
+                ; - Fade out the copper colours of the menu display
+                ; - Transition to: MENU_CREATE
+                ;
 menu_state_fadeout_ml
                         rts
 menu_state_fadeout_int
+                        BSR.W   blend_typer_colour_fade
+                        BSR.W   fade_out_menu_display
+                        tst.l   d0
+                        beq.s   .transition_state
+                        rts 
+
+.transition_state       ; transition to next state
+                        move.w  #STATE_MENU_CREATE,menu_current_state
+                        bsr     menu_set_state
                         rts                   
 
-                ; ------------------ state menu create -----------------
+
+                ; ------------------- state menu create ------------------
+                ; Create the menu display for the value stored in
+                ;  - menu_ptr_index
+                ; This index will have been set during a previous
+                ; menu action a previous MENU_ACTIVE state, or MENU_INIT
+                ;
+                ; - Clear Menu Bitmap Display
+                ; - Draw new Menu Bitmap Display
+                ; - Set Mouse Selector Parameters.
+                ; - Transition To: MENU_FADE_IN
+                ;
 menu_state_create_ml
+                        BSR.W   update_menu_selector_position
                         BSR.W   clear_menu_display
                         BSR.W   display_menu
+
+.set_menu_sprite_ptrs   LEA.L   menu_sprite_left,A0
+                        MOVE.B  left_sprite_hpos1,$0001(A0)
+                        MOVE.B  left_sprite_hpos2,$0003(A0)
+                        LEA.L   menu_sprite_right,A0
+                        MOVE.B  right_sprite_hpos1,$0001(A0)
+                        MOVE.B  right_sprite_hpos2,$0003(A0)
+
                         ; transition to next state
                         move.w  #STATE_MENU_FADEIN,menu_current_state
                         bsr     menu_set_state
@@ -464,7 +512,12 @@ menu_state_create_int
                         rts
 
 
-                ; ----------------- state menu fade in ----------------
+                ; ------------------ state menu fade in -----------------
+                ; Fade in the Menu Display.
+                ;
+                ; - Fade in the copper colours of the menu display
+                ; - Transition to: MENU_ACTIVE
+                ;
 menu_state_fadein_ml
                         rts           
 menu_state_fadein_int
@@ -481,9 +534,15 @@ menu_state_fadein_int
 
 
                 ; ------------------ state menu active ----------------
+                ; Do menu processing actions
 menu_active_state_ml
+                        BTST.B  #$0006,$00bfe001
+                        BNE.B   .mouse_not_clicked            
+                        BSR.W   do_menu_action  
+.mouse_not_clicked 
                         rts
 menu_active_state_int
+                        BSR.W   update_menu_selector_position
                         rts
 
 
@@ -867,10 +926,10 @@ fade_in_menu_display            LEA.L   copper_menu_fade_colour,a0
                                 CMP.B   #$10,fade_counter
                                 BNE.B   .fade_in_not_complete
 
-.set_fade_in_complete           moveq   #0,d0                                           ; z = 1 - Fade has completed
+.set_fade_in_complete           MOVE.W  #$0000,fade_counter
+                                moveq   #0,d0                                           ; z = 1 - Fade has completed
                                 rts
-
-                                MOVE.W  #$0000,fade_counter                              
+                           
 .fade_in_not_complete           moveq   #-1,d0                                          ; z = 0 - Fade has NOT completed
                                 RTS 
 
@@ -889,29 +948,26 @@ fade_in_menu_display            LEA.L   copper_menu_fade_colour,a0
                         ; coords ready for the next menu (obviously I didn;t care or know
                         ; much about separation of concerns when I was 17)
                         ;
-fade_out_menu_display   ; original address L00020672
-                                CMP.B   #$03,fade_speed_counter                         ; L00020743
-                                BNE.W   .exit_fade_out                                  ; L00020738 
-                                MOVE.B  #$00,fade_speed_counter                         ; L00020743
-                                LEA.L   copper_menu_fade_colour,a0                      ; L00022DAE,A0
-                                MOVE.W  $0002(A0),D0
+fade_out_menu_display           LEA.L   copper_menu_fade_colour,a0
+                                MOVE.W  $0002(A0),D0                                    ; get current colour value from copper list
 .calc_blue_component
                                 MOVE.W  D0,D1
                                 AND.W   #$000f,D1
                                 CMP.W   #$0002,D1
-                                BEQ.B   .calc_green_component                           ; L000206A2 
+                                BEQ.B   .calc_green_component
                                 SUB.W   #$0001,$0002(A0)
 .calc_green_component
                                 MOVE.W  D0,D1
                                 AND.W   #$00f0,D1
                                 CMP.W   #$0000,D1
-                                BEQ.B   .calc_red_component                             ; L000206B4 
+                                BEQ.B   .calc_red_component
                                 SUB.W   #$0010,$0002(A0)
 .calc_red_component
                                 AND.W   #$0f00,D0
                                 CMP.W   #$0000,D0
-                                BEQ.B   .set_blend_copy_colour                          ; L000206C4 
+                                BEQ.B   .set_blend_copy_colour
                                 SUB.W   #$0100,$0002(A0)
+
 .set_blend_copy_colour   ; set the copy of the colour for the blend fade routine
                                 MOVE.W  menu_text_fade_colour_copy,D0
                                 CMP.W   #$0000,D0
@@ -922,29 +978,19 @@ fade_out_menu_display   ; original address L00020672
                                 CMP.B   #$10,fade_counter                               ; L00020742
                                 BNE.B   .fade_in_not_complete                           ; L00020736 
 .set_fade_out_complete
-                                ;BCLR.B  #MENU_DISP_FADE_OUT,menu_display_status_bits            ; set fade out completed (clear bit 1) - L000203AA
-                                ;BSET.B  #MENU_DISP_CLEAR,menu_display_status_bits               ; (set bit 6) - L000203AA
-                                ;BCLR.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     ; L000203A8
-                                MOVE.W  #$0000,fade_counter                                     ; L00020742
-.set_menu_sprite_ptrs
-                                LEA.L   menu_sprite_left,A0                                     ; L00035FB8,A0
-                                MOVE.B  left_sprite_hpos1,$0001(A0)
-                                MOVE.B  left_sprite_hpos2,$0003(A0)
-                                LEA.L   menu_sprite_right,A0                                    ; L00035FDC,A0
-                                MOVE.B  right_sprite_hpos1,$0001(A0)
-                                MOVE.B  right_sprite_hpos2,$0003(A0)
+                                MOVE.W  #$0000,fade_counter
+                                move.l  #0,d0
+                                rts
+
 .fade_in_not_complete
+                                move.l  #-1,d0
                                 RTS 
 
-.exit_fade_out
-                                ADD.B   #$01,fade_speed_counter         ; L00020743
-                                RTS 
 
 
 fade_counter            ; original address L00020742 - used to measure if the fade is complete (after 16 fade levels)
                                 dc.b $00
-fade_speed_counter      ; original address L00020743
-                                dc.b $00
+
 
                                 even
 menu_text_fade_colour_copy ; original address L00020744 - copy of the menu text colour (used by the colour blend routine below)
@@ -1339,6 +1385,11 @@ set_main_menu_params    ; original address L0002124E
                                 MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
                                 MOVE.B  #$a9,right_sprite_hpos1                         ; L0002088C
                                 MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+
+                                ; change menu state machine state
+                                move.w  #STATE_MENU_FADEOUT,menu_current_state
+                                bsr     menu_set_state
+
                                 RTS 
 
 
@@ -1355,6 +1406,11 @@ set_disk_1_menu_params    ; original address L00020990
                                 MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
                                 MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
                                 MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+
+                                ; change menu state machine state
+                                move.w  #STATE_MENU_FADEOUT,menu_current_state
+                                bsr     menu_set_state
+
                                 RTS 
 
 
@@ -1371,6 +1427,11 @@ set_disk_2_menu_params   ; original address L000209D2
                                 MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
                                 MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
                                 MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+
+                                ; change menu state machine state
+                                move.w  #STATE_MENU_FADEOUT,menu_current_state
+                                bsr     menu_set_state
+
                                 RTS 
 
 
@@ -1387,6 +1448,11 @@ set_disk_3_menu_params  ; original address L00020A14
                                 MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
                                 MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
                                 MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+
+                                ; change menu state machine state
+                                move.w  #STATE_MENU_FADEOUT,menu_current_state
+                                bsr     menu_set_state
+
                                 RTS 
 
 
@@ -1403,6 +1469,11 @@ set_credits_menu_params ; original address L00020A56
                                 MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
                                 MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
                                 MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+
+                                ; change menu state machine state
+                                move.w  #STATE_MENU_FADEOUT,menu_current_state
+                                bsr     menu_set_state
+
                                 RTS 
 
 
@@ -1419,6 +1490,11 @@ set_greetz_1_menu_params ; original address L00020A98
                                 MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
                                 MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
                                 MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+
+                                ; change menu state machine state
+                                move.w  #STATE_MENU_FADEOUT,menu_current_state
+                                bsr     menu_set_state
+
                                 RTS 
 
 
@@ -1435,6 +1511,11 @@ set_greetz_2_menu_params ; original address L00020ADA
                                 MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
                                 MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
                                 MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+
+                                ; change menu state machine state
+                                move.w  #STATE_MENU_FADEOUT,menu_current_state
+                                bsr     menu_set_state
+
                                 RTS 
 
 
@@ -1442,15 +1523,19 @@ set_greetz_2_menu_params ; original address L00020ADA
                 ; ---------------------- set addresses 1 menu params ------------------------
                 ; set the parameters necessary for the display of the 'addresses 1 menu'
                 ;
-set_addresses_1_menu_params ; original address L00020B1C
-                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-                                MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
-                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-                                MOVE.W  #MENU_IDX_addresses_1_menu,menu_ptr_index       ; L000203AC
-                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
-                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
-                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
-                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+set_addresses_1_menu_params 
+                                MOVE.W  #$0070,menu_selector_min_y
+                                MOVE.W  #$0070,menu_selector_max_y
+                                MOVE.W  #MENU_IDX_addresses_1_menu,menu_ptr_index
+                                MOVE.B  #$42,left_sprite_hpos1
+                                MOVE.B  #$01,left_sprite_hpos2
+                                MOVE.B  #$d6,right_sprite_hpos1
+                                MOVE.B  #$01,right_sprite_hpos2
+
+                                ; change menu state machine state
+                                move.w  #STATE_MENU_FADEOUT,menu_current_state
+                                bsr     menu_set_state
+
                                 RTS 
 
 
@@ -1467,6 +1552,11 @@ set_addresses_2_menu_params ; original address L00020B5E
                                 MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
                                 MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
                                 MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+
+                                ; change menu state machine state
+                                move.w  #STATE_MENU_FADEOUT,menu_current_state
+                                bsr     menu_set_state
+
                                 RTS 
 
 
@@ -1483,6 +1573,11 @@ set_addresses_3_menu_params ; original address L00020BA0
                                 MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
                                 MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
                                 MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+
+                                ; change menu state machine state
+                                move.w  #STATE_MENU_FADEOUT,menu_current_state
+                                bsr     menu_set_state
+
                                 RTS 
 
 
@@ -1499,6 +1594,11 @@ set_addresses_4_menu_params ; original address L00020BE2
                                 MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
                                 MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
                                 MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+
+                                ; change menu state machine state
+                                move.w  #STATE_MENU_FADEOUT,menu_current_state
+                                bsr     menu_set_state
+
                                 RTS 
 
 
@@ -1515,6 +1615,11 @@ set_addresses_5_menu_params ; original address L00020C24
                                 MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
                                 MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
                                 MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+
+                                ; change menu state machine state
+                                move.w  #STATE_MENU_FADEOUT,menu_current_state
+                                bsr     menu_set_state
+
                                 RTS 
 
 
@@ -1531,6 +1636,11 @@ set_addresses_6_menu_params ; original address L00020C66
                                 MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
                                 MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
                                 MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+
+                                ; change menu state machine state
+                                move.w  #STATE_MENU_FADEOUT,menu_current_state
+                                bsr     menu_set_state
+
                                 RTS 
 
 
@@ -1547,6 +1657,11 @@ set_pd_message_menu_params ; original address L00020CA8
                                 MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
                                 MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
                                 MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
+
+                                ; change menu state machine state
+                                move.w  #STATE_MENU_FADEOUT,menu_current_state
+                                bsr     menu_set_state
+
                                 RTS 
 
 
