@@ -94,9 +94,6 @@ STATE_MUSIC_START       EQU     $40
 
 
                 ; ---------------- Start Demo/Music Disk -----------------
-                ; Set stack to top of memory, try to detest aciton replay
-                ; cartidges and eithe disable the freeze of reset/crash
-                ; the computer.
                 ;
 start_demo                      lea.l   STACK_ADDRESS,a7
                                 bsr.w   init_system
