@@ -542,6 +542,7 @@ menu_active_state_int
 execute_menu_action
                                 move.l  menu_current_ptr,a0
                                 move.w  menu_selector_y,d0
+                                add.w   #4,d0                   ; add the mid-point of the sprite arrow to the menu_selector_y co-ordinate
                                 lsr.w   #3,d0                   ; find the text line at which the menu selector is positioned.
 
                                 move.w  $4(a0),d1               ; the text line containing the first selectable option.
