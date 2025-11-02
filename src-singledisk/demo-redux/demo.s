@@ -2527,7 +2527,7 @@ main_menu_definition            dc.l    main_menu_text
                                 dc.l    MNUCMD_MENU,music_menu_2_definition,$0          ; option 2, display menu
                                 dc.l    MNUCMD_MENU,music_menu_3_definition,$0          ; option 3, display menu
                                 dc.l    MNUCMD_MENU,credits_menu_definition,$0          ; option 4, display menu
-                                dc.l    MNUCMD_MENU,greetings_menu_1_definition,$0      ; option 5, display menu
+                                dc.l    MNUCMD_MENU,greetings_menu_new_definition,$0    ; option 5, display menu
                                 dc.l    MNUCMD_MENU,addresses_menu_1_definition,$0      ; option 6, display menu
                                 dc.l    MNUCMD_MENU,pd_message_menu_definition,$0       ; option 7, display menu
 
@@ -2713,6 +2713,35 @@ credits_menu_text               ;        123456789012345678901234567890123456789
                                 dc.b    '             RETURN TO MAIN MENU',$ff  
                                 even
 
+
+                        ; -------------------------------------------------
+                        ; --------- GREETINGS MENU NEW DEFINITION ---------
+                        ;--------------------------------------------------
+greetings_menu_new_definition   dc.l    greetings_menu_new_text
+                                dc.w    16                                              ; 1st selectable line number (0 index)
+                                dc.w    1                                               ; number of selectable options
+                                dc.w    28,11                                           ; left selector char pos, options char width.
+                                dc.l    MNUCMD_MENU,greetings_menu_1_definition,$0      ; option 1, display menu
+
+greetings_menu_new_text          ;        123456789012345678901234567890123456789012345
+                                dc.b    '          ---   !    :               TTE!    ',$0d,$0a
+                                dc.b    '       --!   !- !-   !--.-------      TTE!   ',$0d,$0a
+                                dc.b    '       -/    /  T    /  !   /--/       TTE!  ',$0d,$0a
+                                dc.b    '       +    /  -!- -/   !  --/----      TTE! ',$0d,$0a
+                                dc.b    '----    +--------/------+--------/ .----     ',$0d,$0a
+                                dc.b    '+  !---            --  ---         !  -/     ',$0d,$0a
+                                dc.b    ' +    /  ----  ----+/- + !-- ------!- !---   ',$0d,$0a
+                                dc.b    ' / --/- / --/-/-  !  !  ---/-   ----/  /  T  ',$0d,$0a
+                                dc.b    '/  /  -!   --    -!  !  /   -! (---:  /   !- ',$0d,$0a
+                                dc.b    '+      +---/+----+!--!-------+----/!-/    ++ ',$0d,$0a
+                                dc.b    ' +------+          ---  ---        !NE7---// ',$0d,$0a
+                                dc.b    '      -------- --  .\ /--\ !-- --------      ',$0d,$0a
+                                dc.b    '     /  --   /  /--! 7 -- --/-   --   /      ',$0d,$0a
+                                dc.b    '    /    /--/  /   !  !/  /   !   /--/       ',$0d,$0a
+                                dc.b    '   / ---/--.  /   -! -/  /   -!  --/---      ',$0d,$0a
+                                dc.b    '   +   /   !------+ +--------+--------/      ',$0d,$0a
+                                dc.b    '    +------!      .  :       MORE GREETZ     ',$ff
+                                even
 
                         ; -------------------------------------------------
                         ; ---------- GREETINGS MENU 1 DEFINITION ----------
@@ -3060,6 +3089,47 @@ pd_message_menu_text            ;        123456789012345678901234567890123456789
                                 dc.b    '                                             ',$0d,$0a
                                 dc.b    '                                             ',$ff
 
+                                ; spare screen template for text typer/menu 45 x 17 characters
+                                ;        123456789012345678901234567890123456789012345
+                                dc.b    '                                             ',$0d,$0a 
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$ff
+
+
+
+
+                                ;        123456789012345678901234567890123456789012345
+                                dc.b    '          ___   |    :                       ',$0d,$0a
+                                dc.b    '       __ \  |_ |_   |__.________            ',$0d,$0a
+                                dc.b    '       _/   Z/  T    /  T  Z/__/             ',$0d,$0a
+                                dc.b    '       \    /  _|_ _/   |  __/____           ',$0d,$0a
+                                dc.b    '______  \________/_X____\________/  ._____   ',$0d,$0a
+                                dc.b    '\_   |__            __  ___         |  _/    ',$0d,$0a
+                                dc.b    '  \    /  ____  ____\/_ \ |__ ______|_ |___  ',$0d,$0a
+                                dc.b    ' / ___/_ / __/-/_  |  |  ___/_   ____/  /  T ',$0d,$0a
+                                dc.b    '/  /   _|   __    _|  |  /   _| (___:  /   |_',$0d,$0a
+                                dc.b    '\       \___7)____\|__|_______\____/|_/    \\',$0d,$0a
+                                dc.b    ' \_______\          ___  ___        !NE7___//',$0d,$0a
+                                dc.b    '      ________ __  .\ /__\ |__ ________      ',$0d,$0a
+                                dc.b    '     /  __   /  /__! /7__ __/_   __   /      ',$0d,$0a
+                                dc.b    '    /    /__/  /   |  |/  /   |  Z/__/       ',$0d,$0a
+                                dc.b    '   / ___/__.  /   _| _/  /   _|  __/___      ',$0d,$0a
+                                dc.b    '   \   Z/   |______\ \________\_______/      ',$0d,$0a
+                                dc.b    '    \_______|      .  :      MORE GREETZ     ',$0d,$0a
 
         IFD TEST_BUILD
         even
