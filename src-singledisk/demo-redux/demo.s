@@ -2695,7 +2695,7 @@ credits_menu_definition         dc.l    credits_menu_text
                                 dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 1, display menu
 
 credits_menu_text               ;        123456789012345678901234567890123456789012345
-                                dc.b    '                  CREDITS',$0d,$0a  
+                                dc.b    $0d,$0a  
                                 dc.b    '        CODING - SPONGEHEAD (MARKYTURTLE)',$0d,$0a   
                                 dc.b    '           GFX - JOE',$0d,$0a 
                                 dc.b    '                 T.S.M',$0d,$0a 
