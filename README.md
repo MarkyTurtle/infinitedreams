@@ -41,6 +41,7 @@ I've been looking for better mod player routines for the Amiga, am listing them 
 - [Ultimate Tracker Support Package](https://aminet.net/package/mus/edit/RSE-UTS)
 
 ## Progress To Date
+- **2025-11-02** - Added inital version of code to display the name of the Module being Loaded/Played at the bottom of the screen (needs refactoring but works ok). [single disk image](/src-singledisk/diskimages/)
 - **2025-11-02** - Created new Single-Disk Image ADF for Infinite-Dreams. Features new data-driven menu code and re-organised disk menus. [single disk image](/src-singledisk/diskimages/)
 - **2025-10-31** - Broken the Single-Disk Version Code (The ADF is still ok), I'm rewritting the menu handling code and it has not been reimplemented yet. No menus displayed at the moment,
 - **2025-10-28** - Have created a Single-Disk Version that now includes the original start-up/loading gfx, demo and all tunes on the same disk. ADF image can be found here. [single disk image](/src-singledisk/diskimages/)
