@@ -2511,7 +2511,7 @@ cosm_name                       dc.b    'COSMIC HOW MUCH',$0
 this_name                       dc.b    'THIS IS NOT A RAVE SONG',$0
 eatt_name                       dc.b    'EAT THE BALLBEARING',$0
 thef_name                       dc.b    'THE FLY',$0
-stra_name                       dc.b    'STRATOSPHERIC HOW MUCH',$0
+stra_name                       dc.b    'STRATOSPHERIC CITY',$0
 floa_name                       dc.b    'FLOAT',$0
 flig_name                       dc.b    'FLIGHT-SLEEPY MIX',$0
 ment_name                       dc.b    'MENTAL OBSTACLE',$0
