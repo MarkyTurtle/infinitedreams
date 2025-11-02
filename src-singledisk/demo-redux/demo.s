@@ -740,8 +740,8 @@ display_text_string             move.l  a0,a3
                         ;       a3 - display text
                         ;       d7 - type (x) characters wide
                         ;       d6 - type (x) characters tall 
-display_text                    move.w  #$0000,character_x_pos                          ; reset x position
-                                move.w  #$0000,character_y_offset                       ; reset y offset (line position)
+display_text                    ;move.w  #$0000,character_x_pos                          ; reset x position
+                                ;move.w  #$0000,character_y_offset                       ; reset y offset (line position)
 
 .print_char_loop                moveq.l  #$00000000,d0
                                 moveq.l  #$00000000,d1
@@ -751,7 +751,7 @@ display_text                    move.w  #$0000,character_x_pos                  
 
 .process_ascii_char             ; process ascii character
                                 move.b  (a3)+,d0                        ; get ascii char value
-                                cmp.b   #$ff,d0                         ; text display terminator
+                                cmp.b   #$00,d0                         ; text display NULL terminator
                                 beq     .exit_display_text
                                 cmp.b   #$0a,d0                         ; line feed
                                 beq     .line_feed
@@ -2470,6 +2470,205 @@ logo_line_table ; original address L0003A690
                 ; DATA DRIVEN MENU SYSTEM
                 ;---------------------------------------------------------------------------------------------------------------------
 
+module_name_table               
+                                dc.l    'jarr',jarr_name
+                                dc.l    'soun',soun_name
+                                dc.l    'reto',reto_name
+                                dc.l    'tech',tech_name
+                                dc.l    'brig',brig_name
+                                dc.l    'natu',natu_name
+                                dc.l    'obli',obli_name
+                                dc.l    'skyr',skyr_name
+                                dc.l    'zero',zero_name
+                                dc.l    'brea',brea_name
+                                dc.l    'shaf',shaf_name
+                                dc.l    'love',love_name
+                                dc.l    'cosm',cosm_name
+                                dc.l    'this',this_name
+                                dc.l    'eatt',eatt_name
+                                dc.l    'thef',thef_name
+                                dc.l    'stra',stra_name
+                                dc.l    'floa',floa_name
+                                dc.l    'flig',flig_name
+                                dc.l    'ment',ment_name
+                                dc.l    'blad',blad_name
+                                dc.l    'summ',summ_name
+                                dc.l    'neve',neve_name
+
+jarr_name                       dc.b    'JARRESQUE',$0
+soun_name                       dc.b    'SOUND OF SILENCE',$0
+reto_name                       dc.b    'RETOUCHE',$0
+tech_name                       dc.b    'TECHWAR',$0
+brig_name                       dc.b    'BRIGHT',$0
+natu_name                       dc.b    'NATURAL REALITY',$0
+obli_name                       dc.b    'OBILTERATION FIN',$0
+skyr_name                       dc.b    'SKYRIDERS',$0
+zero_name                       dc.b    'ZERO GRAVITY',$0
+brea_name                       dc.b    'BREAK THROUGH',$0
+shaf_name                       dc.b    'SHAFT',$0
+love_name                       dc.b    'LOVE YOUR MONEY',$0
+cosm_name                       dc.b    'COSMIC HOW MUCH',$0
+this_name                       dc.b    'THIS IS NOT A RAVE SONG',$0
+eatt_name                       dc.b    'EAT THE BALLBEARING',$0
+thef_name                       dc.b    'THE FLY',$0
+stra_name                       dc.b    'STRATOSPHERIC HOW MUCH',$0
+floa_name                       dc.b    'FLOAT',$0
+flig_name                       dc.b    'FLIGHT-SLEEPY MIX',$0
+ment_name                       dc.b    'MENTAL OBSTACLE',$0
+blad_name                       dc.b    'BLADE RUNNNER',$0
+summ_name                       dc.b    'SUMMER IN SWEDEN',$0
+neve_name                       dc.b    'NEVER TOO MUCH',$0
+
+loading_text                    dc.b    'LOADING MODULE: ',$0
+playing_text                    dc.b    'PLAYING MODULE: ',$0
+not_found_text                  dc.b    'NOT FOUND',$0
+                                even
+
+
+                                ; IN: 
+                                ;       d0.l = fileid
+                                ; OUT:
+                                ;       a0.l = string address
+                                ;
+get_module_name_string          lea     module_name_table,a1
+                                move.w  #23-1,d7                        ; total number of module names
+.find_loop                      move.l  (a1),d1
+                                cmp.l   d0,d1
+                                beq.s   .found_file
+.not_found                      lea     8(a1),a1
+                                dbf     d7,.find_loop
+
+.missing_name                   lea     not_found_text,a1               ; set 'not found' module name
+                                bra     .return_result
+
+.found_file                     move.l  4(a1),a1                        ; get string ptr to module name
+
+.return_result                  move.l  a1,a0
+                                rts
+
+
+clear_message_bitplane          lea     insert_disk_blank_message,a0
+                                move.w  #((40*8)/4)-1,d7                ; clear 320x8 message display line
+                                moveq   #0,d0
+.loop                           move.l  d0,(a0)+
+                                dbf     d7,.loop
+                                rts
+
+                        ; IN:
+                        ;       a0.l = null terminated string ptr
+                        ; OUT:
+                        ;       d0.l = string length
+get_string_length               moveq   #0,d0
+.loop                           cmp.b   #$00,(a0)+
+                                beq.s   .exit
+                                addq    #1,d0
+                                bra.s   .loop
+.exit                           rts
+
+display_loading_message
+                                move.l  (a0),d0                         ; get file id to load from parameters ptr passed in
+                                bsr.w   get_module_name_string          ; a0 = module name string       
+                                move.l  a0,a1                           ; a1 = module name string
+                                lea     loading_text,a2                 ; a2 = loading module: string
+
+                                bsr.w   get_string_length               ; d0.l = modulename string length
+                                move.l  d0,d1                           ; d1.l = modulename string length
+
+                                move.l  a2,a0
+                                bsr.w   get_string_length               ; d0.l = loading: string length
+                                move.l  d0,d2                           ; d2.l = loading: string length
+
+                                ; a1.l = module name string ptr
+                                ; d1.l = module name string len
+                                ; a2.l = loading: string ptr
+                                ; d2.l = loading: string len
+                                move.l  d2,d3
+                                add.l   d1,d3                           ; d3 = total string length
+                                move.l  d3,d4
+                                lsr.l   #1,d4                           ; d4 = half string length
+                                move.l  #22,d5                          ; mid-point of display string
+                                sub.l   d4,d5                           ; d5 = start of centred string in buffer
+                                mulu    #7,d5                           ; d5 = start pixel position.
+
+                                bsr.w   clear_message_bitplane
+
+                                ; display loading string
+                                movem.l d0-d7/a0-a6,-(a7)
+                                move.l  a2,a3                           ; text ptr
+                                move.w  d5,character_x_pos
+                                move.w  #0,character_y_offset
+                                lea.l   insert_disk_blank_message,a0
+                                lea.l   menu_font_gfx,a2
+                                jsr     display_text
+                                movem.l (a7)+,d0-d7/a0-a6
+
+                                mulu    #7,d2                   ;  d2 = pixel position
+                                add.l   d2,d5                   ; add 'LOADING MODULE: ' length to start of centred string
+
+                                ; display module string
+                                movem.l d0-d7/a0-a6,-(a7)
+                                move.l  a1,a3                          ; texrt ptr
+                                move.w  d5,character_x_pos
+                                move.w  #0,character_y_offset
+                                lea.l   insert_disk_blank_message,a0
+                                lea.l   menu_font_gfx,a2
+                                jsr     display_text
+                                movem.l (a7)+,d0-d7/a0-a6
+
+                                rts
+
+display_playing_message
+                                move.l  (a0),d0                         ; get file id to load from parameters ptr passed in
+                                bsr.w   get_module_name_string          ; a0 = module name string       
+                                move.l  a0,a1                           ; a1 = module name string
+                                lea     playing_text,a2                 ; a2 = loading module: string
+
+                                bsr.w   get_string_length               ; d0.l = modulename string length
+                                move.l  d0,d1                           ; d1.l = modulename string length
+
+                                move.l  a2,a0
+                                bsr.w   get_string_length               ; d0.l = loading: string length
+                                move.l  d0,d2                           ; d2.l = loading: string length
+
+                                ; a1.l = module name string ptr
+                                ; d1.l = module name string len
+                                ; a2.l = loading: string ptr
+                                ; d2.l = loading: string len
+                                move.l  d2,d3
+                                add.l   d1,d3                           ; d3 = total string length
+                                move.l  d3,d4
+                                lsr.l   #1,d4                           ; d4 = half string length
+                                move.l  #22,d5                          ; mid-point of display string
+                                sub.l   d4,d5                           ; d5 = start of centred string in buffer
+                                mulu    #7,d5                           ; d5 = start pixel position.
+
+                                bsr.w   clear_message_bitplane
+
+                                ; display loading string
+                                movem.l d0-d7/a0-a6,-(a7)
+                                move.l  a2,a3                           ; text ptr
+                                move.w  d5,character_x_pos
+                                move.w  #0,character_y_offset
+                                lea.l   insert_disk_blank_message,a0
+                                lea.l   menu_font_gfx,a2
+                                jsr     display_text
+                                movem.l (a7)+,d0-d7/a0-a6
+
+                                mulu    #7,d2                   ;  d2 = pixel position
+                                add.l   d2,d5                   ; add 'LOADING MODULE: ' length to start of centred string
+
+                                ; display module string
+                                movem.l d0-d7/a0-a6,-(a7)
+                                move.l  a1,a3                          ; texrt ptr
+                                move.w  d5,character_x_pos
+                                move.w  #0,character_y_offset
+                                lea.l   insert_disk_blank_message,a0
+                                lea.l   menu_font_gfx,a2
+                                jsr     display_text
+                                movem.l (a7)+,d0-d7/a0-a6
+
+                                rts
+
                         ; ------------------- load and play protracker module ---------------------
                         ; Command Function called by the menu configuration.
                         ; It receives it's function parameters as a pointer in a0.l
@@ -2478,30 +2677,42 @@ logo_line_table ; original address L0003A690
                         ;
                         ; IN: 
                         ;       a0.l = parameters from menu options (ptr to file id)
-load_and_play_module
-                                movem.l a0,-(a7)                ; save menu option parameter on the stack
+loading_parameters_ptr          dc.l    $0
 
-                                lea     CUSTOM,a6               ; end any music currently playing.
+load_and_play_module            move.l  a0,loading_parameters_ptr               ; save menu option parameters ptr to the file id 
+
+                                ; stop playing current modle
+                                lea     CUSTOM,a6                               ; end any music currently playing.
                                 jsr     _mt_end                               
                                 
-                                lea     CUSTOM,a6               ; remove the CIA player from the interrupt handler (maybe able to prevent this)
+                                lea     CUSTOM,a6                               ; remove the CIA player from the interrupt handler (maybe able to prevent this)
                                 jsr     _mt_remove
 
-                                movem.l (a7)+,a0                ; get saved menu option parameter from stack
-                                jsr     load_music              ; load and depack module
+                                ; display loading module <xxxx>
+                                move.l  loading_parameters_ptr,a0               ; get saved menu option parameter from stack
+                                jsr     display_loading_message
 
-                                lea     CUSTOM,a6               ; install CIA player's interrupt handler etc.
+                                ; load & depack module
+                                move.l  loading_parameters_ptr,a0               ; get saved menu option parameter from stack
+                                jsr     load_music                              ; load and depack module
+
+                                ; display playing module <xxxx>
+                                move.l  loading_parameters_ptr,a0               ; get saved menu option parameter from stack
+                                jsr     display_playing_message
+
+                                ; start playing the module
+                                lea     CUSTOM,a6                               ; install CIA player's interrupt handler etc.
                                 lea     $0,a0
                                 move.L  #$1,d0
                                 JSR     _mt_install
 
-                                lea     CUSTOM,a6               ; initialise and start playing the loaded module.
+                                lea     CUSTOM,a6                               ; initialise and start playing the loaded module.
                                 lea     MUSIC_BUFFER,a0
                                 lea     $0,a1
                                 move.l  #$0,d0
                                 JSR     _mt_init
 
-                                move.b  #$ff,_mt_Enable         ; enable playing.
+                                move.b  #$ff,_mt_Enable                         ; enable playing.
                                 rts
 
 
@@ -2546,7 +2757,7 @@ main_menu_text                  ;        123456789012345678901234567890123456789
                                 dc.b    '      USE MOUSE TO SELECT TUNE TO PLAY',$0d,$0a
                                 dc.b    $0d,$0a
                                 dc.b    '                          *1992-2025 LUNATICS',$0d,$0a   
-                                dc.b    '               HTTPS://GITHUB.COM/MARKYTURTLE',$ff
+                                dc.b    '               HTTPS://GITHUB.COM/MARKYTURTLE',$00
                                 even
 
 
@@ -2596,7 +2807,7 @@ music_menu_1_text               ;        123456789012345678901234567890123456789
                                 dc.b    '       ZERO GRAVITY        - HOLLYWOOD',$0d,$0a
                                 dc.b    '       BREAK THROUGH       - HOLLYWOOD',$0d,$0a 
                                 dc.b    $0d,$0a
-                                dc.b    '             RETURN TO MAIN MENU',$ff
+                                dc.b    '             RETURN TO MAIN MENU',$00
 
                                 even
 
@@ -2644,7 +2855,7 @@ music_menu_2_text               ;        123456789012345678901234567890123456789
                                 dc.b    '     FLOAT                  - SUBCULTURE' ,$0d,$0a
                                 dc.b    '     FLIGHT-SLEEPY MIX      - SUBCULTURE',$0d,$0a
                                 dc.b    $0d,$0a
-                                dc.b    '            RETURN TO MAIN MENU',$ff
+                                dc.b    '            RETURN TO MAIN MENU',$00
                                 even
 
 
@@ -2678,7 +2889,7 @@ music_menu_3_text               ;        123456789012345678901234567890123456789
                                 dc.b    '     SUMMER IN SWEDEN           - PHASER',$0d,$0a
                                 dc.b    '     NEVER TOO MUCH             - PHASER',$0d,$0a
                                 dc.b    $0d,$0a
-                                dc.b    '            RETURN TO MAIN MENU',$ff 
+                                dc.b    '            RETURN TO MAIN MENU',$00
                                 even
 
 
@@ -2707,7 +2918,7 @@ credits_menu_text               ;        123456789012345678901234567890123456789
                                 dc.b    '  4489              REPLACEMENT DISK LOADER',$0d,$0a 
                                 dc.b    '  PAUL RAINGEARD            VSCODE ASSEMBLY',$0d,$0a 
                                 dc.b    $0d,$0a 
-                                dc.b    '             RETURN TO MAIN MENU',$ff  
+                                dc.b    '             RETURN TO MAIN MENU',$00
                                 even
 
 
@@ -2737,7 +2948,7 @@ greetings_menu_new_text          ;        12345678901234567890123456789012345678
                                 dc.b    '    /    /--/  /   !  !/  /   !   /--/       ',$0d,$0a
                                 dc.b    '   / ---/--.  /   -! -/  /   -!  --/---      ',$0d,$0a
                                 dc.b    '   +   /   !------+ +--------+--------/      ',$0d,$0a
-                                dc.b    '    +------!      .  :       MORE GREETZ     ',$ff
+                                dc.b    '    +------!      .  :       MORE GREETZ     ',$00
                                 even
 
                         ; -------------------------------------------------
@@ -2767,7 +2978,7 @@ greetings_menu_1_text           ;        123456789012345678901234567890123456789
                                 dc.b    $0d,$0a
                                 dc.b    $0d,$0a
                                 dc.b    '                MORE GREETZ',$0d,$0a
-                                dc.b    '            RETURN TO MAIN MENU',$ff  
+                                dc.b    '            RETURN TO MAIN MENU',$00 
                                 even
 
       
@@ -2800,7 +3011,7 @@ greetings_menu_2_text           ;        123456789012345678901234567890123456789
                                 dc.b    $0d,$0a
                                 dc.b    $0d,$0a
                                 dc.b    '                MORE GREETZ',$0d,$0a
-                                dc.b    '            RETURN TO MAIN MENU',$ff       
+                                dc.b    '            RETURN TO MAIN MENU',$00      
                                 even
 
                         ; -------------------------------------------------
@@ -2830,7 +3041,7 @@ greetings_menu_3_text           ;        123456789012345678901234567890123456789
                                 dc.b    $0d,$0a
                                 dc.b    $0d,$0a
                                 dc.b    '                MORE GREETZ',$0d,$0a
-                                dc.b    '            RETURN TO MAIN MENU',$ff  
+                                dc.b    '            RETURN TO MAIN MENU',$00 
                                 even
 
                         ; -------------------------------------------------
@@ -2859,7 +3070,7 @@ greetings_menu_4_text           ;        123456789012345678901234567890123456789
                                 dc.b    $0d,$0a  
                                 dc.b    '      WIZZCAT - XENTEX - ZITE PRODUCTIONS',$0d,$0a
                                 dc.b    $0d,$0a
-                                dc.b    '            RETURN TO MAIN MENU',$ff  
+                                dc.b    '            RETURN TO MAIN MENU',$00
                                 even
 
                         ; -------------------------------------------------
@@ -2887,7 +3098,7 @@ addresses_menu_1_text           ;        123456789012345678901234567890123456789
                                 dc.b    '       TEL : *** ****** ****** (*****)',$0d,$0a
                                 dc.b    '           ALSO -ELITE- SWAPPING!',$0d,$0a
                                 dc.b    $0d,$0a
-                                dc.b    '              MORE ADDRESSES',$ff
+                                dc.b    '              MORE ADDRESSES',$00
                                 even
 
 
@@ -2916,7 +3127,7 @@ addresses_menu_2_text           ;        123456789012345678901234567890123456789
                                 dc.b    $0d,$0a
                                 dc.b    $0d,$0a
                                 dc.b    $0d,$0a
-                                dc.b    '              MORE ADDRESSES',$ff
+                                dc.b    '              MORE ADDRESSES',$00
                                 even
 
 
@@ -2945,7 +3156,7 @@ addresses_menu_3_text           ;        123456789012345678901234567890123456789
                                 dc.b    $0d,$0a
                                 dc.b    $0d,$0a
                                 dc.b    $0d,$0a
-                                dc.b    '              MORE ADDRESSES',$ff                             
+                                dc.b    '              MORE ADDRESSES',$00                           
                                 even
 
 
@@ -2975,7 +3186,7 @@ addresses_menu_4_text           ;        123456789012345678901234567890123456789
                                 dc.b    $0d,$0a
                                 dc.b    $0d,$0a
                                 dc.b    $0d,$0a
-                                dc.b    '              MORE ADDRESSES',$ff
+                                dc.b    '              MORE ADDRESSES',$00
                                 even
 
 
@@ -3004,7 +3215,7 @@ addresses_menu_5_text           ;        123456789012345678901234567890123456789
                                 dc.b    $0d,$0a
                                 dc.b    $0d,$0a
                                 dc.b    $0d,$0a
-                                dc.b    '              MORE ADDRESSES',$ff 
+                                dc.b    '              MORE ADDRESSES',$00
                                 even
 
 
@@ -3033,7 +3244,7 @@ addresses_menu_6_text           ;        123456789012345678901234567890123456789
                                 dc.b    $0d,$0a
                                 dc.b    $0d,$0a
                                 dc.b    $0d,$0a
-                                dc.b    '            RETURN TO MAIN MENU',$ff
+                                dc.b    '            RETURN TO MAIN MENU',$00
                                 even
 
 
@@ -3062,7 +3273,7 @@ pd_message_menu_text            ;        123456789012345678901234567890123456789
                                 dc.b    $0d,$0a                          
                                 dc.b    $0d,$0a
                                 dc.b    $0d,$0a
-                                dc.b    '            RETURN TO MAIN MENU',$ff
+                                dc.b    '            RETURN TO MAIN MENU',$00
                                 even
 
 
@@ -3084,7 +3295,7 @@ pd_message_menu_text            ;        123456789012345678901234567890123456789
                                 dc.b    '                                             ',$0d,$0a
                                 dc.b    '                                             ',$0d,$0a
                                 dc.b    '                                             ',$0d,$0a
-                                dc.b    '                                             ',$ff
+                                dc.b    '                                             ',$00
 
                                 ; spare screen template for text typer/menu 45 x 17 characters
                                 ;        123456789012345678901234567890123456789012345
@@ -3104,7 +3315,7 @@ pd_message_menu_text            ;        123456789012345678901234567890123456789
                                 dc.b    '                                             ',$0d,$0a
                                 dc.b    '                                             ',$0d,$0a
                                 dc.b    '                                             ',$0d,$0a
-                                dc.b    '                                             ',$ff
+                                dc.b    '                                             ',$00
 
 
 
@@ -3126,7 +3337,7 @@ pd_message_menu_text            ;        123456789012345678901234567890123456789
                                 dc.b    '    /    /__/  /   |  |/  /   |  Z/__/       ',$0d,$0a
                                 dc.b    '   / ___/__.  /   _| _/  /   _|  __/___      ',$0d,$0a
                                 dc.b    '   \   Z/   |______\ \________\_______/      ',$0d,$0a
-                                dc.b    '    \_______|      .  :      MORE GREETZ     ',$0d,$0a
+                                dc.b    '    \_______|      .  :      MORE GREETZ     ',$00
 
         IFD TEST_BUILD
         even
