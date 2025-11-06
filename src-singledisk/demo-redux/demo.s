@@ -42,15 +42,7 @@ MENU_IDX_pd_message_menu        EQU     $34     ; menu index/id = $34
 FILE_TABLE_OFFSET       EQU $400        ; disk offset to file table (directly following the bootblock)
 FILE_TABLE_LENGTH       EQU $1a0        ; length of file table in bytes
 
-                ; Offset        Description
-                ; 0             FileID	
-                ; 4             Byte Offset to file start
-                ; 8             PackedSize (unused $0)	
-                ; C             File Size in Bytes
-FTAB_FILE_ID            EQU $0
-FTAB_FILE_OFFSET        EQU $4
-FTAB_FILE_PACKED        EQU $8
-FTAB_FILE_SIZE          EQU $C
+
 
 
 
@@ -102,9 +94,6 @@ STATE_MUSIC_START       EQU     $40
 
 
                 ; ---------------- Start Demo/Music Disk -----------------
-                ; Set stack to top of memory, try to detest aciton replay
-                ; cartidges and eithe disable the freeze of reset/crash
-                ; the computer.
                 ;
 start_demo                      lea.l   STACK_ADDRESS,a7
                                 bsr.w   init_system
@@ -362,9 +351,9 @@ top_logo_fade_count
                 ;-----------------------------------------------------------------
 STATE_MENU_NULL         EQU     $0                      ; null state - do nothing state
 STATE_MENU_INIT         EQU     $1
-STATE_MENU_FADEOUT      EQU     $2
+STATE_MENU_FADE_OUT     EQU     $2
 STATE_MENU_CREATE       EQU     $3
-STATE_MENU_FADEIN       EQU     $4
+STATE_MENU_FADE_IN      EQU     $4
 STATE_MENU_ACTIVE       EQU     $5
 
 
@@ -440,47 +429,10 @@ menu_state_table
                 ; - Set the initial menu for display
                 ; - Transition to: MENU_CREATE
                 ;
-menu_state_init_ml
-
-                        move.l  #main_menu_definition,menu_current_ptr
-
-                        ; initialise menu selector sprite positions from menu definition data.
-                        move.l  menu_current_ptr,a0
-                        move.w  $4(a0),d0               ; 1st selectable line
-                        mulu    #8,d0                   ; pixel start of 1st line = 8 x line number
-                        move.w  d0,menu_selector_y
-                        move.w  d0,menu_selector_min_y
-
-                        move.w  $6(a0),d1               ; number of selectable lines
-                        mulu    #8,d1
-                        add.w   d0,d1                   ; pixel start of last line = 1stline + (8 x number of lines)
-                        move.w  d1,menu_selector_max_y
-
-                        move.w  $8(a0),d0
-                        mulu    #7,d0                   ; 7 pixels wide characters
-                        lsr.w   #1,d0                   ; divide total by 2
-                        move.b  d0,left_sprite_hpos1
-                        move.b  #$01,left_sprite_hpos2
-
-                        move.w  $a(a0),d1
-                        mulu    #7,d1
-                        lsr.w   #1,d1
-                        add.w   d0,d1
-                        move.b  d1,right_sprite_hpos1
-                        move.b  #$01,right_sprite_hpos2
-
-                        ; initialise first menu for display here.
-                        ;MOVE.W  #$0020,menu_selector_y
-                        ;MOVE.W  #$0020,menu_selector_min_y
-                        ;MOVE.W  #$0050,menu_selector_max_y
-                        MOVE.W  #MENU_IDX_main_menu,menu_ptr_index
-                        ;MOVE.B  #$6c,left_sprite_hpos1
-                        ;MOVE.B  #$01,left_sprite_hpos2
-                        ;MOVE.B  #$a9,right_sprite_hpos1
-                        ;MOVE.B  #$01,right_sprite_hpos2
+menu_state_init_ml      move.l  #main_menu_definition,menu_current_ptr                  ; set the first menu definition for display
 
                         ; transition to next state                      
-                        move.w  #STATE_MENU_CREATE,menu_current_state
+                        move.w  #STATE_MENU_CREATE,menu_current_state                   ; change state to 'MENU_CREATE'
                         bsr     menu_set_state
                         rts
 menu_state_init_int
@@ -488,51 +440,42 @@ menu_state_init_int
 
 
                 ; ----------------- state menu fade out -----------------
-                ; Fade out the Menu Display.
+                ; Fade out the current Menu Display in preparation for
+                ; displaying the next.
                 ;
                 ; - Fade out the copper colours of the menu display
                 ; - Transition to: MENU_CREATE
                 ;
 menu_state_fadeout_ml
                         rts
-menu_state_fadeout_int
-                        BSR.W   blend_typer_colour_fade
-                        BSR.W   fade_out_menu_display
+menu_state_fadeout_int   
+                        BSR.W   blend_typer_colour_fade                              
+                        BSR.W   fade_out_menu_display                                   ; fade out menu display
                         tst.l   d0
-                        beq.s   .transition_state
+                        beq.s   .transition_state                                       ; if fade complete, change state
                         rts 
 
 .transition_state       ; transition to next state
-                        move.w  #STATE_MENU_CREATE,menu_current_state
+                        move.w  #STATE_MENU_CREATE,menu_current_state                   ; change state to MENU_CREATE
                         bsr     menu_set_state
                         rts                   
 
 
-                ; ------------------- state menu create ------------------
-                ; Create the menu display for the value stored in
-                ;  - menu_ptr_index
-                ; This index will have been set during a previous
-                ; menu action a previous MENU_ACTIVE state, or MENU_INIT
+                ; ---------------------- state menu create ----------------------
+                ; Create the menu display for the menu definition pointer:
+                ;  - menu_current_ptr
                 ;
-                ; - Clear Menu Bitmap Display
-                ; - Draw new Menu Bitmap Display
-                ; - Set Mouse Selector Parameters.
+                ; This pointer will have been set during a previouly executed
+                ; menu action in a previous MENU_ACTIVE state, or set during
+                ; MENU_INIT to the first menu for display.
+                ;
+                ; - Create the menu, initialise the menu selector
                 ; - Transition To: MENU_FADE_IN
                 ;
-menu_state_create_ml
-                        BSR.W   update_menu_selector_position
-                        BSR.W   clear_menu_display
-                        BSR.W   display_menu
-
-.set_menu_sprite_ptrs   LEA.L   menu_sprite_left,A0
-                        MOVE.B  left_sprite_hpos1,$0001(A0)
-                        MOVE.B  left_sprite_hpos2,$0003(A0)
-                        LEA.L   menu_sprite_right,A0
-                        MOVE.B  right_sprite_hpos1,$0001(A0)
-                        MOVE.B  right_sprite_hpos2,$0003(A0)
+menu_state_create_ml    bsr.w   create_current_menu                                     ; create next menu from current menu definition
 
                         ; transition to next state
-                        move.w  #STATE_MENU_FADEIN,menu_current_state
+                        move.w  #STATE_MENU_FADE_IN,menu_current_state                   ; change state to MENU_FADE_IN
                         bsr     menu_set_state
                         rts
 
@@ -549,8 +492,8 @@ menu_state_create_int
 menu_state_fadein_ml
                         rts           
 menu_state_fadein_int
-                        BSR.W   blend_typer_colour_fade
-                        BSR.W   fade_in_menu_display
+                        bsr.w   blend_typer_colour_fade
+                        bsr.w   fade_in_menu_display
                         tst.l   d0
                         beq.s   .transition_state
                         rts 
@@ -564,13 +507,14 @@ menu_state_fadein_int
                 ; ------------------ state menu active ----------------
                 ; Do menu processing actions
 menu_active_state_ml
-                        BTST.B  #$0006,$00bfe001
-                        BNE.B   .mouse_not_clicked            
-                        BSR.W   do_menu_action  
+                        btst.b  #$0006,$00bfe001
+                        bne.b   .mouse_not_clicked             
+                        bsr.w   execute_menu_action
 .mouse_not_clicked 
                         rts
 menu_active_state_int
-                        BSR.W   update_menu_selector_position
+                        bsr.w   update_menu_selector_position
+                        bsr.w   set_menu_selector_sprite_positions
                         rts
 
 
@@ -582,122 +526,147 @@ menu_active_state_int
 
 
 
+                ; ===============================================================================================
+                ;  MENU MANAGEMENT
+                ; ===============================================================================================
+                ; ===============================================================================================
 
-                ; ****************************************************************
-                ; ***********                 MAIN LOOP                 **********
-                ; ****************************************************************
+
+                        ; ------------------- Execute Menu Action -------------------
+                        ; Using the position of the menu selector, find the and
+                        ; execute the menu action.
+                        ;
+execute_menu_action
+                                move.l  menu_current_ptr,a0
+                                move.w  menu_selector_y,d0
+                                add.w   #4,d0                   ; add the mid-point of the sprite arrow to the menu_selector_y co-ordinate
+                                lsr.w   #3,d0                   ; find the text line at which the menu selector is positioned.
+
+                                move.w  $4(a0),d1               ; the text line containing the first selectable option.
+                                sub.w   d1,d0                   ; calc the index into the menu definition commands.
+
+                                mulu    #12,d0                  ; calculate index into the menu definition commands (3 long words per entry - 12 bytes)
+                                lea     $c(a0),a1               ; the start of the menu definition commands
+
+                                move.l  (a1,d0.w),d1            ; get the option command code ($0 = display menu, $1 = execute function)
+                                
+                                cmp.l   #MNUCMD_MENU,d1
+                                beq.s   .display_menu
+                                cmp.l   #MNUCMD_FUNCTION,d1
+                                beq.s   .execute_function
+                                cmp.l   #MNUCMD_NOP,d1
+                                beq.s   .no_operation
+                                ; unexpected menu command
+                                rts
+
+                        ; set next menu for display
+.display_menu                   move.l  4(a1,d0.w),menu_current_ptr                     ; set next menu definition for display
+                                ; transition state
+                                move.w  #STATE_MENU_FADE_OUT,menu_current_state         ; start transition to next menu display
+                                bsr     menu_set_state
+                                rts
+
+                        ; execute function (parameters address in a1)
+.execute_function               move.l  8(a1,d0.w),a0                                   ; function parameters
+                                move.l  4(a1,d0.w),a1                                   ; function ptr
+                                jsr     (a1)
+                                rts
+
+                        ; no operation (empty menu option)
+.no_operation                   rts
+
+
+                        ; ------------------- Create Current Menu --------------------
+                        ; Initialse and Create a menu specfied by the menu definition
+                        ; referenced by the 'menu_current_ptr'
+                        ;
+create_current_menu             bsr.w   init_menu_selector                      ; calculate menu selector limits, min/max y and selector x co-ords (not physical screen x,y positions)
+                                bsr.w   set_menu_selector_sprite_positions      ; set initial x,y positions of menu selector sprites (physical screen x,y positions)
+                                bsr.w   clear_menu_display                      ; clear the menu bitplane ram
+                                bsr.w   display_current_menu_text               ; write menu text into bitplane ram
+                                rts
+
+
+                        ; -------------------- Display Menu Text --------------------
+                        ; Using the currently menu selected menu, write the menu
+                        ; text into the bitplane ram.
+display_current_menu_text       move.l  menu_current_ptr,a1
+                                move.l  (a1),a0
+                                move.l  #45,d0                                  ; standard menu text display width (45 characters)
+                                move.l  #17,d1                                  ; standard text display height (17 characters)
+                                bsr.w   display_text_string                     ; write text into bitplane memory
+                                rts
+
+
+                        ; ---------------- Initialise Menu Selector -----------------
+                        ; Using the currently selected menu, set the virtual x,y
+                        ; selector position and limits.
+                        ; This is virtual menu space where x=0, y=0 is the top left
+                        ; pixel of the menu.
+                        ; Each text line is 8 pixels high, 
+                        ; Each character is 7 pixels wide,
+                        ; Giving a screen of 45 characters by 17 lines high for the
+                        ; combined text and menu options.
+                        ;
+init_menu_selector
+                                ; initialise menu selector x,y positions from menu definition data.
+                                ; not physical display co-ords, these are co-ords into the character display (0,0 = top left)
+                                ; these have to translated into sprite co-ords (i.e. adding physical screen borders and window disply offsets when updating sprite co-ords)
+                                move.l  menu_current_ptr,a0
+                                move.w  $4(a0),d0               ; 1st selectable line
+                                mulu    #8,d0                   ; pixel start of 1st line = 8 x line number
+                                move.w  d0,menu_selector_y
+                                move.w  d0,menu_selector_min_y
+
+                                move.w  $6(a0),d1               ; number of selectable lines
+                                sub.w   #1,d1
+                                mulu    #8,d1
+                                add.w   d0,d1                   ; pixel start of last line = 1stline + (8 x number of lines)
+                                move.w  d1,menu_selector_max_y
+
+                                ; left menu selector x pos (into character screen)
+                                move.w  $8(a0),d0                               ; left character of menu selector
+                                mulu    #7,d0                                   ; 8 pixels wide characters
+                                sub.w   #2,d0                                   ; adjust x to make visually appealing
+                                move.w  d0,menu_selector_left_x
+
+                                ; right sprite x pos
+                                move.w  $a(a0),d1                               ; menu option character width 
+                                mulu    #7,d1                                   ; 8 pixels wide characters
+                                add.w   #8,d1                                   ; add the width of the selector sprite 
+                                add.w   d0,d1
+                                add.w   #2,d1                                   ; adjust x to make visually appealing
+                                move.w  d1,menu_selector_right_x
+
+                                rts
+
+
+
+                ; ================================================================================
+                ;  MENU MANAGEMENT
+                ; ================================================================================
+
+
+
+
+
+
+
+
+                ; ********************************************************************************
+                ;  MAIN LOOP             
+                ; ********************************************************************************
                 ; new main loop, created to clean-up the state-management
 main_loop
                                 bsr     menu_mainloop_state_machine
                                 bra     main_loop
 
+                ; ********************************************************************************
+                ;  MAIN LOOP             
+                ; ********************************************************************************
 
 
 
-                ; ****************************************************************
-                ; ***********                 MAIN LOOP                 **********
-                ; ****************************************************************
-;main_loop       
-;
-;                        ; check if need to change music track
-;                                BTST.B  #LOAD_MODULE,loader_status_bits         
-;                                BEQ.B   .do_menu_processing                     
-;
-;.do_change_music        ; stop existing track(if playing), then load selected track
-;                                BTST.B  #MUSIC_PLAYING,music_status_bits        ; is music playing?
-;                                BEQ.B   .load_music                             ;   if no, load music
-;                                                                                ;   if yes, stop music
-;.disable_music          ; stop music playing
-;                                BCLR.B  #MUSIC_PLAYING,music_status_bits                             
-;                                JSR     _mt_end
-;
-;.load_music             ; load music
-;                                BSR.W   load_music                                              
-;                                BCLR.B  #LOAD_MODULE,loader_status_bits                                                 ; set running status
-;
-;                                BCLR.B  #MENU_FADING,menu_selection_status_bits                 ; enable menu selection 
-;                                BCLR.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     
-;                                BSET.B  #$0001,music_status_bits
-;
-;
-;
-;.do_menu_processing     ; do menu processing
-;                                BTST.B  #MENU_FADING,menu_selection_status_bits                 
-;                                BNE.B   .mouse_not_clicked                                      
-;                        
-;.mouse_test             ; test mouse clicked
-;                                BTST.B  #$0006,$00bfe001
-;                                BNE.B   .mouse_not_clicked                                      
-;
-;.mouse_is_clicked       ; do menu item selected processing
-;                                BSET.B  #MENU_FADING,menu_selection_status_bits                 ; disable menu selection 
-;                                BSET.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     
-;                                BSR.W   do_menu_action                                         
-;
-;.mouse_not_clicked      ; test draw new menu (if required)
-;                                BTST.B  #MENU_DISP_DRAW,menu_display_status_bits                
-;                                BNE.B   .check_clear_menu                                       
-;                                BSR.W   display_menu                                           
-;
-;                        ; test clear menu display (if required)
-;.check_clear_menu
-;                                BTST.B  #MENU_DISP_CLEAR,menu_display_status_bits               
-;                                BEQ.B   .check_music_init                                       
-;                                BSR.W   clear_menu_display                                      
-;
-;                        ; test menu item selected/loading
-;.check_music_init
-;                                BTST.B  #$0001,music_status_bits
-;                                BEQ.B   .end_main_loop                                          
-;
-;                        ; do music initialisation
-;.initialise_music
-;                                JSR     _mt_remove
-;
-;                                lea     $0,a0
-;                                move.L  #$1,d0
-;                                JSR     _mt_install
-;
-;                                lea     MUSIC_BUFFER,a0
-;                                lea     $0,a1
-;                                move.l  #$0,d0
-;                                JSR     _mt_init
-;
-;                                move.b  #$ff,_mt_Enable
-;
-;                                BCLR.B  #$0001,music_status_bits
-;                                BSET.B  #$0000,music_status_bits
-;
-;.end_main_loop
-;                                BRA.W   main_loop                                                
-
-
-
-;                ; menu_selection_status_bits
-;MENU_FADING             EQU     $0000           ; bit 0 (1 = menu is fading in/out)
-;MENU_MOUSE_PTR_DISABLED EQU     $0001           ; bit 1 (1 = menu pointer updates disabled)
-;menu_selection_status_bits      dc.b    $00     ; original address L000203A8
-;
-;
-;
-;LOAD_MODULE             EQU     $0000           ; bit 0 (1 = loading protracker module)
-;loader_status_bits      ; original address L000203A9
-;                                dc.b    $00     ; bit 0 (1 = loading protrackermodule)
-;
-;
-;                ; menu_display_status_bits
-;MENU_DISP_FADE_IN               EQU     $0      ; bit 0 - 1 = Fade Menu In
-;MENU_DISP_FADE_OUT              EQU     $1      ; bit 1 - 1 = Fade Menu Out
-;MENU_DISP_CLEAR                 EQU     $6      ; bit 6 - 1 = Clear Menu Display
-;MENU_DISP_DRAW                  EQU     $7      ; bit 7 - 1 = Draw New Menu
-;menu_display_status_bits        dc.b    $00     ; original address L000203AA
-;
-;MUSIC_PLAYING                   EQU     $0      ; bit 0 - 1 = music playing
-;music_status_bits               dc.b    $00     ; original address L000203AB 
-;
-menu_ptr_index  ; original address L000203AC -  ;  index to menu typer ptr list.
-;                                dc.w    $0000    ; index to the list of menu text pointers (multiple of 4 - longword list)
-;
 
 
                 ; ---------------------- Do Nothing Interrupt Handler -------------------
@@ -746,124 +715,65 @@ level_3_interrupt_handler
 
 
 
-;                ; ----------------------- Level 3 Interrupt Handler ----------------
-;                ; VBL and COPER interrupt handler routine, intended to be called
-;                ; ones per frame.
-;level_3_interrupt_handler 
-;                                MOVEM.L D0-D7/A0-A6,-(A7)
-;                                lea     $dff000,a6
-;                                MOVE.W  INTREQR(a6),d0
-;                                AND.W   #$0020,d0
-;                                BEQ.S   .exit_handler  
-;
-;
-;                                BSR.W   text_scroller                   ; Bottom screen text scroller - L0002152E
-;                                BSR.W   swap_vector_logo_buffers        ; L000212F8
-;                                BSR.W   clear_vector_logo_buffer        ; L000212D2
-;                                BSR.W   spin_logo                       ; L000213EE
-;                                BSR.W   calc_3d_perspective             ; L0002138E
-;                                BSR.W   draw_logo_outline               ; L00021352
-;                                BSR.W   calc_logo_lighting              ; L000213D8
-;                                BSR.W   fill_vector_logo                ; L00021290
-;
-;
-;
-;                        ; do fade in menu display (if required)
-;.do_menu_fade_in                BTST.B  #MENU_DISP_FADE_IN,menu_display_status_bits             ; L000203AA
-;                                BEQ.B   .do_menu_fade_out 
-;                                BSR.W   fade_in_menu_display            ; L000205D4 - bit 0 = 1 - fade in menu display
-;
-;                        ; do fade out menu display (if required)
-;.do_menu_fade_out               BTST.B  #MENU_DISP_FADE_OUT,menu_display_status_bits            ; L000203AA - bit 1 = 1 - fade out menu display
-;                                BEQ.B   .do_blended_fade                       
-;                                BSR.W   fade_out_menu_display                                   ; L00020672 - bit 1 = 1 - menu routine
-;
-;                        ; blend typer colour where it overlaps with vector logo (alpha blend effect)
-;.do_blended_fade                BSR.W   blend_typer_colour_fade                                 ; L00020746
-;
-;
-;
-;.do_menu_item_pointers  ; test menu disabled status bits
-;                                BTST.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     ; L000203A8
-;                                BNE.B   .do_music                                               ; L00020406 
-;                        ; update menu item selection pointer display
-;                                BSR.W   update_menu_selector_position                           ; L000207EA
-;
-;
-;.do_music                ; test music loaded & ready - original address L00020406
-;                                BTST.B  #MUSIC_PLAYING,music_status_bits
-;                                BEQ.B   .no_music                                               ; L00020420
-;                        ; play/update music
-;                                ;BSR.W   play_music                                              ; L00021C2C
-;                                move.b  #$ff,_mt_Enable
-;                                bra     .exit_handler 
-;.no_music
-;                                ;move.b  #$00,_mt_Enable
-;
-;.exit_handler    ; original address L00020424
-;                                MOVE.W  #$0020,INTREQ(A6)
-;                                MOVEM.L (A7)+,D0-D7/A0-A6
-;                                RTE 
 
 
+                        ; ------------------------ display menu -------------------------
+                        ; Routine to display menu text on the screen. The menu is 
+                        ; displayed in a 1 bitplane screen, overlayed on a vector
+                        ; spinning logo.
+                        ; The text is displaed using the processor (which is odd for me)
+                        ; i'd normally use the blitter for gfx operations.
+                        ; The typer works in the main loop, while all blitter operations
+                        ; occur during the copper interrupt.
+                        ;
+                        ; IN:   a0.l - text to type ptr
+                        ;
+display_text_string             move.l  a0,a3
+                                move.w  #0,character_x_pos
+                                move.w  #0,character_y_offset
+                                lea.l   menu_typer_bitplane,a0
+                                lea.l   menu_font_gfx,a2
 
+                        ; ------------------------- display text -------------------------
+                        ; IN:   a0 - typer bitplane
+                        ;       a2 - font_gfx
+                        ;       a3 - display text
+                        ;       d7 - type (x) characters wide
+                        ;       d6 - type (x) characters tall 
+display_text                    ;move.w  #$0000,character_x_pos                          ; reset x position
+                                ;move.w  #$0000,character_y_offset                       ; reset y offset (line position)
 
+.print_char_loop                moveq.l  #$00000000,d0
+                                moveq.l  #$00000000,d1
+                                moveq.l  #$00000000,d2
+                                moveq.l  #$00000000,d3
+                                moveq.l  #$00000000,d4
 
-                ; IN:   a0.l - text to type ptr
-                ;       d0.l - characters wide
-                ;       d1.l - lines high
-display_text_new
-                move.l  a0,a3
-                move.l  d0,d7
-                move.l  d1,d6
+.process_ascii_char             ; process ascii character
+                                move.b  (a3)+,d0                        ; get ascii char value
+                                cmp.b   #$00,d0                         ; text display NULL terminator
+                                beq     .exit_display_text
+                                cmp.b   #$0a,d0                         ; line feed
+                                beq     .line_feed
+                                cmp.b   #$0d,d0                         ; carriage return
+                                beq     .carriage_return
+                                cmp.b   #$20,d0                         ; space character
+                                beq     .space_character
+                                bra.s   .print_char
 
-                move.w  #0,character_x_pos
-                move.w  #0,character_y_offset
+.line_feed                      add.w   #$0140,character_y_offset       ; increase y offset by 1 whole text line (8x40 bytes)
+                                bra.s   .process_ascii_char
 
-                lea.l   menu_typer_bitplane,a0
-                lea.l   menu_font_gfx,a2
-                bsr     display_text
-                rts
+.carriage_return                move.w  #$0000,character_x_pos          ; reset x position (left hand side)
+                                bra.s   .process_ascii_char
 
+.space_character                add.w   #7,character_x_pos
+                                bra.s   .process_ascii_char
 
-                ; ------------------------ display menu -------------------------
-                ; Routine to display menu text on the screen. The menu is 
-                ; displayed in a 1 bitplane screen, overlayed on a vector
-                ; spinning logo.
-                ; The text is displaed using the processor (which is odd for me)
-                ; i'd normally use the blitter for gfx operations.
-                ; The typer works in the main loop, while all blitter operations
-                ; occur during the copper interrupt.
-                ;
-                ; The screen format is 45 characters wide by 17 text lines high.
-                ;
-display_menu    ; original address L0002049C
-                                LEA.L   menu_typer_bitplane,a0
-                                LEA.L   menu_font_gfx,a2   
-                                LEA.L   menu_ptrs,a3
-                                MOVE.W  menu_ptr_index,d0                       ; menu ptr index (multiple of 4)
-                                LEA.L   $00(A3,D0.W),A3
-                                MOVEA.L (A3),A3                                 ; a3 = menu text to display
-                                MOVE.W  #$002c,D7                               ; 44+1 characters wide
-                                MOVE.W  #$0010,D6                               ; 16+1 lines tall
+.print_char                     SUB.B   #$20,D0                         ; font starts at 'space' char (32 ascii)
 
-                ; IN:   a0 - typer bitplane
-                ;       a2 - font_gfx
-                ;       a3 - display text
-                ;       d7 - type (x) characters wide
-                ;       d6 - type (x) characters tall 
-display_text
-                ; print character loop -L000204C2
-.print_char_loop
-                                MOVE.L  #$00000000,D0
-                                MOVE.L  #$00000000,D1
-                                MOVE.L  #$00000000,D2
-                                MOVE.L  #$00000000,D3
-                                MOVE.L  #$00000000,D4
-                                MOVE.B  (A3)+,D0                        ; d0 = char to print
-                                SUB.B   #$20,D0                         ; font starts at 'space' char (32 ascii)
-                                LSL.B   #$00000001,D0                   ; d- = index to start of char gfx
-                                LEA.L   $00(A2,D0.W),A4                 ; a4 = char gfx ptr
+                                LSL.B   #$00000001,D0                   ; d0 = index to start of char gfx
+                                LEA.L   (A2,D0.W),A4                    ; a4 = char gfx ptr
                                 MOVE.W  character_x_pos,d1              
                                 MOVE.W  D1,D3
                                 LSR.W   #$00000003,D1                   ; d1 = byte offset
@@ -874,67 +784,64 @@ display_text
                                 BEQ.W   .is_even_byte_offset 
                                 BCLR.L  #$0000,D1
                                 MOVE.W  #$0008,D2
-                                BRA.W   .do_shift_and_print
+                                BRA.W   .shift_and_print_char
 .is_even_byte_offset
                                 MOVE.W  #$0000,D2
-.do_shift_and_print
-                                LEA.L   $00(A0,D1.W),A1                 ; a1 = dest ptr + x offset
+
+.shift_and_print_char           LEA.L   (A0,D1.W),A1                    ; a1 = dest ptr + x offset
                                 MOVE.W  character_y_offset,D1
-                                LEA.L   $00(A1,D1.W),A1                 ; a1 = dest ptr + y offset
+                                LEA.L   (A1,D1.W),A1                    ; a1 = dest ptr + y offset
                                 MOVE.L  $0000(A4),D0                    ; char line 1
                                 AND.L   #$ffff0000,D0
                                 ROR.L   D2,D0
                                 ROR.L   D3,D0
                                 OR.L    D0,$0000(A1)
-                                MOVE.L  $0076(A4),D0                    ; char line 2
+                                MOVE.L  $0076(A4),D0                                    ; char line 2
                                 AND.L   #$ffff0000,D0
                                 ROR.L   D2,D0
                                 ROR.L   D3,D0
                                 OR.L    D0,$0028(A1)
-                                MOVE.L  $00ec(A4),D0                    ; char line 3
+                                MOVE.L  $00ec(A4),D0                                    ; char line 3
                                 AND.L   #$ffff0000,D0
                                 ROR.L   D2,D0
                                 ROR.L   D3,D0
                                 OR.L    D0,$0050(A1)
-                                MOVE.L  $0162(A4),D0                    ; char line 4
+                                MOVE.L  $0162(A4),D0                                    ; char line 4
                                 AND.L   #$ffff0000,D0
                                 ROR.L   D2,D0
                                 ROR.L   D3,D0
                                 OR.L    D0,$0078(A1)
-                                MOVE.L  $01d8(A4),D0                    ; char line 5
+                                MOVE.L  $01d8(A4),D0                                    ; char line 5
                                 AND.L   #$ffff0000,D0
                                 ROR.L   D2,D0
                                 ROR.L   D3,D0
                                 OR.L    D0,$00a0(A1)
-                                MOVE.L  $024e(A4),D0                    ; char line 6
+                                MOVE.L  $024e(A4),D0                                    ; char line 6
                                 AND.L   #$ffff0000,D0
                                 ROR.L   D2,D0
                                 ROR.L   D3,D0
                                 OR.L    D0,$00c8(A1)
-                                MOVE.L  $02c4(A4),D0                    ; char line 7
+                                MOVE.L  $02c4(A4),D0                                    ; char line 7
                                 AND.L   #$ffff0000,D0
                                 ROR.L   D2,D0
                                 ROR.L   D3,D0
                                 OR.L    D0,$00f0(A1)
 
-                                ADD.W   #$0007,character_x_pos          ; add character width to x position
-                                DBF.W   D7,.print_char_loop
+                                ADD.W   #$0007,character_x_pos                          ; add character width to x position
+                                bra.w   .print_char_loop
 
-                                MOVE.W  #$0000,character_x_pos          ; reset x position (left hand side)
-                                ADD.W   #$0140,character_y_offset       ; increment line offset (8 rasters = 320 bytes)
-                                MOVE.W  #$002c,D7                       ; reset line loop counter (next 45 chars)
-                                DBF.W   D6,.print_char_loop             ; do next line loop
+                                MOVE.W  #$0000,character_x_pos                          ; reset x position (left hand side)
+                                ADD.W   #$0140,character_y_offset                       ; increment line offset (8 rasters = 320 bytes)
+                                ;MOVE.W  #$002c,D7                                       ; reset line loop counter (next 45 chars)
+                                bra.w   .print_char_loop                             ; do next line loop
 
-                                ;BSET.B  #MENU_DISP_DRAW,menu_display_status_bits        ; bit 7 - 1 = menu typer completed
-                                ;BSET.B  #MENU_DISP_FADE_IN,menu_display_status_bits     ; bit 0 - 1 = do fade in menu display
+.exit_display_text
                                 MOVE.W  #$0000,character_x_pos                          ; reset x position
                                 MOVE.W  #$0000,character_y_offset                       ; reset y offset (line position)
                                 RTS 
 
-character_x_pos ; original address L000205D0 - x - pixel position        
-                                dc.w    $0000 
-character_y_offset ; original address L000205D2 - y - offset (multiple of bytes per raster)
-                                dc.w    $0000
+character_x_pos                 dc.w    $0000                                           ; typer x - pixel position
+character_y_offset              dc.w    $0000                                           ; typer - y - offset (multiple of bytes per raster)
 
 
 
@@ -988,7 +895,7 @@ fade_in_menu_display            LEA.L   copper_menu_fade_colour,a0
 
 
 
-                        ; --------------------- fade in menu display text ----------------------
+                        ; --------------------- fade out menu display text ----------------------
                         ; Fades out the text colour of the menu text display. 
                         ; This routine sets the colour in the copper list for the value where
                         ; the text does not overlap the vector logo in the backround.
@@ -999,6 +906,9 @@ fade_in_menu_display            LEA.L   copper_menu_fade_colour,a0
                         ; when the fade completes, then this routine sets the menu sprite
                         ; coords ready for the next menu (obviously I didn;t care or know
                         ; much about separation of concerns when I was 17)
+                        ;
+                        ; OUT:
+                        ;       d0 - Equals $0 for Fade Completed
                         ;
 fade_out_menu_display           LEA.L   copper_menu_fade_colour,a0
                                 MOVE.W  $0002(A0),D0                                    ; get current colour value from copper list
@@ -1121,59 +1031,93 @@ clear_menu_display              LEA.L   menu_typer_bitplane,a0
                 ; ----------------- Update Menu Selector Position -------------------
                 ; Get mouse input and position the left/right arrows that are used
                 ; to select the menu items from the on-screen menu selections.
+                ;
+                ; TODO: make this routiun just keep track of mouse delta movements
+                ;       remove menu dependencies code.
+                ;
 update_menu_selector_position   ; original address L000207EA
                                 MOVE.L  #$00000000,D0
                                 MOVE.L  #$00000000,D1
-                                MOVE.B  CUSTOM+JOY0DAT,D0                       ; $00dff00a,D0
-                                MOVE.B  mouse_y_value,d1                        ; L00020882,D1
-                                MOVE.B  D0,mouse_y_value                        ; L00020882
-                                SUB.W   D0,D1
+                                MOVE.B  CUSTOM+JOY0DAT,D0                       ; read mouse y-axis counter 
+                                MOVE.B  mouse_y_value,d1                        ; last read y-axis counter
+                                MOVE.B  D0,mouse_y_value                        ; update last y-axis counter value
+                                SUB.W   D0,D1                                   ; get difference between current counter and last read value,
                                 CMP.W   #$ff80,D1                               ; compare -128
-                                BLT.B   underflow_y_wrap                        ; L00020816 
+                                BLT.B   underflow_y_wrap                        ; the mouse counter value has wrapped (underflow)
                                 CMP.W   #$007f,D1                               ; compare +127
-                                BGT.B   overflow_y_wrap                         ; L00020810 
-                                BRA.B   update_menu_selector_y                  ; L0002081A 
+                                BGT.B   overflow_y_wrap                         ; the mouse counter value has wrapped (overflow)
+                                BRA.B   update_menu_selector_y
 
                         ; mouse counter overflow +ve
 overflow_y_wrap         ; original address L00020810
                                 SUB.W   #$0100,D1                               ; wrap mouse y value
-                                BRA.B   update_menu_selector_y                  ; L0002081A 
+                                BRA.B   update_menu_selector_y
 
                         ; mouse counter underflow -ve
 underflow_y_wrap        ; original address L00020816
                                 ADD.W   #$0100,D1                               ; wrap mouse y value
 
+                        ;
+                        ; ***** TODO: remove menu display dependency from this code
 update_menu_selector_y  ; original address L0002081A
-                                ASR.W   #$00000001,D1
+                                ASR.W   #$00000001,D1                           ; divide the amount by 2 (make movement less sensitive)
                                 NEG.W   D1
-                                ADD.W   D1,menu_selector_y                      ; L00020888
-                                MOVE.W  menu_selector_y,D0                      ; L00020888,D0
-                                MOVE.W  menu_selector_min_y,D1                  ; L00020884,D1
+                                ADD.W   D1,menu_selector_y                      ; update current menu selector_y
+                                MOVE.W  menu_selector_y,D0
+                                MOVE.W  menu_selector_min_y,D1
                                 CMP.W   D1,D0
-                                BLT.W   clamp_min_y                             ; L00020850 
-                                MOVE.W  menu_selector_max_y,D1                  ; L00020886,D1
+                                BLT.W   clamp_min_y
+                                MOVE.W  menu_selector_max_y,D1
                                 CMP.W   D1,D0
-                                BGT.W   clamp_max_y                             ; L00020844 
-                                BRA.B   set_menu_selector_sprite_y              ; L0002085A 
+                                BGT.W   clamp_max_y 
+                                rts
 
 clamp_max_y             ; original address L00020844
                                 MOVE.W  menu_selector_max_y,menu_selector_y     ; clamp mouse y limit
-                                BRA.B   set_menu_selector_sprite_y              ; L0002085A 
+                                rts
 
 clamp_min_y             ; original address L00020850
                                 MOVE.W  menu_selector_min_y,menu_selector_y     ; clamp mouse y limit
+                                rts
 
-set_menu_selector_sprite_y ; original address L0002085A
+SPRITE_MENU_X_WINDOW_START       EQU     $80
+SPRITE_MENU_Y_WINDOW_START       EQU     $71                                     ; $71 = 113 (start of typer bitplane raster start in view window/copper vertical wait $7101,$FFFE)
+
+set_menu_selector_sprite_positions
                                 LEA.L   menu_sprite_left,A0                     ; left sprite
                                 LEA.L   menu_sprite_right,A1                    ; right sprite
-                                MOVE.W  menu_selector_y,D0                      ; L00020888,D0
-                                ADD.W   #$0079,D0                               ; sprite y offset to 1st menu item
+                                MOVE.W  menu_selector_y,D0
+
+                                ; set menu selector y-axis positions
+                                ADD.W   #SPRITE_MENU_Y_WINDOW_START,D0          ; Add vertical window start position to the selector_y value
                                 MOVE.B  D0,(A0)
                                 MOVE.B  D0,(A1)
                                 ADD.B   #$07,D0
                                 MOVE.B  D0,$0002(A0)
                                 MOVE.B  D0,$0002(A1)
+
+                                ; set left selector x-axis position
+                                move.w  menu_selector_left_x,d0
+                                add.w   #SPRITE_MENU_X_WINDOW_START,d0          ; add left window x start
+                                lsr.w   #1,d0                                   ; divide total by 2 (hpos1 holds sprite position to a resolution of 2 pixels per unit value)                       
+                                move.b  d0,left_sprite_hpos1
+                                move.b  #$01,left_sprite_hpos2                  ; hpos2 holds the LSB of sprite horizontal position (odd/even horizontal position - single pixel resolution) 
+
+                                ; set right selector x-axis position
+                                move.w  menu_selector_right_x,d0
+                                add.w   #SPRITE_MENU_X_WINDOW_START,d0          ; add left window x start
+                                lsr.w   #1,d0                                   ; divide total by 2 (hpos1 holds sprite position to a resolution of 2 pixels per unit value)                       
+                                move.b  d0,right_sprite_hpos1
+                                move.b  #$01,right_sprite_hpos2                  ; hpos2 holds the LSB of sprite horizontal position (odd/even horizontal position - single pixel resolution) 
+                          
+                                ; set menu selector x-axis positons
+                                MOVE.B  left_sprite_hpos1,$0001(A0)
+                                MOVE.B  left_sprite_hpos2,$0003(A0)
+                                MOVE.B  right_sprite_hpos1,$0001(A1)
+                                MOVE.B  right_sprite_hpos2,$0003(A1)
+
                                 RTS 
+
 
                                 even
 mouse_y_value           ; original address L00020882
@@ -1184,7 +1128,9 @@ menu_selector_min_y     ; original address L00020884
 menu_selector_max_y     ; original address L00020886
                                 dc.w    $0050
 menu_selector_y         ; original address L00020888
-                                dc.w    $0000
+                                dc.w    $0000                   ; menu selector Y position into character view - 0 = top line (not physical display co-ords)
+menu_selector_left_x            dc.w    $0000                   ; left menu selector X position into character view - 0 = left hand side (not physical displat co-ords)
+menu_selector_right_x           dc.w    $0000                   ; right menu selector X position into character view - 0 = left hand side (not physical displat co-ords)
 
 
 ; sprite menu pointer control word values (used to set sprite control word values directly)
@@ -1192,695 +1138,6 @@ left_sprite_hpos1               dc.b    $6c     ; left sprite hvalue (bit 2-9 of
 left_sprite_hpos2               dc.b    $01     ; left sprite hvalue (bit 1 of hpos)
 right_sprite_hpos1              dc.b    $a9     ; right sprite hvalue (bit 2-9 of hpos)
 right_sprite_hpos2              dc.b    $01     ; right sprite hvalue (bit 1 of hpos)
-
-
-
-
-
-
-        ; *****************************************************************************
-        ; ***                         MENU ACTION PROCESSING                        ***
-        ; *****************************************************************************
-        ; The menu action processing is hard-coded (I was only 17 at the time)
-        ; It works as follows:-
-        ;
-        ; 1) Detect which menu is currently displayed and call the relevent handler
-        ; 2) compare the vertical position of the sprite selection sprites
-        ;       depending on the position, either:-
-        ;              a) display a different menu, or
-        ;              b) load a module to play
-        ;
-
-
-        ; -------------------------------- do menu action ------------------------------
-        ; called from the main loop when the mouse button is clicked. 
-        ; the routine checks the currently displayed menu and performs the necessary 
-        ; actions for that menu.
-        ;
-do_menu_action                  ; original address L0002088E
-                        ; main menu actions
-                                CMP.W   #MENU_IDX_main_menu,menu_ptr_index              ; L000203AC
-                                BEQ.W   do_main_menu_actions                            ; L00020938 
-                        ; disk 1 menu actions
-                                CMP.W   #MENU_IDX_disk_1_menu,menu_ptr_index            ; L000203AC
-                                BEQ.W   do_disk_1_menu_actions                          ; L00020CFC
-                        ; disk 2 menu actions
-                                CMP.W   #MENU_IDX_disk_2_menu,menu_ptr_index            ; L000203AC
-                                BEQ.W   do_disk_2_menu_actions                          ; L00020D3C 
-                        ; disk 3 menu actions
-                                CMP.W   #MENU_IDX_disk_3_menu,menu_ptr_index            ; L000203AC
-                                BEQ.W   do_disk_3_menu_actions                          ; L00020DAC 
-                        ; credits menu actions
-                                CMP.W   #MENU_IDX_credits_menu,menu_ptr_index           ; L000203AC
-                                BEQ.W   set_main_menu_params                            ; L0002124E
-                        ; greetings 1 menu actions
-                                CMP.W   #MENU_IDX_greetings_1_menu,menu_ptr_index       ; L000203AC
-                                BEQ.W   do_greetings_1_menu_actions                     ; L00020E1C 
-                        ; greetings 2 menu actions
-                                CMP.W   #MENU_IDX_greetings_2_menu,menu_ptr_index       ; L000203AC
-                                BEQ.W   set_main_menu_params                            ; L0002124E
-                        ; addresses 1 menu actions
-                                CMP.W   #MENU_IDX_addresses_1_menu,menu_ptr_index       ; L000203AC
-                                BEQ.W   set_addresses_2_menu_params                     ; L00020B5E 
-                        ; addresses 2 menu actions
-                                CMP.W   #MENU_IDX_addresses_2_menu,menu_ptr_index       ; L000203AC
-                                BEQ.W   set_addresses_3_menu_params                     ; L00020BA0 
-                        ; addresses 3 menu actions
-                                CMP.W   #MENU_IDX_addresses_3_menu,menu_ptr_index       ; L000203AC
-                                BEQ.W   set_addresses_4_menu_params                     ; L00020BE2 
-                        ; addresses 4 menu actions
-                                CMP.W   #MENU_IDX_addresses_4_menu,menu_ptr_index       ; L000203AC
-                                BEQ.W   set_addresses_5_menu_params                     ; L00020C24 
-                        ; addresses 5 menu actions
-                                CMP.W   #MENU_IDX_addresses_5_menu,menu_ptr_index       ; L000203AC
-                                BEQ.W   set_addresses_6_menu_params                     ; L00020C66 
-                        ; addresses 6 menu actions
-                                CMP.W   #MENU_IDX_addresses_6_menu,menu_ptr_index       ; L000203AC
-                                BEQ.W   set_main_menu_params                            ; L0002124E 
-                        ; pd menu actions
-                                CMP.W   #MENU_IDX_pd_message_menu,menu_ptr_index        ; L000203AC
-                                BEQ.W   set_main_menu_params                            ; L0002124E
-                        ; other - exit (shouldn't happen)
-                                RTS 
-
-
-
-
-                ; ------------------------ do main menu actions -------------------------
-                ; called from main 'do_menu_action' when the main menu is displayed.
-                ; From this menu, you can only navigate to other sub menus.
-                ;
-                ;                - Disk 1 Menu
-                ;                - Disk 2 Menu
-                ;                - Disk 3 Menu
-                ;                - Credits 
-                ;                - Greetings
-                ;                - Addresses
-                ;                - PD Message
-                ;
-do_main_menu_actions    ; original address L00020938
-                                CMP.W   #$0024,menu_selector_y          
-                                BLE.W   set_disk_1_menu_params           
-                                CMP.W   #$002c,menu_selector_y          
-                                BLE.W   set_disk_2_menu_params           
-                                CMP.W   #$0034,menu_selector_y          
-                                BLE.W   set_disk_3_menu_params           
-                                CMP.W   #$003c,menu_selector_y          
-                                BLE.W   set_credits_menu_params          
-                                CMP.W   #$0044,menu_selector_y          
-                                BLE.W   set_greetz_1_menu_params         
-                                CMP.W   #$004c,menu_selector_y          
-                                BLE.W   set_addresses_1_menu_params      
-                                CMP.W   #$0054,menu_selector_y          
-                                BLE.W   set_pd_message_menu_params       
-                                BRA.W   enable_menu_selection            
-
-
-enable_menu_selection
-                                ;BCLR.B  #MENU_FADING,menu_selection_status_bits                 
-                                ;BCLR.B  #MENU_MOUSE_PTR_DISABLED,menu_selection_status_bits     
-                                RTS 
-
-
-
-                ; ----------------------- do disk 1 menu actions ---------------------
-                ; called from main 'do_menu_action' when the menu is displayed.
-                ; From this menu, you can load music, or return to the main menu
-                ;
-                ;               Jarresque
-                ;               The Fly
-                ;               Stratospheric City
-                ;               Float
-                ;               FLight-Sleepy Mix
-                ;               Return to Main Menu
-                ;
-do_disk_1_menu_actions ; original address L00020CFC
-                                CMP.W   #$0034,menu_selector_y          
-                                BLE.W   set_loader_jarresque             
-                                CMP.W   #$003c,menu_selector_y          
-                                BLE.W   set_loader_the_fly               
-                                CMP.W   #$0044,menu_selector_y          
-                                BLE.W   set_loader_stratospheric_city    
-                                CMP.W   #$004c,menu_selector_y          
-                                BLE.W   set_loader_float                 
-                                CMP.W   #$0054,menu_selector_y          
-                                BLE.W   set_loader_flight_sleepy_mix     
-                                BRA.W   set_main_menu_params             
-
-
-
-                ; ----------------------- do disk 2 menu actions ---------------------
-                ; called from main 'do_menu_action' when the menu is displayed.
-                ; From this menu, you can load music, or return to the main menu
-                ;
-                ;               Shaft
-                ;               Love Your Money
-                ;               Cosmic How Much
-                ;               This Is Not A Love Song
-                ;               Eat The Ballbearing
-                ;               Sound Of Silence
-                ;               Retouche
-                ;               Techwar
-                ;               Bright
-                ;               Return to Main Menu
-                ;
-do_disk_2_menu_actions  ; original address L00020D3C
-                                CMP.W   #$002c,menu_selector_y          
-                                BLE.W   set_loader_shaft                 
-                                CMP.W   #$0034,menu_selector_y          
-                                BLE.W   set_loader_love_your_money       
-                                CMP.W   #$003c,menu_selector_y          
-                                BLE.W   set_loader_cosmic_how_much       
-                                CMP.W   #$0044,menu_selector_y          
-                                BLE.W   set_loader_not_a_love_song       
-                                CMP.W   #$004c,menu_selector_y          
-                                BLE.W   set_loader_eat_the_ballbearing   
-                                CMP.W   #$0054,menu_selector_y          
-                                BLE.W   set_loader_sound_of_silence      
-                                CMP.W   #$005c,menu_selector_y          
-                                BLE.W   set_loader_retouche              
-                                CMP.W   #$0064,menu_selector_y          
-                                BLE.W   set_loader_techwar               
-                                CMP.W   #$006c,menu_selector_y          
-                                BLE.W   set_loader_bright                
-                                BRA.W   set_main_menu_params             
-
-
-
-                ; ----------------------- do disk 3 menu actions ---------------------
-                ; called from main 'do_menu_action' when the menu is displayed.
-                ; From this menu, you can load music, or return to the main menu
-                ;
-                ;               Mental Obstacle
-                ;               Blade Runner
-                ;               Natural Reality
-                ;               Obliteration Fin
-                ;               Skyriders
-                ;               Zero Gravity
-                ;               Break Through
-                ;               Summer In Sweden
-                ;               Never To Much
-                ;               Return to Main Menu
-                ; 
-do_disk_3_menu_actions
-                                CMP.W   #$002c,menu_selector_y          
-                                BLE.W   set_loader_mental_obstacle       
-                                CMP.W   #$0034,menu_selector_y          
-                                BLE.W   set_loader_blade_runner          
-                                CMP.W   #$003c,menu_selector_y          
-                                BLE.W   set_loader_natural_reality       
-                                CMP.W   #$0044,menu_selector_y          
-                                BLE.W   set_loader_obliteration_fin      
-                                CMP.W   #$004c,menu_selector_y          
-                                BLE.W   set_loader_skyriders             
-                                CMP.W   #$0054,menu_selector_y          
-                                BLE.W   set_loader_zero_gravity          
-                                CMP.W   #$005c,menu_selector_y          
-                                BLE.W   set_loader_break_through         
-                                CMP.W   #$0064,menu_selector_y          
-                                BLE.W   set_loader_summer_in_sweden      
-                                CMP.W   #$006c,menu_selector_y          
-                                BLE.W   set_loader_never_to_much         
-                                BRA.W   set_main_menu_params             
-
-
-
-                ; ----------------------- do greetings 1 menu actions ---------------------
-                ; called from main 'do_menu_action' when the menu is displayed.
-                ; From this menu, you can load music, or return to the main menu
-                ;
-                ;               More Greetz
-                ;               Return to Main Menu
-                ;
-do_greetings_1_menu_actions     ; original address L00020E1C
-                                CMP.W   #$006c,menu_selector_y    
-                                BLE.W   set_greetz_2_menu_params   
-                                BRA.W   set_main_menu_params       
-
-
-
-
-
-
-                ; ---------------------- set main menu params ------------------------
-                ; set the parameters necessary for the display of the 'main menu'
-                ;
-set_main_menu_params    ; original address L0002124E
-                                ;BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-                                MOVE.W  #$0020,menu_selector_min_y                      ; L00020884
-                                MOVE.W  #$0050,menu_selector_max_y                      ; L00020886
-                                MOVE.W  #MENU_IDX_main_menu,menu_ptr_index              ; L000203AC
-                                MOVE.B  #$6c,left_sprite_hpos1                          ; L0002088A
-                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
-                                MOVE.B  #$a9,right_sprite_hpos1                         ; L0002088C
-                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
-
-                                ; change menu state machine state
-                                move.w  #STATE_MENU_FADEOUT,menu_current_state
-                                bsr     menu_set_state
-
-                                RTS 
-
-
-
-                ; ---------------------- set disk 1 menu params ------------------------
-                ; set the parameters necessary for the display of the 'disk 1 menu'
-                ;
-set_disk_1_menu_params    ; original address L00020990
-                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-                                MOVE.W  #$0030,menu_selector_min_y                      ; L00020884
-                                MOVE.W  #$0058,menu_selector_max_y                      ; L00020886
-                                MOVE.W  #MENU_IDX_disk_1_menu,menu_ptr_index            ; L000203AC
-                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
-                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
-                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
-                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
-
-                                ; change menu state machine state
-                                move.w  #STATE_MENU_FADEOUT,menu_current_state
-                                bsr     menu_set_state
-
-                                RTS 
-
-
-
-                ; ---------------------- set disk 2 menu params ------------------------
-                ; set the parameters necessary for the display of the 'disk 2 menu'
-                ;
-set_disk_2_menu_params   ; original address L000209D2
-                                ;BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-                                MOVE.W  #$0028,menu_selector_min_y                      ; L00020884
-                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-                                MOVE.W  #MENU_IDX_disk_2_menu,menu_ptr_index            ; L000203AC
-                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
-                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
-                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
-                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
-
-                                ; change menu state machine state
-                                move.w  #STATE_MENU_FADEOUT,menu_current_state
-                                bsr     menu_set_state
-
-                                RTS 
-
-
-
-                ; ---------------------- set disk 3 menu params ------------------------
-                ; set the parameters necessary for the display of the 'disk 3 menu'
-                ;
-set_disk_3_menu_params  ; original address L00020A14
-                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-                                MOVE.W  #$0028,menu_selector_min_y                      ; L00020884
-                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-                                MOVE.W  #MENU_IDX_disk_3_menu,menu_ptr_index            ; L000203AC
-                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
-                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
-                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
-                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
-
-                                ; change menu state machine state
-                                move.w  #STATE_MENU_FADEOUT,menu_current_state
-                                bsr     menu_set_state
-
-                                RTS 
-
-
-
-                ; ---------------------- set credits menu params ------------------------
-                ; set the parameters necessary for the display of the 'credits menu'
-                ;
-set_credits_menu_params ; original address L00020A56
-                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-                                MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
-                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-                                MOVE.W  #MENU_IDX_credits_menu,menu_ptr_index           ; L000203AC
-                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
-                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
-                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
-                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
-
-                                ; change menu state machine state
-                                move.w  #STATE_MENU_FADEOUT,menu_current_state
-                                bsr     menu_set_state
-
-                                RTS 
-
-
-
-                ; ---------------------- set greetings 1 menu params ------------------------
-                ; set the parameters necessary for the display of the 'greetings 1 menu'
-                ;
-set_greetz_1_menu_params ; original address L00020A98
-                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-                                MOVE.W  #$0068,menu_selector_min_y                      ; L00020884
-                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-                                MOVE.W  #MENU_IDX_greetings_1_menu,menu_ptr_index       ; L000203AC
-                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
-                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
-                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
-                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
-
-                                ; change menu state machine state
-                                move.w  #STATE_MENU_FADEOUT,menu_current_state
-                                bsr     menu_set_state
-
-                                RTS 
-
-
-
-                ; ---------------------- set greetings 2 menu params ------------------------
-                ; set the parameters necessary for the display of the 'greetings 2 menu'
-                ;
-set_greetz_2_menu_params ; original address L00020ADA
-                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-                                MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
-                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-                                MOVE.W  #MENU_IDX_greetings_2_menu,menu_ptr_index       ; L000203AC
-                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
-                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
-                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
-                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
-
-                                ; change menu state machine state
-                                move.w  #STATE_MENU_FADEOUT,menu_current_state
-                                bsr     menu_set_state
-
-                                RTS 
-
-
-
-                ; ---------------------- set addresses 1 menu params ------------------------
-                ; set the parameters necessary for the display of the 'addresses 1 menu'
-                ;
-set_addresses_1_menu_params 
-                                MOVE.W  #$0070,menu_selector_min_y
-                                MOVE.W  #$0070,menu_selector_max_y
-                                MOVE.W  #MENU_IDX_addresses_1_menu,menu_ptr_index
-                                MOVE.B  #$42,left_sprite_hpos1
-                                MOVE.B  #$01,left_sprite_hpos2
-                                MOVE.B  #$d6,right_sprite_hpos1
-                                MOVE.B  #$01,right_sprite_hpos2
-
-                                ; change menu state machine state
-                                move.w  #STATE_MENU_FADEOUT,menu_current_state
-                                bsr     menu_set_state
-
-                                RTS 
-
-
-
-                ; ---------------------- set addresses 2 menu params ------------------------
-                ; set the parameters necessary for the display of the 'addresses 2 menu'
-                ;
-set_addresses_2_menu_params ; original address L00020B5E
-                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-                                MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
-                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-                                MOVE.W  #MENU_IDX_addresses_2_menu,menu_ptr_index       ; L000203AC
-                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
-                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
-                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
-                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
-
-                                ; change menu state machine state
-                                move.w  #STATE_MENU_FADEOUT,menu_current_state
-                                bsr     menu_set_state
-
-                                RTS 
-
-
-
-                ; ---------------------- set addresses 3 menu params ------------------------
-                ; set the parameters necessary for the display of the 'addresses 3 menu'
-                ;
-set_addresses_3_menu_params ; original address L00020BA0
-                                ;BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-                                MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
-                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-                                MOVE.W  #MENU_IDX_addresses_3_menu,menu_ptr_index       ; L000203AC
-                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
-                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
-                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
-                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
-
-                                ; change menu state machine state
-                                move.w  #STATE_MENU_FADEOUT,menu_current_state
-                                bsr     menu_set_state
-
-                                RTS 
-
-
-
-                ; ---------------------- set addresses 4 menu params ------------------------
-                ; set the parameters necessary for the display of the 'addresses 4 menu'
-                ;
-set_addresses_4_menu_params ; original address L00020BE2
-                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-                                MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
-                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-                                MOVE.W  #MENU_IDX_addresses_4_menu,menu_ptr_index       ; L000203AC
-                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
-                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
-                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
-                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
-
-                                ; change menu state machine state
-                                move.w  #STATE_MENU_FADEOUT,menu_current_state
-                                bsr     menu_set_state
-
-                                RTS 
-
-
-
-                ; ---------------------- set addresses 5 menu params ------------------------
-                ; set the parameters necessary for the display of the 'addresses 5 menu'
-                ;
-set_addresses_5_menu_params ; original address L00020C24
-                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-                                MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
-                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-                                MOVE.W  #MENU_IDX_addresses_5_menu,menu_ptr_index       ; L000203AC
-                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
-                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
-                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
-                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
-
-                                ; change menu state machine state
-                                move.w  #STATE_MENU_FADEOUT,menu_current_state
-                                bsr     menu_set_state
-
-                                RTS 
-
-
-
-                ; ---------------------- set addresses 6 menu params ------------------------
-                ; set the parameters necessary for the display of the 'addresses 6 menu'
-                ;
-set_addresses_6_menu_params ; original address L00020C66
-                               ; BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-                                MOVE.W  #$0070,menu_selector_min_y                      ; L00020884
-                                MOVE.W  #$0070,menu_selector_max_y                      ; L00020886
-                                MOVE.W  #MENU_IDX_addresses_6_menu,menu_ptr_index       ; L000203AC
-                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
-                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
-                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
-                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
-
-                                ; change menu state machine state
-                                move.w  #STATE_MENU_FADEOUT,menu_current_state
-                                bsr     menu_set_state
-
-                                RTS 
-
-
-
-                ; ---------------------- set pd message menu params ------------------------
-                ; set the parameters necessary for the display of the 'pd message menu'
-                ;
-set_pd_message_menu_params ; original address L00020CA8
-                              ;  BSET.B  #MENU_DISP_FADE_OUT,menu_display_status_bits    ; L000203AA
-                                MOVE.W  #$0078,menu_selector_min_y                      ; L00020884
-                                MOVE.W  #$0078,menu_selector_max_y                      ; L00020886
-                                MOVE.W  #MENU_IDX_pd_message_menu,menu_ptr_index        ; L000203AC 
-                                MOVE.B  #$42,left_sprite_hpos1                          ; L0002088A
-                                MOVE.B  #$01,left_sprite_hpos2                          ; L0002088B
-                                MOVE.B  #$d6,right_sprite_hpos1                         ; L0002088C
-                                MOVE.B  #$01,right_sprite_hpos2                         ; L0002088D
-
-                                ; change menu state machine state
-                                move.w  #STATE_MENU_FADEOUT,menu_current_state
-                                bsr     menu_set_state
-
-                                RTS 
-
-
-loader_file_id                  dc.l    $0                      ; file id of module to load.
-
-;loader_start_offset             dc.l    $0
-;loader_file_length              dc.l    $0
-;loader_disk_number              dc.l    $0
-;loader_decompressed_length      dc.l    $0
-
-                ; -------------------- load music: jarresque -------------------
-set_loader_jarresque    ; original address L00020E2C
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits 
-                                move.l  #'jarr',loader_file_id
-                                RTS 
-
-                ; ------------------- load music: the fly --------------------
-set_loader_the_fly      ; original address L00020E5A
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits  
-                                move.l  #'thef',loader_file_id  
-                                RTS 
-
-                ; ------------------- load music: stratospheric city --------------------
-set_loader_stratospheric_city; original address L00020E88
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #'stra',loader_file_id
-                                RTS 
-
-                ; ------------------- load music: float --------------------
-set_loader_float        ; original address L00020EB6
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits 
-                                move.l  #'floa',loader_file_id
-                                RTS 
-
-                ; ------------------- load music: flight-sleepy mix --------------------
-set_loader_flight_sleepy_mix ; original address L00020EE4
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits 
-                                move.l  #'flig',loader_file_id
-                                RTS 
-
-                ; ------------------- load music: bright --------------------
-set_loader_bright       ; original address L00020F12
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits 
-                                move.l  #'brig',loader_file_id
-                                RTS 
-
-
-                ; ------------------- load music: love your money --------------------
-set_loader_love_your_money      ; original address L00020F40
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #'love',loader_file_id
-                                RTS 
-
-
-                ; ------------------- load music: cosmic how much --------------------
-set_loader_cosmic_how_much      ; original address L00020F6E
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #'cosm',loader_file_id
-                                RTS 
-
-
-                ; ------------------- load music: this is not a love song --------------------
-set_loader_not_a_love_song      ; original address L00020F9C
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #'this',loader_file_id  
-                                RTS 
-
-
-                ; ------------------- load music: eat the ballbearing --------------------
-set_loader_eat_the_ballbearing ; original address L00020FCA
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #'eatt',loader_file_id
-                                RTS 
-
-
-                ; ------------------- load music: sound of silence --------------------
-set_loader_sound_of_silence ; orignal address L00020FF8
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #'soun',loader_file_id
-                                RTS 
-
-
-                ; ------------------- load music: retouche --------------------
-set_loader_retouche     ; original address L00021026
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #'reto',loader_file_id 
-                                RTS 
-
-
-                ; ------------------- load music: techwar --------------------
-set_loader_techwar      ; original address L00021054
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #'tech',loader_file_id 
-                                RTS 
-
-
-                ; ------------------- load music: shaft --------------------
-set_loader_shaft        ; original address L00021082
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #'shaf',loader_file_id
-                                RTS 
-
-
-                ; ------------------- load music: mental obstacle --------------------
-set_loader_mental_obstacle      ; original address L000210B0
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #'ment',loader_file_id
-                                RTS 
-
-
-                ; ------------------- load music: blade runner --------------------
-set_loader_blade_runner ; original address L000210DE
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #'blad',loader_file_id
-                                RTS 
-
-
-                ; ------------------- load music: natural reality --------------------
-set_loader_natural_reality      ; original address L0002110C
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #'natu',loader_file_id
-                                RTS 
-
-
-                ; ------------------- load music: obliteration fin --------------------
-set_loader_obliteration_fin ; original address L0002113A
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #'obli',loader_file_id 
-                                RTS 
-
-
-                ; ------------------- load music: obliteration fin --------------------
-set_loader_skyriders    ; original address L00021168
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #'skyr',loader_file_id 
-                                RTS 
-
-
-                ; ------------------- load music: zero gravity --------------------
-set_loader_zero_gravity ; original address L00021196
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #'zero',loader_file_id
-                                RTS 
-
-
-                ; ------------------- load music: break through --------------------
-set_loader_break_through        ; original address L000211C4
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #'brea',loader_file_id
-                                RTS 
-
-
-                ; ------------------- load music: summer in sweden --------------------
-set_loader_summer_in_sweden     ; original address L000211F2
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #'summ',loader_file_id
-                                RTS 
-
-
-                ; ------------------- load music: never to much --------------------
-set_loader_never_to_much        ; original address L00021220
-                               ; BSET.B  #LOAD_MODULE,loader_status_bits
-                                move.l  #'neve',loader_file_id
-                                RTS 
-
-
-
-        ; *****************************************************************************
-        ; ***                    END OF MENU ACTION PROCESSING                      ***
-        ; *****************************************************************************
 
 
 
@@ -2424,6 +1681,22 @@ scroller_next_character ; original address L000215FA
                                 RTS 
 
 
+
+                ; ************************************************************************************
+                ;  DISK / LOADER ROUTINES
+                ; ************************************************************************************
+
+                ; file table structure - definition
+                ; Offset        Description
+                ; 0             FileID	
+                ; 4             Byte Offset to file start
+                ; 8             PackedSize (unused $0)	
+                ; C             File Size in Bytes
+FTAB_FILE_ID            EQU $0
+FTAB_FILE_OFFSET        EQU $4
+FTAB_FILE_PACKED        EQU $8
+FTAB_FILE_SIZE          EQU $C
+
                 even
                 ; disk file table 4 long words per file entry
                 ; Offset        Description
@@ -2444,25 +1717,12 @@ disk_1_file_table_packed_delta
                 ; load a music file from disk, checks the disk number
                 ; in the drive and waits for the correct disk.
                 ;
-        
-;---------------------------------------------------------------------------------------
-; -> d0.l  offset       (0-$dc000)
-; -> d1.l  length       (0-$dc000)
-; -> d2.l  drive        (0-3)
-; -> a0.l  dst address  (anywhere)
-; -> a1.l  mfm address  ($1760 words - sufficient as we snoop load)
-;
-; <- d0.l  == 0         (success)
-; <- d0.l  != 0         (error)
-;
-; <- assume all other registers are trashed
-;---------------------------------------------------------------------------------------
-
-
-            ; loader_file_id = file id to load
+                ; IN:
+                ;       a0.l = ptr to file id
+                ;
 load_music                      movem.l d0-d7/a0-a6,-(a7)               ; save all registers
 
-                                move.l  loader_file_id,d0               ; get file id to load
+                                move.l  (a0),d0                         ; get file id to load from parameters ptr passed in
                                 move.w  #27-1,d7                        ; size of file table (27 entries)
                                 lea     disk_file_table,a3              ; disk file table, see infinitedreams.adf.filetable.txt
 
@@ -2476,19 +1736,19 @@ load_music                      movem.l d0-d7/a0-a6,-(a7)               ; save a
                                 move.w  #$f00,$dff180                   ; turn screen red
                                 bra.s   .load_error                     ; loop forever.
 
-.load_file          ; load file from disk to address a0
+.load_file          ; load file from disk
                                 move.l  FTAB_FILE_OFFSET(a3),d0         ; disk byte offset
                                 move.l  FTAB_FILE_SIZE(a3),d1           ; disk file length
                                 moveq   #$00000000,d2                   ; drive 0
-                                lea     BUFFER_LOW,a0
-                                lea     MFM_BUFFER,a1
+                                lea     BUFFER_LOW,a0                   ; load address for module.zx0
+                                lea     MFM_BUFFER,a1                   ; raw mfm track buffer
                                 bsr     loader_4489
                                 tst.l   d0                              ; test for load error
                                 bne.s   .load_error                     ; some kinda disk error.
 
                                 ; DECOMPRESS ZXO
-                                lea     BUFFER_LOW,a0
-                                lea     BUFFER_HIGH,a1
+                                lea     BUFFER_LOW,a0                   ; ptr to module.zx0
+                                lea     BUFFER_HIGH,a1                  ; ptr to decompression buffer (delta4 module)
                                 movem.l a0/a1,-(a7)
                                 jsr     uncompress_zx0
                                 movem.l (a7)+,a0/a1
@@ -2502,36 +1762,6 @@ load_music                      movem.l d0-d7/a0-a6,-(a7)               ; save a
                                 rts
 
 
-
-;load_music
-;                                movem.l d0-d7/a0-a6,-(a7)                          
-;                                move.l  loader_start_offset,d0          ; #$0000CCB0,d0
-;                                move.l  loader_file_length,d1           ; #$0002A56E,d1
-;                                move.l  #$00000000,d2
-;                                lea     LOAD_BUFFER,a0
-;                                lea     MFM_BUFFER,a1
-;
-;                                movem.l a0-a1,-(a7)
-;                                jsr     loader_4489
-;                                movem.l (a7)+,a0-a1
-;
-;                                tst.l   d0
-;                                bne     load_error
-;
-;                                ; DECOMPRESS ZXO
-;                                lea     LOAD_BUFFER,a0
-;                                lea     DEPACKED_BUFFER,a1
-;                                movem.l a0/a1,-(a7)
-;                                jsr     uncompress_zx0
-;                                movem.l (a7)+,a0/a1
-;
-;                                ; DECOMPRESS DELTA 4
-;                                lea     DEPACKED_BUFFER,a0              ; delta 4 compressed file start
-;                                lea     MUSIC_BUFFER,a1                 ; output buffer for decompressed module destination
-;                                jsr     depackdelta4
-;
-;                                movem.l (a7)+,d0-d7/a0-a6
-;                                rts
 
 load_error                      lea     $dff000,a6
 .error                          move.w  VHPOSR(a6),$dff180
@@ -2551,6 +1781,13 @@ loader_4489
 ;zx0_decompress:
 uncompress_zx0
                         include "zx0/unzx0_68000.s"
+
+
+                ; ************************************************************************************
+                ;  DISK / LOADER ROUTINES
+                ; ************************************************************************************
+
+
 
 
 
@@ -3224,23 +2461,6 @@ logo_line_table ; original address L0003A690
 
 
 
-                ; ------------------------ menu screen pointer list ---------------------
-                ; a list of memory pointers to the text for each menu in the music disk
-menu_ptrs       ; original address L0003A7AC
-                                dc.l    main_menu_text                          ; index = $00
-                                dc.l    music_menu_1_text                       ; index = $04
-                                dc.l    music_menu_2_text                       ; index = $08
-                                dc.l    music_menu_3_text                       ; index = $0c
-                                dc.l    credits_menu_text                       ; index = $10
-                                dc.l    greetings_menu_1_text                   ; index = $14
-                                dc.l    greetings_menu_2_text                   ; index = $18
-                                dc.l    addresses_menu_1_text                   ; index = $1c
-                                dc.l    addresses_menu_2_text                   ; index = $20
-                                dc.l    addresses_menu_3_text                   ; index = $24
-                                dc.l    addresses_menu_4_text                   ; index = $28
-                                dc.l    addresses_menu_5_text                   ; index = $2c
-                                dc.l    addresses_menu_6_text                   ; index = $30
-                                dc.l    pd_message_menu_text                    ; index = $34
 
 
 
@@ -3250,20 +2470,256 @@ menu_ptrs       ; original address L0003A7AC
                 ; DATA DRIVEN MENU SYSTEM
                 ;---------------------------------------------------------------------------------------------------------------------
 
+module_name_table               
+                                dc.l    'jarr',jarr_name
+                                dc.l    'soun',soun_name
+                                dc.l    'reto',reto_name
+                                dc.l    'tech',tech_name
+                                dc.l    'brig',brig_name
+                                dc.l    'natu',natu_name
+                                dc.l    'obli',obli_name
+                                dc.l    'skyr',skyr_name
+                                dc.l    'zero',zero_name
+                                dc.l    'brea',brea_name
+                                dc.l    'shaf',shaf_name
+                                dc.l    'love',love_name
+                                dc.l    'cosm',cosm_name
+                                dc.l    'this',this_name
+                                dc.l    'eatt',eatt_name
+                                dc.l    'thef',thef_name
+                                dc.l    'stra',stra_name
+                                dc.l    'floa',floa_name
+                                dc.l    'flig',flig_name
+                                dc.l    'ment',ment_name
+                                dc.l    'blad',blad_name
+                                dc.l    'summ',summ_name
+                                dc.l    'neve',neve_name
 
-                        ;----------------------------------------
-                        ; menu callback: Load a music module 
-                        ; in: a0 = function parameters ptr
-menu_load_module:
-                                lea     $dff180,a6
-                                move.w  VHPOSR(a6),COLOR00(a6)
-                                jmp     menu_load_module
+jarr_name                       dc.b    'JARRESQUE',$0
+soun_name                       dc.b    'SOUND OF SILENCE',$0
+reto_name                       dc.b    'RETOUCHE',$0
+tech_name                       dc.b    'TECHWAR',$0
+brig_name                       dc.b    'BRIGHT',$0
+natu_name                       dc.b    'NATURAL REALITY',$0
+obli_name                       dc.b    'OBILTERATION FIN',$0
+skyr_name                       dc.b    'SKYRIDERS',$0
+zero_name                       dc.b    'ZERO GRAVITY',$0
+brea_name                       dc.b    'BREAK THROUGH',$0
+shaf_name                       dc.b    'SHAFT',$0
+love_name                       dc.b    'LOVE YOUR MONEY',$0
+cosm_name                       dc.b    'COSMIC HOW MUCH',$0
+this_name                       dc.b    'THIS IS NOT A RAVE SONG',$0
+eatt_name                       dc.b    'EAT THE BALLBEARING',$0
+thef_name                       dc.b    'THE FLY',$0
+stra_name                       dc.b    'STRATOSPHERIC CITY',$0
+floa_name                       dc.b    'FLOAT',$0
+flig_name                       dc.b    'FLIGHT-SLEEPY MIX',$0
+ment_name                       dc.b    'MENTAL OBSTACLE',$0
+blad_name                       dc.b    'BLADE RUNNNER',$0
+summ_name                       dc.b    'SUMMER IN SWEDEN',$0
+neve_name                       dc.b    'NEVER TOO MUCH',$0
+
+loading_text                    dc.b    'LOADING MODULE: ',$0
+playing_text                    dc.b    'PLAYING MODULE: ',$0
+not_found_text                  dc.b    'NOT FOUND',$0
+                                even
+
+
+                                ; IN: 
+                                ;       d0.l = fileid
+                                ; OUT:
+                                ;       a0.l = string address
+                                ;
+get_module_name_string          lea     module_name_table,a1
+                                move.w  #23-1,d7                        ; total number of module names
+.find_loop                      move.l  (a1),d1
+                                cmp.l   d0,d1
+                                beq.s   .found_file
+.not_found                      lea     8(a1),a1
+                                dbf     d7,.find_loop
+
+.missing_name                   lea     not_found_text,a1               ; set 'not found' module name
+                                bra     .return_result
+
+.found_file                     move.l  4(a1),a1                        ; get string ptr to module name
+
+.return_result                  move.l  a1,a0
+                                rts
+
+
+clear_message_bitplane          lea     insert_disk_blank_message,a0
+                                move.w  #((40*8)/4)-1,d7                ; clear 320x8 message display line
+                                moveq   #0,d0
+.loop                           move.l  d0,(a0)+
+                                dbf     d7,.loop
+                                rts
+
+                        ; IN:
+                        ;       a0.l = null terminated string ptr
+                        ; OUT:
+                        ;       d0.l = string length
+get_string_length               moveq   #0,d0
+.loop                           cmp.b   #$00,(a0)+
+                                beq.s   .exit
+                                addq    #1,d0
+                                bra.s   .loop
+.exit                           rts
+
+display_loading_message
+                                move.l  (a0),d0                         ; get file id to load from parameters ptr passed in
+                                bsr.w   get_module_name_string          ; a0 = module name string       
+                                move.l  a0,a1                           ; a1 = module name string
+                                lea     loading_text,a2                 ; a2 = loading module: string
+
+                                bsr.w   get_string_length               ; d0.l = modulename string length
+                                move.l  d0,d1                           ; d1.l = modulename string length
+
+                                move.l  a2,a0
+                                bsr.w   get_string_length               ; d0.l = loading: string length
+                                move.l  d0,d2                           ; d2.l = loading: string length
+
+                                ; a1.l = module name string ptr
+                                ; d1.l = module name string len
+                                ; a2.l = loading: string ptr
+                                ; d2.l = loading: string len
+                                move.l  d2,d3
+                                add.l   d1,d3                           ; d3 = total string length
+                                move.l  d3,d4
+                                lsr.l   #1,d4                           ; d4 = half string length
+                                move.l  #22,d5                          ; mid-point of display string
+                                sub.l   d4,d5                           ; d5 = start of centred string in buffer
+                                mulu    #7,d5                           ; d5 = start pixel position.
+
+                                bsr.w   clear_message_bitplane
+
+                                ; display loading string
+                                movem.l d0-d7/a0-a6,-(a7)
+                                move.l  a2,a3                           ; text ptr
+                                move.w  d5,character_x_pos
+                                move.w  #0,character_y_offset
+                                lea.l   insert_disk_blank_message,a0
+                                lea.l   menu_font_gfx,a2
+                                jsr     display_text
+                                movem.l (a7)+,d0-d7/a0-a6
+
+                                mulu    #7,d2                   ;  d2 = pixel position
+                                add.l   d2,d5                   ; add 'LOADING MODULE: ' length to start of centred string
+
+                                ; display module string
+                                movem.l d0-d7/a0-a6,-(a7)
+                                move.l  a1,a3                          ; texrt ptr
+                                move.w  d5,character_x_pos
+                                move.w  #0,character_y_offset
+                                lea.l   insert_disk_blank_message,a0
+                                lea.l   menu_font_gfx,a2
+                                jsr     display_text
+                                movem.l (a7)+,d0-d7/a0-a6
+
+                                rts
+
+display_playing_message
+                                move.l  (a0),d0                         ; get file id to load from parameters ptr passed in
+                                bsr.w   get_module_name_string          ; a0 = module name string       
+                                move.l  a0,a1                           ; a1 = module name string
+                                lea     playing_text,a2                 ; a2 = loading module: string
+
+                                bsr.w   get_string_length               ; d0.l = modulename string length
+                                move.l  d0,d1                           ; d1.l = modulename string length
+
+                                move.l  a2,a0
+                                bsr.w   get_string_length               ; d0.l = loading: string length
+                                move.l  d0,d2                           ; d2.l = loading: string length
+
+                                ; a1.l = module name string ptr
+                                ; d1.l = module name string len
+                                ; a2.l = loading: string ptr
+                                ; d2.l = loading: string len
+                                move.l  d2,d3
+                                add.l   d1,d3                           ; d3 = total string length
+                                move.l  d3,d4
+                                lsr.l   #1,d4                           ; d4 = half string length
+                                move.l  #22,d5                          ; mid-point of display string
+                                sub.l   d4,d5                           ; d5 = start of centred string in buffer
+                                mulu    #7,d5                           ; d5 = start pixel position.
+
+                                bsr.w   clear_message_bitplane
+
+                                ; display loading string
+                                movem.l d0-d7/a0-a6,-(a7)
+                                move.l  a2,a3                           ; text ptr
+                                move.w  d5,character_x_pos
+                                move.w  #0,character_y_offset
+                                lea.l   insert_disk_blank_message,a0
+                                lea.l   menu_font_gfx,a2
+                                jsr     display_text
+                                movem.l (a7)+,d0-d7/a0-a6
+
+                                mulu    #7,d2                   ;  d2 = pixel position
+                                add.l   d2,d5                   ; add 'LOADING MODULE: ' length to start of centred string
+
+                                ; display module string
+                                movem.l d0-d7/a0-a6,-(a7)
+                                move.l  a1,a3                          ; texrt ptr
+                                move.w  d5,character_x_pos
+                                move.w  #0,character_y_offset
+                                lea.l   insert_disk_blank_message,a0
+                                lea.l   menu_font_gfx,a2
+                                jsr     display_text
+                                movem.l (a7)+,d0-d7/a0-a6
+
+                                rts
+
+                        ; ------------------- load and play protracker module ---------------------
+                        ; Command Function called by the menu configuration.
+                        ; It receives it's function parameters as a pointer in a0.l
+                        ; The Parameters are set in the Menu Configuration for
+                        ; the selected option.
+                        ;
+                        ; IN: 
+                        ;       a0.l = parameters from menu options (ptr to file id)
+loading_parameters_ptr          dc.l    $0
+
+load_and_play_module            move.l  a0,loading_parameters_ptr               ; save menu option parameters ptr to the file id 
+
+                                ; stop playing current modle
+                                lea     CUSTOM,a6                               ; end any music currently playing.
+                                jsr     _mt_end                               
+                                
+                                lea     CUSTOM,a6                               ; remove the CIA player from the interrupt handler (maybe able to prevent this)
+                                jsr     _mt_remove
+
+                                ; display loading module <xxxx>
+                                move.l  loading_parameters_ptr,a0               ; get saved menu option parameter from stack
+                                jsr     display_loading_message
+
+                                ; load & depack module
+                                move.l  loading_parameters_ptr,a0               ; get saved menu option parameter from stack
+                                jsr     load_music                              ; load and depack module
+
+                                ; display playing module <xxxx>
+                                move.l  loading_parameters_ptr,a0               ; get saved menu option parameter from stack
+                                jsr     display_playing_message
+
+                                ; start playing the module
+                                lea     CUSTOM,a6                               ; install CIA player's interrupt handler etc.
+                                lea     $0,a0
+                                move.L  #$1,d0
+                                JSR     _mt_install
+
+                                lea     CUSTOM,a6                               ; initialise and start playing the loaded module.
+                                lea     MUSIC_BUFFER,a0
+                                lea     $0,a1
+                                move.l  #$0,d0
+                                JSR     _mt_init
+
+                                move.b  #$ff,_mt_Enable                         ; enable playing.
                                 rts
 
 
 
 MNUCMD_MENU     EQU     $0              ; selecting this option displays another menu.
 MNUCMD_FUNCTION EQU     $1              ; execute function
+MNUCMD_NOP      EQU     $2              ; no operation (blank menu option)
 
 menu_current_ptr                dc.l    main_menu_definition                    ; ptr to current menu for/being displayed
 
@@ -3274,34 +2730,34 @@ menu_current_ptr                dc.l    main_menu_definition                    
 main_menu_definition            dc.l    main_menu_text
                                 dc.w    5                                               ; 1st selectable line number (0 index)
                                 dc.w    7                                               ; number of selectable options
-                                dc.w    13,16                                           ; left selector char pos, options char width.
+                                dc.w    13,18                                           ; left selector char pos, options char width.
                                 dc.l    MNUCMD_MENU,music_menu_1_definition,$0          ; option 1, display menu
                                 dc.l    MNUCMD_MENU,music_menu_2_definition,$0          ; option 2, display menu
                                 dc.l    MNUCMD_MENU,music_menu_3_definition,$0          ; option 3, display menu
                                 dc.l    MNUCMD_MENU,credits_menu_definition,$0          ; option 4, display menu
-                                dc.l    MNUCMD_MENU,greetings_menu_1_definition,$0      ; option 5, display menu
+                                dc.l    MNUCMD_MENU,greetings_menu_new_definition,$0    ; option 5, display menu
                                 dc.l    MNUCMD_MENU,addresses_menu_1_definition,$0      ; option 6, display menu
                                 dc.l    MNUCMD_MENU,pd_message_menu_definition,$0       ; option 7, display menu
 
-                                ; menu format = 45 x 17 characters
+                                ; menu format = 45 x 17 characters max
 main_menu_text                  ;        123456789012345678901234567890123456789012345
-                                dc.b    '                                             '
-                                dc.b    '  - THE LUNATICS PRESENT INFINITE DREAMS -   '
-                                dc.b    '            SINGLE DISK VERSION.             '   
-                                dc.b    '                                             '
-                                dc.b    '                                             '               
-                                dc.b    '              ..MUSIC MENU 1..               '           
-                                dc.b    '              ..MUSIC MENU 2..               '
-                                dc.b    '              ..MUSIC MENU 3..               '
-                                dc.b    '              ....CREDITS.....               '
-                                dc.b    '              ...GREETINGS....               '
-                                dc.b    '              ...ADDRESSES....               '
-                                dc.b    '              ..P.D. MESSAGE..               '             
-                                dc.b    '                                             '
-                                dc.b    '      USE MOUSE TO SELECT TUNE TO PLAY       '
-                                dc.b    '                                             '
-                                dc.b    '                          *1992-2025 LUNATICS'   
-                                dc.b    '               HTTPS://GITHUB.COM/MARKYTURTLE'
+                                dc.b    $0d,$0a
+                                dc.b    '  - THE LUNATICS PRESENT INFINITE DREAMS -',$0d,$0a
+                                dc.b    '            SINGLE DISK VERSION.',$0d,$0a  
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a               
+                                dc.b    '              MUSIC    HOLLYWOOD',$0d,$0a           
+                                dc.b    '              MUSIC   SUBCULTURE',$0d,$0a
+                                dc.b    '              MUSIC REEAL/PHASER',$0d,$0a
+                                dc.b    '                 DEMO CREDITS',$0d,$0a
+                                dc.b    '                OUR  GREETINGS',$0d,$0a
+                                dc.b    '              CONTACT  ADDRESSES',$0d,$0a
+                                dc.b    '                 P.D. MESSAGE',$0d,$0a             
+                                dc.b    $0d,$0a
+                                dc.b    '      USE MOUSE TO SELECT TUNE TO PLAY',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '                          *1992-2025 LUNATICS',$0d,$0a   
+                                dc.b    '               HTTPS://GITHUB.COM/MARKYTURTLE',$00
                                 even
 
 
@@ -3309,34 +2765,50 @@ main_menu_text                  ;        123456789012345678901234567890123456789
                         ; ------------ MUSIC MENU 1 DEFINITION ------------
                         ;--------------------------------------------------
 music_menu_1_definition         dc.l    music_menu_1_text
-                                dc.w    7                                               ; 1st selectable line number (0 index)
-                                dc.w    6                                               ; number of selectable options
-                                dc.w    1,41                                            ; left selector char pos, options char width.
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 1, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 2, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 3, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 4, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 5, load music
-                                dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 6, display menu
+                                dc.w    4                                                               ; 1st selectable line number (0 index)
+                                dc.w    12                                                              ; number of selectable options
+                                dc.w    6,31                                                            ; left selector char pos, options char width.
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_jarresque           ; option 1, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_silence             ; option 2, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_retouche            ; option 3, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_techwar             ; option 4, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_bright              ; option 5, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_reality             ; option 6, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_obilteration        ; option 7, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_skyriders           ; option 8, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_gravity             ; option 9, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_breakthrough        ; option 10, load music
+                                dc.l    MNUCMD_NOP,$0,$0                                                ; option 11, NOP
+                                dc.l    MNUCMD_MENU,main_menu_definition,$0                             ; option 12, display menu
+params_jarresque                dc.l    'jarr'
+params_silence                  dc.l    'soun' 
+params_retouche                 dc.l    'reto' 
+params_techwar                  dc.l    'tech' 
+params_bright                   dc.l    'brig'
+params_reality                  dc.l    'natu'
+params_obilteration             dc.l    'obli'
+params_skyriders                dc.l    'skyr'
+params_gravity                  dc.l    'zero'
+params_breakthrough             dc.l    'brea'
 
 music_menu_1_text               ;        123456789012345678901234567890123456789012345
-                                dc.b    '              -----------------              '
-                                dc.b    '             - INFINITE DREAMS -             '
-                                dc.b    '              -----------------              '              
-                                dc.b    '                                             '
-                                dc.b    '                MUSIC MENU 1.                '
-                                dc.b    '                -------------                '               
-                                dc.b    '                                             '
-                                dc.b    '  JARRESQUE.......................HOLLYWOOD  '              
-                                dc.b    '  THE.FLY........................SUBCULTURE  '
-                                dc.b    '  STRATOSPHERIC.CITY.............SUBCULTURE  '
-                                dc.b    '  FLOAT..........................SUBCULTURE  ' 
-                                dc.b    '  FLIGHT-SLEEPY MIX..............SUBCULTURE  '
-                                dc.b    '  ...........RETURN TO MAIN MENU...........  ' 
-                                dc.b    '                                             '
-                                dc.b    '                                             '
-                                dc.b    '                                             '
-                                dc.b    '                                             '
+                                dc.b    $0d,$0a             
+                                dc.b    '             MUSIC BY HOLLYWOOD',$0d,$0a
+                                dc.b    $0d,$0a              
+                                dc.b    $0d,$0a
+                                dc.b    '       JARRESQUE           - HOLLYWOOD',$0d,$0a
+                                dc.b    '       SOUND OF SILENCE    - HOLLYWOOD',$0d,$0a
+                                dc.b    '       RETOUCHE            - HOLLYWOOD',$0d,$0a 
+                                dc.b    '       TECHWAR             - HOLLYWOOD',$0d,$0a
+                                dc.b    '       BRIGHT              - HOLLYWOOD',$0d,$0a
+                                dc.b    '       NATURAL REALITY     - HOLLYWOOD',$0d,$0a
+                                dc.b    '       OBLITERATION FIN    - HOLLYWOOD',$0d,$0a 
+                                dc.b    '       SKYRIDERS           - HOLLYWOOD',$0d,$0a
+                                dc.b    '       ZERO GRAVITY        - HOLLYWOOD',$0d,$0a
+                                dc.b    '       BREAK THROUGH       - HOLLYWOOD',$0d,$0a 
+                                dc.b    $0d,$0a
+                                dc.b    '             RETURN TO MAIN MENU',$00
+
                                 even
 
 
@@ -3344,38 +2816,46 @@ music_menu_1_text               ;        123456789012345678901234567890123456789
                         ; ------------ MUSIC MENU 2 DEFINITION ------------
                         ;--------------------------------------------------
 music_menu_2_definition         dc.l    music_menu_2_text
-                                dc.w    6                                               ; 1st selectable line number (0 index)
-                                dc.w    10                                              ; number of selectable options
-                                dc.w    1,41                                            ; left selector char pos, options char width.
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 1, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 2, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 3, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 4, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 5, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 6, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 7, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 8, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 9, load music
-                                dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 10, display menu
+                                dc.w    4                                                               ; 1st selectable line number (0 index)
+                                dc.w    11                                                              ; number of selectable options
+                                dc.w    4,35                                                            ; left selector char pos, options char width.
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_shaft               ; option 1, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_lovemoney           ; option 2, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_cosmic              ; option 3, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_notrave             ; option 4, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_ballbearing         ; option 5, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_thefly              ; option 6, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_stratospheric       ; option 7, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_float               ; option 8, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_flight              ; option 9, load music
+                                dc.l    MNUCMD_NOP,$0,$0                                                ; option 10, NOP
+                                dc.l    MNUCMD_MENU,main_menu_definition,$0                             ; option 11, display menu
+params_shaft                    dc.l    'shaf' 
+params_lovemoney                dc.l    'love' 
+params_cosmic                   dc.l    'cosm' 
+params_notrave                  dc.l    'this' 
+params_ballbearing              dc.l    'eatt' 
+params_thefly                   dc.l    'thef'
+params_stratospheric            dc.l    'stra'
+params_float                    dc.l    'floa'
+params_flight                   dc.l    'flig'
 
 music_menu_2_text               ;        123456789012345678901234567890123456789012345
-                                dc.b    '              -----------------              '
-                                dc.b    '             - INFINITE DREAMS -             '
-                                dc.b    '              -----------------              '              
-                                dc.b    '                MUSIC MENU 2.                '
-                                dc.b    '                -------------                '               
-                                dc.b    '                                             '
-                                dc.b    '  SHAFT..........................SUBCULTURE  '              
-                                dc.b    '  LOVE.YOUR.MONEY................SUBCULTURE  '
-                                dc.b    '  COSMIC.HOW.MUCH................SUBCULTURE  '
-                                dc.b    '  THIS IS NOT A RAVE SONG........SUBCULTURE  ' 
-                                dc.b    '  EAT THE BALLBEARING............SUBCULTURE  '
-                                dc.b    '  SOUND OF SILENCE................HOLLYWOOD  '
-                                dc.b    '  RETOUCHE........................HOLLYWOOD  ' 
-                                dc.b    '  TECHWAR.........................HOLLYWOOD  '
-                                dc.b    '  BRIGHT..........................HOLLYWOOD  '
-                                dc.b    '  ...........RETURN TO MAIN MENU...........  ' 
-                                dc.b    '                                             '
+                                dc.b    $0d,$0a           
+                                dc.b    '            MUSIC BY SUBCULTURE',$0d,$0a
+                                dc.b    $0d,$0a               
+                                dc.b    $0d,$0a
+                                dc.b    '     SHAFT                  - SUBCULTURE',$0d,$0a              
+                                dc.b    '     LOVE YOUR MONEY        - SUBCULTURE',$0d,$0a
+                                dc.b    '     COSMIC HOW MUCH        - SUBCULTURE',$0d,$0a
+                                dc.b    '     NOT A RAVE SONG        - SUBCULTURE',$0d,$0a 
+                                dc.b    '     EAT THE BALLBEARING    - SUBCULTURE',$0d,$0a
+                                dc.b    '     THE FLY                - SUBCULTURE',$0d,$0a
+                                dc.b    '     STRATOSPHERIC CITY     - SUBCULTURE',$0d,$0a
+                                dc.b    '     FLOAT                  - SUBCULTURE' ,$0d,$0a
+                                dc.b    '     FLIGHT-SLEEPY MIX      - SUBCULTURE',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '            RETURN TO MAIN MENU',$00
                                 even
 
 
@@ -3383,38 +2863,33 @@ music_menu_2_text               ;        123456789012345678901234567890123456789
                         ; ------------ MUSIC MENU 3 DEFINITION ------------
                         ;--------------------------------------------------
 music_menu_3_definition         dc.l    music_menu_3_text
-                                dc.w    6                                               ; 1st selectable line number (0 index)
-                                dc.w    10                                              ; number of selectable options
-                                dc.w    1,41                                            ; left selector char pos, options char width.
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 1, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 2, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 3, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 4, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 5, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 6, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 7, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 8, load music
-                                dc.l    MNUCMD_FUNCTION,menu_load_module,$0             ; option 9, load music
-                                dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 10, display menu
+                                dc.w    6                                                               ; 1st selectable line number (0 index)
+                                dc.w    6                                                               ; number of selectable options
+                                dc.w    4,35                                                            ; left selector char pos, options char width.
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_mental              ; option 1, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_blade               ; option 2, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_sweden              ; option 3, load music
+                                dc.l    MNUCMD_FUNCTION,load_and_play_module,params_toomuch             ; option 4, load music
+                                dc.l    MNUCMD_NOP,$0,$0                                                ; option 5, NOP
+                                dc.l    MNUCMD_MENU,main_menu_definition,$0                             ; option 6, display menu
+params_mental                   dc.l    'ment'
+params_blade                    dc.l    'blad'
+params_sweden                   dc.l    'summ'
+params_toomuch                  dc.l    'neve'
 
 music_menu_3_text               ;        123456789012345678901234567890123456789012345
-                                dc.b    '              -----------------              '
-                                dc.b    '             - INFINITE DREAMS -             '
-                                dc.b    '              -----------------              '              
-                                dc.b    '                MUSIC MENU 3.                '
-                                dc.b    '                -------------                '               
-                                dc.b    '                                             '
-                                dc.b    '  MENTAL OBSTACLE.....................REEAL  '              
-                                dc.b    '  BLADE RUNNER........................REEAL  '
-                                dc.b    '  NATURAL REALITY.................HOLLYWOOD  '
-                                dc.b    '  OBLITERATION FIN................HOLLYWOOD  ' 
-                                dc.b    '  SKYRIDERS.......................HOLLYWOOD  '
-                                dc.b    '  ZERO GRAVITY....................HOLLYWOOD  '
-                                dc.b    '  BREAK THROUGH...................HOLLYWOOD  ' 
-                                dc.b    '  SUMMER IN SWEDEN...................PHASER  '
-                                dc.b    '  NEVER TO MUCH......................PHASER  '
-                                dc.b    '  ...........RETURN TO MAIN MENU...........  ' 
-                                dc.b    '                                             '
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '           MUSIC BY REEAL/PHASER',$0d,$0a              
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '     MENTAL OBSTACLE            - REEAL',$0d,$0a              
+                                dc.b    '     BLADE RUNNER               - REEAL',$0d,$0a
+                                dc.b    '     SUMMER IN SWEDEN           - PHASER',$0d,$0a
+                                dc.b    '     NEVER TOO MUCH             - PHASER',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '            RETURN TO MAIN MENU',$00
                                 even
 
 
@@ -3424,58 +2899,89 @@ music_menu_3_text               ;        123456789012345678901234567890123456789
 credits_menu_definition         dc.l    credits_menu_text
                                 dc.w    15                                              ; 1st selectable line number (0 index)
                                 dc.w    1                                               ; number of selectable options
-                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.w    12,19                                           ; left selector char pos, options char width.
                                 dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 1, display menu
 
 credits_menu_text               ;        123456789012345678901234567890123456789012345
-                                dc.b    '               ...CREDITS...                 '    
-                                dc.b    '    CODING................SPONGE HEAD        '  
-                                dc.b    '    GFX...........................JOE        '  
-                                dc.b    '                                T.S.M        '  
-                                dc.b    '    MUSIC...................HOLLYWOOD        '  
-                                dc.b    '                           SUBCULTURE        '  
-                                dc.b    '                               PHASER        '  
-                                dc.b    '                                REEAL        '  
-                                dc.b    '                                             '  
-                                dc.b    '    SALVADOR    (COMPRESSION TOOLS)          '  
-                                dc.b    '    HEMIYODA    (DELTA COMPRESSION)          '  
-                                dc.b    '    H0FFMAN     (DISK BUILDER & PT TOOLS)    '  
-                                dc.b    '    4489        (REPLACEMENT DISK LOADER)    '  
-                                dc.b    '    PAUL RAINGEARD (VSCODE ASSEMBLY)         ' 
-                                dc.b    '                                             ' 
-                                dc.b    '  ...........RETURN TO MAIN MENU...........  '  
-                                dc.b    '                                             '  
+                                dc.b    $0d,$0a  
+                                dc.b    '        CODING - SPONGEHEAD (MARKYTURTLE)',$0d,$0a   
+                                dc.b    '           GFX - JOE',$0d,$0a 
+                                dc.b    '                 T.S.M',$0d,$0a 
+                                dc.b    '         MUSIC - HOLLYWOOD',$0d,$0a 
+                                dc.b    '                 SUBCULTURE',$0d,$0a 
+                                dc.b    '                 PHASER',$0d,$0a 
+                                dc.b    '                 REEAL',$0d,$0a 
+                                dc.b    $0d,$0a  
+                                dc.b    '  SALVADOR                COMPRESSION TOOLS',$0d,$0a 
+                                dc.b    '  HEMIYODA                DELTA COMPRESSION',$0d,$0a 
+                                dc.b    '  H0FFMAN    DISK BUILDER, PT TOOLS, ADVICE',$0d,$0a 
+                                dc.b    '  4489              REPLACEMENT DISK LOADER',$0d,$0a 
+                                dc.b    '  PAUL RAINGEARD            VSCODE ASSEMBLY',$0d,$0a 
+                                dc.b    $0d,$0a 
+                                dc.b    '             RETURN TO MAIN MENU',$00
                                 even
 
+
+                        ; -------------------------------------------------
+                        ; --------- GREETINGS MENU NEW DEFINITION ---------
+                        ;--------------------------------------------------
+greetings_menu_new_definition   dc.l    greetings_menu_new_text
+                                dc.w    16                                              ; 1st selectable line number (0 index)
+                                dc.w    1                                               ; number of selectable options
+                                dc.w    28,11                                           ; left selector char pos, options char width.
+                                dc.l    MNUCMD_MENU,greetings_menu_1_definition,$0      ; option 1, display menu
+
+greetings_menu_new_text          ;        123456789012345678901234567890123456789012345
+                                dc.b    '          ---   !    :               TTE!    ',$0d,$0a
+                                dc.b    '       --!   !- !-   !--.-------      TTE!   ',$0d,$0a
+                                dc.b    '       -/    /  T    /  !   /--/       TTE!  ',$0d,$0a
+                                dc.b    '       +    /  -!- -/   !  --/----      TTE! ',$0d,$0a
+                                dc.b    '----    +--------/------+--------/ .----     ',$0d,$0a
+                                dc.b    '+  !---            --  ---         !  -/     ',$0d,$0a
+                                dc.b    ' +    /  ----  ----+/- + !-- ------!- !---   ',$0d,$0a
+                                dc.b    ' / --/- / --/-/-  !  !  ---/-   ----/  /  T  ',$0d,$0a
+                                dc.b    '/  /  -!   --    -!  !  /   -! (---:  /   !- ',$0d,$0a
+                                dc.b    '+      +---/+----+!--!-------+----/!-/    ++ ',$0d,$0a
+                                dc.b    ' +------+          ---  ---        !NE7---// ',$0d,$0a
+                                dc.b    '      -------- --  .\ /--\ !-- --------      ',$0d,$0a
+                                dc.b    '     /  --   /  /--! 7 -- --/-   --   /      ',$0d,$0a
+                                dc.b    '    /    /--/  /   !  !/  /   !   /--/       ',$0d,$0a
+                                dc.b    '   / ---/--.  /   -! -/  /   -!  --/---      ',$0d,$0a
+                                dc.b    '   +   /   !------+ +--------+--------/      ',$0d,$0a
+                                dc.b    '    +------!      .  :       MORE GREETZ     ',$00
+                                even
 
                         ; -------------------------------------------------
                         ; ---------- GREETINGS MENU 1 DEFINITION ----------
                         ;--------------------------------------------------
 greetings_menu_1_definition     dc.l    greetings_menu_1_text
-                                dc.w    14                                              ; 1st selectable line number (0 index)
+                                dc.w    15                                              ; 1st selectable line number (0 index)
                                 dc.w    2                                               ; number of selectable options
-                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.w    11,19                                           ; left selector char pos, options char width.
                                 dc.l    MNUCMD_MENU,greetings_menu_2_definition,$0      ; option 1, display menu
                                 dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 2, display menu
 
 greetings_menu_1_text           ;        123456789012345678901234567890123456789012345
-                                dc.b    '   ADDONIC-AGILE-AGNOSTIC FRONT AND PANIC    '  
-                                dc.b    '   ALCATRAZ-ALCHEMY-ALLIANCE-ALPHA FLIGHT    '  
-                                dc.b    '    AMAZE-ANAL INTRUDERS-ANARCHY-ANTHROX     '  
-                                dc.b    '   APOCALYPSE-ARCHAOS-ASSSASSINS-ATLANTIS    '  
-                                dc.b    '   AURORA-AWAKE-BLACK ROBES-BRUTAL-CHROME    '  
-                                dc.b    '  COLLISION-COMPLEX-CRASHEAD-CRYSTAL-CYTAX   '  
-                                dc.b    '   DAMAGE INC-DAMONES-DECAY-DESIRE-DEVILS    '  
-                                dc.b    '   DIMENSION X-DISKNET-DUAL CREW-DYNAMIK     '  
-                                dc.b    '     ECLIPSE-END OF CENTURY 1999-ENERGY      '  
-                                dc.b    '   EQUINOX-FAIRLIGHT-FRANTIC-FUSION-GHOST    '  
-                                dc.b    '   GRACE-GUARDIAN ANGEL-HARDLINE-HYSTERIA    '  
-                                dc.b    '    INFINITY-ITALIAN BAD BOYS-JESTERS        '  
-                                dc.b    '     KEFRENS-LA ROCCA-LEGEND-LIVE ACT        '  
-                                dc.b    '   LOGIC SYSTEMS-LSD-LYNX-MAGIC 12-MIRAGE    '  
-                                dc.b    '  ..............MORE GREETZ................  '  
-                                dc.b    '  ...........RETURN TO MAIN MENU...........  '  
-                                dc.b    '                                             '       
+                                dc.b    ' ADDONIC - AGILE - AGNOSTIC FRONT AND PANIC',$0d,$0a
+                                dc.b    $0d,$0a  
+                                dc.b    'ALCATRAZ - ALCHEMY - ALLIANCE - ALPHA FLIGHT',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    ' AMAZE - ANAL INTRUDERS - ANARCHY - ANTHROX',$0d,$0a
+                                dc.b    $0d,$0a 
+                                dc.b    'APOCALYPSE - ARCHAOS - ASSSASSINS - ATLANTIS',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '    AURORA - AWAKE - BLACK ROBES - CHROME',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '   COLLISION - COMPLEX - CRASHEAD - CRYSTAL',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    'CYTAX - DAMAGE INC - DAMONES - DECAY - DESIRE',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '                MORE GREETZ',$0d,$0a
+                                dc.b    '            RETURN TO MAIN MENU',$00 
+                                even
+
+      
                                 even
 
                         ; -------------------------------------------------
@@ -3483,30 +2989,89 @@ greetings_menu_1_text           ;        123456789012345678901234567890123456789
                         ;--------------------------------------------------
 greetings_menu_2_definition     dc.l    greetings_menu_2_text
                                 dc.w    15                                              ; 1st selectable line number (0 index)
-                                dc.w    1                                               ; number of selectable options
-                                dc.w    1,41                                            ; left selector char pos, options char width.
-                                dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 1, display menu
+                                dc.w    2                                               ; number of selectable options
+                                dc.w    11,19                                           ; left selector char pos, options char width.
+                                dc.l    MNUCMD_MENU,greetings_menu_3_definition,$0      ; option 1, display menu
+                                dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 2, display menu
 
 greetings_menu_2_text           ;        123456789012345678901234567890123456789012345
-                                dc.b    '   NEMISIS-NOXIOUS-ORIGIN-PALACE-PARADISE    '  
-                                dc.b    '   PARAGON-PHANTASM-PHANTASY-PHASE-PLASMA    '  
-                                dc.b    '  POLARIS-PURE METAL CODERS-QUARTEX-QUARTZ   '  
-                                dc.b    '     RAM JAM-RAF-RAZOR-REALLITY-REBELS       '  
-                                dc.b    '       REDNEX-RELAY-RICH-RIP MASTERS         '  
-                                dc.b    '   RUBBER RADISH-SCANDAL-SCOOPEX-SHINING     '  
-                                dc.b    '   SHINING 8-SILENTS-SILICON LTD-SKID ROW    '  
-                                dc.b    '      SLIPSTREAM-SONIC-SPREADPOINT-STAX      '  
-                                dc.b    '   SUPPLEX-SUPRISE PRODUCTIONS-TALENT-TECH   '  
-                                dc.b    '    TRASH-TRIBE-TRISTAR AND RED SECTOR INC   '  
-                                dc.b    '          =-=-=-=-=-=-=-=-=-=-=-=-=-         ' 
-                                dc.b    '          - TTE - THE TWITCH ELITE -         '  
-                                dc.b    '          =-=-=-=-=-=-=-=-=-=-=-=-=-         ' 
-                                dc.b    '         VERMIN-VISION-VISION FACTORY        '  
-                                dc.b    '       WIZZCAT-XENTEX-ZITE PRODUCTIONS       '  
-                                dc.b    '  ...........RETURN TO MAIN MENU...........  '  
-                                dc.b    '                                             ' 
+                                dc.b    ' DEVILS - DIMENSION X - DISKNET - DUAL CREW',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '   DYNAMIK - ECLIPSE - END OF CENTURY 1999',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '   ENERGY - EQUINOX - FAIRLIGHT - FRANTIC',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '   FUSION - GHOST - GRACE - GUARDIAN ANGEL',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '       HARDLINE - HYSTERIA - INFINITY',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '    ITALIAN BAD BOYS - JESTERS - KEFRENS',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    'LA ROCCA - LEGEND - LIVE ACT - LOGIC SYSTEMS',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '                MORE GREETZ',$0d,$0a
+                                dc.b    '            RETURN TO MAIN MENU',$00      
                                 even
 
+                        ; -------------------------------------------------
+                        ; ---------- GREETINGS MENU 3 DEFINITION ----------
+                        ;--------------------------------------------------
+greetings_menu_3_definition     dc.l    greetings_menu_3_text
+                                dc.w    15                                              ; 1st selectable line number (0 index)
+                                dc.w    2                                               ; number of selectable options
+                                dc.w    11,19                                           ; left selector char pos, options char width.
+                                dc.l    MNUCMD_MENU,greetings_menu_4_definition,$0      ; option 1, display menu
+                                dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 2, display menu
+
+greetings_menu_3_text           ;        123456789012345678901234567890123456789012345
+                                dc.b    '       LSD - LYNX - MAGIC 12 - MIRAGE',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '     NEMISIS - NOXIOUS - ORIGIN - PALACE',$0d,$0a
+                                dc.b    $0d,$0a 
+                                dc.b    '  PARADISE - PARAGON - PHANTASM - PHANTASY',$0d,$0a
+                                dc.b    $0d,$0a  
+                                dc.b    'PHASE - PLASMA - POLARIS - PURE METAL CODERS',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '  QUARTEX - QUARTZ - RAM JAM - RAF - RAZOR',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '  REALITY - REBELS - REDNEX - RELAY - RICH',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '   RIP MASTERS - RUBBER RADISH - SCANDAL',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '                MORE GREETZ',$0d,$0a
+                                dc.b    '            RETURN TO MAIN MENU',$00 
+                                even
+
+                        ; -------------------------------------------------
+                        ; ---------- GREETINGS MENU 4 DEFINITION ----------
+                        ;--------------------------------------------------
+greetings_menu_4_definition     dc.l    greetings_menu_4_text
+                                dc.w    16                                              ; 1st selectable line number (0 index)
+                                dc.w    1                                               ; number of selectable options
+                                dc.w    11,19                                           ; left selector char pos, options char width.
+                                dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 1, display menu
+
+greetings_menu_4_text           ;        123456789012345678901234567890123456789012345
+                                dc.b    '  SCOOPEX - SHINING - SHINING 8 - SILENTS',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    'SILICON LTD - SKID ROW - SLIPSTREAM - SONIC',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    'SPREADPOINT - STAX - SUPPLEX - TALENT - TECH',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    ' SUPRISE PRODUCTIONS - TRASH - TRIBE ',$0d,$0a
+                                dc.b    $0d,$0a 
+                                dc.b    'TRISTAR AND RED SECTOR INC - THE FLAME ARROWS',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    ' THE SPECIAL BROTHERS - VERMIN - VISION',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    ' VISION FACTORY - VOX DEI - VISUAL BYTES',$0d,$0a
+                                dc.b    $0d,$0a  
+                                dc.b    '      WIZZCAT - XENTEX - ZITE PRODUCTIONS',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '            RETURN TO MAIN MENU',$00
+                                even
 
                         ; -------------------------------------------------
                         ; ---------- ADDRESSES MENU 1 DEFINITION ----------
@@ -3514,27 +3079,26 @@ greetings_menu_2_text           ;        123456789012345678901234567890123456789
 addresses_menu_1_definition     dc.l    addresses_menu_1_text
                                 dc.w    15                                              ; 1st selectable line number (0 index)
                                 dc.w    1                                               ; number of selectable options
-                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.w    13,14                                           ; left selector char pos, options char width.
                                 dc.l    MNUCMD_MENU,addresses_menu_2_definition,$0      ; option 1, display menu
 
 addresses_menu_1_text           ;        123456789012345678901234567890123456789012345
-                                dc.b    '  THE LUNATICS "WERE" LOOKING FOR SOME MORE  '  
-                                dc.b    '   MEMBERS AND COOOL DIVISIONS AROUND THE    '  
-                                dc.b    '  WORLD. TO SET UP A DIVISION WRITE TO THE   '  
-                                dc.b    '           FOLLOWING ADDRESS.....            '  
-                                dc.b    '                                             '  
-                                dc.b    '               T.S.M                         '  
-                                dc.b    '               ** ******* ****               '  
-                                dc.b    '               *******                       '  
-                                dc.b    '               *** ****                      '  
-                                dc.b    '               **** ***                      '  
-                                dc.b    '               **                            '  
-                                dc.b    '                                             '  
-                                dc.b    '       TEL : *** ****** ****** (*****)       '  
-                                dc.b    '           ALSO -ELITE- SWAPPING!            '  
-                                dc.b    '                                             '  
-                                dc.b    '  .............MORE ADDRESSES..............  '  
-                                dc.b    '                                             ' 
+                                dc.b    '  THE LUNATICS "WERE" LOOKING FOR SOME MORE',$0d,$0a  
+                                dc.b    '   MEMBERS AND COOOL DIVISIONS AROUND THE',$0d,$0a
+                                dc.b    '  WORLD. TO SET UP A DIVISION WRITE TO THE',$0d,$0a
+                                dc.b    '           FOLLOWING ADDRESS.....',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '               T.S.M',$0d,$0a
+                                dc.b    '               ** ******* ****',$0d,$0a
+                                dc.b    '               *******',$0d,$0a
+                                dc.b    '               *** ****',$0d,$0a
+                                dc.b    '               **** ***',$0d,$0a
+                                dc.b    '               **',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '       TEL : *** ****** ****** (*****)',$0d,$0a
+                                dc.b    '           ALSO -ELITE- SWAPPING!',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '              MORE ADDRESSES',$00
                                 even
 
 
@@ -3544,27 +3108,26 @@ addresses_menu_1_text           ;        123456789012345678901234567890123456789
 addresses_menu_2_definition     dc.l    addresses_menu_2_text
                                 dc.w    15                                              ; 1st selectable line number (0 index)
                                 dc.w    1                                               ; number of selectable options
-                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.w    13,14                                           ; left selector char pos, options char width.
                                 dc.l    MNUCMD_MENU,addresses_menu_3_definition,$0      ; option 1, display menu
                                
 addresses_menu_2_text           ;        123456789012345678901234567890123456789012345
-                                dc.b    '   TO JOIN THE UK DIVISION WRITE TO ONE OF   '  
-                                dc.b    '           THE FOLLOWING ADDRESSES:-         ' 
-                                dc.b    '                                             '   
-                                dc.b    '                                             '  
-                                dc.b    '    AZTEC               HOLLYWOOD            '  
-                                dc.b    '    ** ******** ***     ** ********* ***     '  
-                                dc.b    '    *******             **********           '  
-                                dc.b    '    *************       ******               '  
-                                dc.b    '    *** ***             *** ***              '  
-                                dc.b    '                                             '  
-                                dc.b    '    ELITE SWAP ALSO     ELITE MUSIC SWAP     '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '  .............MORE ADDRESSES..............  '  
-                                dc.b    '                                             ' 
+                                dc.b    '   TO JOIN THE UK DIVISION WRITE TO ONE OF',$0d,$0a  
+                                dc.b    '           THE FOLLOWING ADDRESSES:-',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '    AZTEC               HOLLYWOOD',$0d,$0a
+                                dc.b    '    ** ******** ***     ** ********* ***',$0d,$0a
+                                dc.b    '    *******             **********',$0d,$0a
+                                dc.b    '    *************       ******',$0d,$0a
+                                dc.b    '    *** ***             *** ***',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '    ELITE SWAP ALSO     ELITE MUSIC SWAP',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '              MORE ADDRESSES',$00
                                 even
 
 
@@ -3574,27 +3137,26 @@ addresses_menu_2_text           ;        123456789012345678901234567890123456789
 addresses_menu_3_definition     dc.l    addresses_menu_3_text
                                 dc.w    15                                              ; 1st selectable line number (0 index)
                                 dc.w    1                                               ; number of selectable options
-                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.w    13,14                                            ; left selector char pos, options char width.
                                 dc.l    MNUCMD_MENU,addresses_menu_4_definition,$0      ; option 1, display menu
                                                                
 addresses_menu_3_text           ;        123456789012345678901234567890123456789012345 
-                                dc.b    '    TO JOIN THE AUSTRIAN DIVISION WRITE TO   '  
-                                dc.b    '       ONE OF THE FOLLOWING ADDRESSES:-      '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '   RIP               NUKE                    '  
-                                dc.b    '   ** *** **         ** *** **               '  
-                                dc.b    '   **** *******      ****** *******          '  
-                                dc.b    '   *******           *******                 '  
-                                dc.b    '                                             '  
-                                dc.b    '                     ALSO ELITE SWAP         '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '  .............MORE ADDRESSES..............  '    
-                                dc.b    '                                             '                                 
+                                dc.b    '    TO JOIN THE AUSTRIAN DIVISION WRITE TO',$0d,$0a  
+                                dc.b    '       ONE OF THE FOLLOWING ADDRESSES:-',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '   RIP               NUKE',$0d,$0a
+                                dc.b    '   ** *** **         ** *** **',$0d,$0a
+                                dc.b    '   **** *******      ****** *******',$0d,$0a
+                                dc.b    '   *******           *******',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '                     ALSO ELITE SWAP',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '              MORE ADDRESSES',$00                           
                                 even
 
 
@@ -3605,27 +3167,26 @@ addresses_menu_3_text           ;        123456789012345678901234567890123456789
 addresses_menu_4_definition     dc.l    addresses_menu_4_text
                                 dc.w    15                                              ; 1st selectable line number (0 index)
                                 dc.w    1                                               ; number of selectable options
-                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.w    13,14                                           ; left selector char pos, options char width.
                                 dc.l    MNUCMD_MENU,addresses_menu_5_definition,$0      ; option 1, display menu
                                                               
 addresses_menu_4_text           ;        123456789012345678901234567890123456789012345
-                                dc.b    '     TO JOIN THE DUTCH DIVISION WRITE TO     '  
-                                dc.b    '          THE FOLLOWING ADDRESS:-            '  
-                                dc.b    '                                             '  
-                                dc.b    '           SANE                              '  
-                                dc.b    '           *************** **                '  
-                                dc.b    '           **** ** *********                 '  
-                                dc.b    '           *******                           '  
-                                dc.b    '                                             '  
-                                dc.b    '           TEL : *** ******* *****           '  
-                                dc.b    '                                             '  
-                                dc.b    '           ALSO ELITE SWAP                   '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '  .............MORE ADDRESSES..............  ' 
-                                dc.b    '                                             ' 
+                                dc.b    '     TO JOIN THE DUTCH DIVISION WRITE TO',$0d,$0a 
+                                dc.b    '          THE FOLLOWING ADDRESS:-',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '           SANE',$0d,$0a
+                                dc.b    '           *************** **',$0d,$0a
+                                dc.b    '           **** ** *********',$0d,$0a
+                                dc.b    '           *******',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '           TEL : *** ******* *****',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '           ALSO ELITE SWAP',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '              MORE ADDRESSES',$00
                                 even
 
 
@@ -3635,27 +3196,26 @@ addresses_menu_4_text           ;        123456789012345678901234567890123456789
 addresses_menu_5_definition     dc.l    addresses_menu_5_text
                                 dc.w    15                                              ; 1st selectable line number (0 index)
                                 dc.w    1                                               ; number of selectable options
-                                dc.w    1,41                                            ; left selector char pos, options char width.
-                                dc.l    MNUCMD_MENU,addresses_menu_5_definition,$0      ; option 1, display menu
+                                dc.w    13,14                                           ; left selector char pos, options char width.
+                                dc.l    MNUCMD_MENU,addresses_menu_6_definition,$0      ; option 1, display menu
                                  
 addresses_menu_5_text           ;        123456789012345678901234567890123456789012345
-                                dc.b    '  TO JOIN THE AUSTRALIAN DIVISION WRITE TO   '  
-                                dc.b    '           THE FOLLOWING ADDRESS:-           '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '           WOODY                             '  
-                                dc.b    '           * ***** *****                     '  
-                                dc.b    '           ********                          '  
-                                dc.b    '           ******** ****                     '  
-                                dc.b    '           **********                        '  
-                                dc.b    '                                             '  
-                                dc.b    '           ALSO -ELITE- SWAP                 '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '  .............MORE ADDRESSES..............  ' 
-                                dc.b    '                                             ' 
+                                dc.b    '  TO JOIN THE AUSTRALIAN DIVISION WRITE TO',$0d,$0a  
+                                dc.b    '           THE FOLLOWING ADDRESS:-',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '           WOODY',$0d,$0a
+                                dc.b    '           * ***** *****',$0d,$0a
+                                dc.b    '           ********',$0d,$0a
+                                dc.b    '           ******** ****',$0d,$0a
+                                dc.b    '           **********',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '           ALSO -ELITE- SWAP',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '              MORE ADDRESSES',$00
                                 even
 
 
@@ -3665,27 +3225,26 @@ addresses_menu_5_text           ;        123456789012345678901234567890123456789
 addresses_menu_6_definition     dc.l    addresses_menu_6_text
                                 dc.w    15                                              ; 1st selectable line number (0 index)
                                 dc.w    1                                               ; number of selectable options
-                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.w    11,19                                           ; left selector char pos, options char width.
                                 dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 1, display menu
 
 addresses_menu_6_text           ;        123456789012345678901234567890123456789012345
-                                dc.b    '    TO JOIN THE SWEDISH DIVISION WRITE TO    '  
-                                dc.b    '          THE FOLLOWING ADDRESS:-            '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '           PHASER                            '  
-                                dc.b    '           ********* **                      '  
-                                dc.b    '           *** ** *********                  '  
-                                dc.b    '           ******                            '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '  ..........RETURN TO MAIN MENU ...........  '   
-                                dc.b    '                                             ' 
+                                dc.b    '    TO JOIN THE SWEDISH DIVISION WRITE TO',$0d,$0a  
+                                dc.b    '          THE FOLLOWING ADDRESS:-',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '           PHASER',$0d,$0a
+                                dc.b    '           ********* **',$0d,$0a
+                                dc.b    '           *** ** *********',$0d,$0a
+                                dc.b    '           ******',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '            RETURN TO MAIN MENU',$00
                                 even
 
 
@@ -3695,50 +3254,90 @@ addresses_menu_6_text           ;        123456789012345678901234567890123456789
 pd_message_menu_definition      dc.l    pd_message_menu_text
                                 dc.w    15                                              ; 1st selectable line number (0 index)
                                 dc.w    1                                               ; number of selectable options
-                                dc.w    1,41                                            ; left selector char pos, options char width.
+                                dc.w    11,19                                           ; left selector char pos, options char width.
                                 dc.l    MNUCMD_MENU,main_menu_definition,$0             ; option 1, display menu
                               
 pd_message_menu_text            ;        123456789012345678901234567890123456789012345
-                                dc.b    '                                             ' 
-                                dc.b    '  THIS PAGE ORIGINALLY CONTAINED A MESSAGE   '  
-                                dc.b    '  TO P.D. COMPANIES AKSING THEM TO RESPECT   '  
-                                dc.b    '  THE AUTHORS COPYRIGHT.....                 '  
-                                dc.b    '                                             '  
-                                dc.b    '  A BIT RICH COMING FROM A GROUP THAT HAD    '  
-                                dc.b    '  MEMBERS SWAPPING WAREZ AROUND THE WORLD.   '  
-                                dc.b    '                                             '  
-                                dc.b    '  WE WERE YOUNG AND NAIVE.......             '  
-                                dc.b    '                                             '  
-                                dc.b    '           .....WISH I STILL WAS.....        '  
-                                dc.b    '                                             ' 
-                                dc.b    '                                             '                                  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '  ..........RETURN TO MAIN MENU ...........  '  
-                                dc.b    '                                             '  
+                                dc.b    $0d,$0a
+                                dc.b    '  THIS PAGE ORIGINALLY CONTAINED A MESSAGE',$0d,$0a
+                                dc.b    '  TO P.D. COMPANIES AKSING THEM TO RESPECT',$0d,$0a
+                                dc.b    '  THE AUTHORS COPYRIGHT.....',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '  A BIT RICH COMING FROM A GROUP THAT HAD',$0d,$0a
+                                dc.b    '  MEMBERS SWAPPING WAREZ AROUND THE WORLD.',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '  WE WERE YOUNG AND NAIVE.......',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '           .....WISH I STILL WAS.....',$0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a                          
+                                dc.b    $0d,$0a
+                                dc.b    $0d,$0a
+                                dc.b    '            RETURN TO MAIN MENU',$00
                                 even
 
 
                                 ; spare screen template for text typer/menu 45 x 17 characters
                                 ;        123456789012345678901234567890123456789012345
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             '  
-                                dc.b    '                                             ' 
+                                dc.b    '                                             ',$0d,$0a 
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$00
 
+                                ; spare screen template for text typer/menu 45 x 17 characters
+                                ;        123456789012345678901234567890123456789012345
+                                dc.b    '                                             ',$0d,$0a 
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$0d,$0a
+                                dc.b    '                                             ',$00
+
+
+
+
+                                ;        123456789012345678901234567890123456789012345
+                                dc.b    '          ___   |    :                       ',$0d,$0a
+                                dc.b    '       __ \  |_ |_   |__.________            ',$0d,$0a
+                                dc.b    '       _/   Z/  T    /  T  Z/__/             ',$0d,$0a
+                                dc.b    '       \    /  _|_ _/   |  __/____           ',$0d,$0a
+                                dc.b    '______  \________/_X____\________/  ._____   ',$0d,$0a
+                                dc.b    '\_   |__            __  ___         |  _/    ',$0d,$0a
+                                dc.b    '  \    /  ____  ____\/_ \ |__ ______|_ |___  ',$0d,$0a
+                                dc.b    ' / ___/_ / __/-/_  |  |  ___/_   ____/  /  T ',$0d,$0a
+                                dc.b    '/  /   _|   __    _|  |  /   _| (___:  /   |_',$0d,$0a
+                                dc.b    '\       \___7)____\|__|_______\____/|_/    \\',$0d,$0a
+                                dc.b    ' \_______\          ___  ___        !NE7___//',$0d,$0a
+                                dc.b    '      ________ __  .\ /__\ |__ ________      ',$0d,$0a
+                                dc.b    '     /  __   /  /__! /7__ __/_   __   /      ',$0d,$0a
+                                dc.b    '    /    /__/  /   |  |/  /   |  Z/__/       ',$0d,$0a
+                                dc.b    '   / ___/__.  /   _| _/  /   _|  __/___      ',$0d,$0a
+                                dc.b    '   \   Z/   |______\ \________\_______/      ',$0d,$0a
+                                dc.b    '    \_______|      .  :      MORE GREETZ     ',$00
 
         IFD TEST_BUILD
         even
