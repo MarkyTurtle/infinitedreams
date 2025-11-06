@@ -1,7 +1,22 @@
 
 
-                        ; IN:   a0 = delta4 compressed buffer ptr
-                        ;       a1 = decompressed output buffer ptr
+                        ; Perform delta4 decompression on a protracker module that has previously been
+                        ; compressed using the 'deladaenc' 4bit delta compression utility found at:-
+                        ; https://github.com/Hemiyoda/deladaenc
+                        ;
+                        ; 1) Set address register a0.l to the address of the loaded compressed module.
+                        ; 2) Set address register a1.l to the address of a buffer large enough to hold the decompressed module.
+                        ; 3) Call depackdelta4.
+                        ;
+                        ;       lea.l   compressed_module,a0
+                        ;       lea.l   decompressed_buffer,a1
+                        ;       jsr     depackdelta4
+                        ;       ...
+                        ;
+                        ; IN:   
+                        ;       a0 = delta4 compressed pt-module buffer ptr
+                        ;       a1 = decompressed pt-module output buffer ptr
+                        ;
 depackdelta4:
                                 movem.l d0-d7/a0-a6,-(a7)
 
