@@ -1,0 +1,60 @@
+Converter for "Soundtracker to Protracker" (ST2PT) V.1.3
+
+Soundtracker modules with 31 instruments are not 100 % compatible with
+Protracker. Before Soundtracker 2.5, loop samples are replayed in a
+different way.
+
+
+What does this tool do for you ?
+
+
+Correcting incompatible commands
+
+The whole Amiga tracker module is scanned for effect commands to make sure
+it is a Soundtracker module and not a Noisetracker, Startrekker or Pro-
+tracker module.
+
+There might be Soundtracker modules with a "Speed" effect command which has
+a value of more than 15 ticks. In this case the command in the pattern is
+corrected to 15 ticks to ensure a compatible replay speed.
+
+
+1:1 conversion of loop samples
+
+As mentioned above, loop samples are played in a different way, whereas
+sample length = repeat length. To ensure that these samples are played in
+the correct way in Protracker, the data before the repeat point and
+after repeat point + repeat length is cut and only the sample data within
+the repeat length is saved in the converted module.
+
+
+Ensuring the right replay speed
+
+For the default speed in ticks, a "Speed 6" command is written into the
+first position of the first played pattern, if there is not already a
+"Speed" command or any other command. If a non-"Speed" command was found,
+the next free channel is used.
+
+
+Ensuring the right replay tempo
+
+The standard Protracker tempo of 125 BPM is written as a "Speed 125" command
+into the first position of the first played pattern if possible.
+
+
+Ensuring a turned off lowpass filter
+
+The third command to be written at the first pattern position for a channel
+without an effect command is a "Set Filter off".
+
+
+Creating a module with a Protracker compatible songstructure
+
+And last but not least, the Protracker module ID is added to the converted
+module.
+
+The new file gets the suffix "(PT)" to save the original Soundtracker module.
+
+
+Because of the module ID and the scan of effect commands, a Soundtracker
+module with 31 instruments can be detected very precise.

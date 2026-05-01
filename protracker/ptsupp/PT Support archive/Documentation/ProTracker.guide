@@ -1,0 +1,5418 @@
+@database Default
+@master Text:PT-AG/ProTracker.guide
+@$VER: N.A.
+@author "Håvard Pedersen"
+@(c) "© 1994-96 Mental Diseases"
+@index HeddleyAutoIndex
+@remark Created with Heddley v1.1 (c) Edd Dumbill 1994
+
+@node "MAIN" "ProTracker documentation"
+
+    @{b}ProTracker V3.x - The AmigaGuide documentation@{ub}
+
+
+    "...The use of noise to make music will continue and increase until
+    we reach a music produced through the aid of electrical
+    instruments, which will make available for musical purposes any and
+    all sounds that can be heard."
+                    -- John Cage
+
+    "It is not hard to compose, but it is wonderfully hard to let the
+    superfluous notes fall under the table."
+                    -- Johannes Brahms
+
+
+    @{b}Table of contents:@{ub}
+
+    @{"Introduction" link "MENU - Introduction" 0}
+    @{"Gadgets" link "MENU - Gadgets" 0}
+    @{"Nice to know" link "MENU - Nice to know" 0}
+    @{"How to create music using ProTracker" link "MENU - How to create music" 0}
+    @{"Miscellaneous" link "MENU - Miscellaneous" 0}
+    @{"For the technical minded" link "MENU - For technical minded" 0}
+    @{"How to use this documentation" link "How to use this guide" 0}
+
+Powerpacker.library is © Nico François and req.library is © Bruce Dawson
+and Colin Fox.
+
+This AmigaGuide® help-file is based on the printable help-file for
+ProTracker V1.3 by Lars Hamre, and is made by Håvard "HOWARD/MENTAL
+DISEASES" Pedersen. @{"DYN technical chapter" link "DYN Samples" 0} by PUW.
+
+More specific credits are found in both the '@{"version history" link "Version history" 0}' and the
+'@{"contact the authors" link "Contacting the authors" 0}' chapters.
+
+Consider this entire documentation a beta. If there's @{i}anything@{ui} missing,
+please @{"inform us" link "Contacting the authors" 0}.
+@endnode
+
+@node "MENU - Introduction" "Introduction"
+This chapter contains basic information about ProTracker and how and why
+to get started using it.
+
+        @{"What is ProTracker?" link "What is ProTracker?" 0}
+        @{"Legal mush" link "Legal mush" 0}
+        @{"How to start ProTracker" link "How to start ProTracker" 0}
+@endnode
+
+@node "What is ProTracker?" "What is ProTracker?"
+ProTracker is a so-called "Tracker", a program designed for creating
+music savable as MOD-files. The most significant difference between
+ProTracker and other trackers is that ProTracker is based on the
+original tracker, SoundTracker. It also has more built-in tools than
+almost any other tracker and supports all aspects of the MOD
+file-format. (With the exception of 100-pattern modules)
+
+If you don't count MIDI, about 99% of all music on the Amiga is made on
+ProTracker. The ProTracker has become a standard for music and the
+MOD-files are even supported by most sample-based music programs on the
+PC. (I've even seen some players for Macintosh that supported them!)
+
+We must admit that the user-interface for the ProTracker is neither
+multitasking-friendly nor does it conform to the standard GUI
+guidelines. The reason for this is that the GUI consumes quite a bit of
+the program itself, and it would be a very time-consuming job to port it
+to use the system. (Besides, not all keyboard-shortcuts are comfortably
+read through the system.)
+@endnode
+
+@node "Legal mush" "Legal mush"
+All users and distributors @{i}@{u}must@{ui}@{uu} read this!
+
+- This program is fully public domain software, and may therefore
+freely be copied by @{i}anyone@{ui} to @{i}anyone@{ui}.
+
+- The authors will not accept @{i}@{u}any@{ui}@{uu} charges demanded for
+distribution and/or copying of this program which exceeds the nominal
+charge for postage, handling and disks.
+
+- The authors takes @{i}@{u}no@{ui}@{uu} responsibility for any damages caused by use
+or misuse of this program, though all efforts are taken to make it as
+faultless as possible.
+
+- This program is law-established intellectual achievement, and
+is therefore regulated by laws concerning such, where such laws exists.
+
+- By using and/or distributing this program, you indicate your
+agreement with these paragraphs.
+
+- If there are @{i}any@{ui} of these paragraphs you do not understand, you
+are obliged to contact the @{"authors" link "Contacting the authors" 0} and ask for further information
+before indicating your agreement through the previous paragraph.
+
+- Any violation of these paragraphs is both illegal and immoral.
+@endnode
+
+@node "How to start ProTracker" "How to start ProTracker"
+ProTracker may be started from both CLI and Workbench. (Type name in CLI
+or doubleclick on icon from Workbench)
+
+No arguments or tooltypes are supported yet, though.
+@endnode
+
+@node "MENU - Gadgets" "Gadgets"
+This chapter should explain all gadgets and gizmos in ProTracker.
+
+
+        @{b}Mainscreen@{ub}
+
+        @{"Various" link "Main screen - Various" 0}
+        @{"Song section" link "Main screen - Song section" 0}
+        @{"Sample section" link "Main screen - Sample section" 0}
+        @{"Edit options" link "Main screen - Edit options" 0}
+        @{"Sample edit" link "Main screen - Sample edit" 0}
+        @{"Chord editor" link "Main screen - Chord editor" 0}
+        @{"Filter editor" link "Main screen - Filter editor" 0}
+        @{"Edit gadgets" link "Main screen - Edit gadgets" 0}
+
+
+        @{b}Setup@{ub}
+
+        @{"Miscellaneous" link "Setup screen - Miscellaneous" 0}
+        @{"Flags" link "Setup screen - Flags" 0}
+
+
+        @{b}Disk operations@{ub}
+
+        @{"Disk operations" link "Disk operations" 0}
+
+
+        @{b}Sampler@{ub}
+
+        @{"Main" link "Sampler - Main" 0}
+        @{"Volume requester" link "Sampler - Volume requester" 0}
+
+
+Most effects that are performed on samples, comes with a demonstration
+sample. The two samples used for demonstration are a @{"piano" link "Samples/Piano.8svx/main" 0} and a
+@{"sequence" link "Samples/Seq.8svx/main" 0}.
+@endnode
+
+@node "Main screen - Various" "Main screen - Various"
+@{b}CLOSEGADGET@{ub}
+
+This is a small box located in the upper left corner of the ProTracker
+screen. Pressing this will quit.
+
+
+@{b}QUADRASCOPE@{ub}
+
+This is 4 "boxes" located in the upper right part of your screen. These
+shows the waveform currently being played on each channel. Clicking in
+any of these will disable the respective channel and ghost the box.
+
+
+@{b}DEPTHGADGET@{ub}
+
+This is another box located in the upper right corner of the ProTracker
+screen. Pressing this will push the ProTracker screen behind all other
+screens currently open.
+
+
+@{b}DATE@{ub}
+
+Shows the current date. (Atleast your computers idea of it!)
+
+
+@{b}TIME@{ub}
+
+Shows the system time.
+
+
+@{b}PLAY@{ub}
+
+Shows the time elapsed since ProTracker started playing.
+
+
+@{b}EDIT OPTIONS (Numbers 1 - 7)@{ub}
+
+The edit options represent several small "tools" grouped into (somewhat)
+clear categories. The upper line will state what these functions will
+affect. The numbers are:
+
+    1 - @{"Edit options" link "Main screen - Edit options" 0}
+    2 - @{"Sample edit" link "Main screen - Sample edit" 0}
+    3 - @{"Chord editor" link "Main screen - Chord editor" 0}
+    4 - @{"Filter editor" link "Main screen - Filter editor" 0}
+
+
+@{b}STATUS@{ub}
+
+Shows a somewhat descriptive text describing what ProTracker is doing.
+
+
+@{b}CHIP@{ub}
+
+Shows how much chip-memory there is left on your Amiga.
+
+
+@{b}FAST@{ub}
+
+Shows how much fast-memory there is left on your Amiga.
+
+
+@{b}TUNE@{ub}
+
+Shows how much memory the current module uses.
+
+
+@{b}PUBL@{ub}
+
+Shows how much memory (any type) there is left on your Amiga.
+
+
+@{b}PATTERNNUMBER GADGET@{ub}
+
+This is a small box to the left of the BPM gadget, and represents the
+number of the pattern currently being edited. Click on it to type in a
+new number.
+
+
+@{b}BPM@{ub}
+
+The tempo gadget on the status bar is for setting the CIA speed, if CIA
+timing is used. The gadget will be updated every time you set the speed
+using the @{"F command" link "Adjust tempo effect command" 0} (if CIA that is). This gadget does not show actual
+beats per minute unless the speed is 6!
+
+
+The main screen has some indicators on the left side of the statustext.
+The indicators are as follows:
+
+M S M (Metronome ON, Split keyboard ON, Multi keyboard ON) I 0-9
+(AutoInsert ON, AutoInsert Macro)
+@endnode
+
+@node "Main screen - Song section" "Main screen - Song section"
+@{b}SONGNAME@{ub}
+
+This defines the name of your module.
+
+
+@{b}MASTERVOLUME@{ub}
+
+Defines the volume of your module. This gadget affects playing only, and
+the setting is not saved along with your module in current version of
+ProTracker.
+
+
+@{b}POS@{ub}
+
+Defines the current position in the position-table.
+
+
+@{b}I(NSERT)@{ub}
+
+Insert a position into your song.
+
+
+@{b}D(ELETE)@{ub}
+
+Delete a position from your song.
+
+
+@{b}PATTERN@{ub}
+
+Defines which pattern will be played at the selected position.
+
+
+@{b}LENGTH (SONG)@{ub}
+
+Defines the length of the song.
+
+
+@{b}PLAY@{ub}
+
+Will play the song from the current position in the song. The pointer
+turns yellow, just to show you what's going on.
+
+
+@{b}PATTERN@{ub}
+
+Will play the current pattern which is shown at the bottom of the
+screen. The pointer turns yellow here as well. Holding down the right
+button while pressing play,pattern or record will play from the current
+patternposition.
+
+
+@{b}CLEAR@{ub}
+
+Will first ask you what you want to clear. You can clear either all,
+song or samples. In addition to the gadgets you can use "A" for All, "O"
+for Song, "S" for samples and "C" or ESC for Cancel.
+
+
+@{b}STOP@{ub}
+
+Will stop playing of songs and patterns, recording, and will turn edit
+mode off.
+
+
+@{b}RECORD@{ub}
+
+Will put you in edit mode, but also play the current pattern or song.
+You can select this in the Edit Options menu. While the pattern or song
+is playing, you can type in notes and numbers from the keyboard, and
+they will appear in the pattern as it scrolls. The notes and numbers
+will also be quantized to the nearest slot, so that keeping a steady
+rhythm is no problem. The pointer will turn blue here as well as in the
+the normal edit mode.
+
+
+@{b}SETUP@{ub}
+
+Will go to the @{"Setup Screen" link "Setup screen - Miscellaneous" 0}.
+
+
+@{b}CONTINUE@{ub}
+
+Will continue the module from the last stopped position.
+
+
+@{b}EDIT@{ub}
+
+Will put you in edit mode. The pointer turns blue, and you can enter
+notes and numbers from the keyboard. Use the arrowkeys to move up/down
+and left/right in the pattern. Entering a note or a number will cause
+the pattern to jump one or more slots down.
+
+
+@{b}DISK OP.@{ub}
+
+Will go to the @{"Disk operation screen" link "Disk operations" 0}.
+@endnode
+
+@node "Main screen - Sample section" "Main screen - Sample section"
+@{b}SAMPLENAME@{ub}
+
+This defines the name of the current sample.
+
+
+@{b}SAMPLE@{ub}
+
+The number of the chosen sample. You can have up to 31, or hex $1F
+samples in a song. Pressing both mousebuttons at the same time will set
+the samplenumber to zero. You can then record the pattern with sample 0
+to prevent ProTracker from setting the volume each time you play a new
+note.
+
+
+@{b}VOLUME@{ub}
+
+Use this to set the volume the current sample will be played with.
+
+
+@{b}FINETUNE@{ub}
+
+Tune your untuned samples to match the others.
+
+    0 436.4 hz    -1 432.1 hz
+    1 439.0 hz    -2 429.6 hz
+    2 441.6 hz    -3 426.3 hz
+    3 445.1 hz    -4 423.1 hz
+    4 447.8 hz    -5 419.9 hz
+    5 451.5 hz    -6 416.7 hz
+    6 455.2 hz    -7 414.4 hz
+    7 457.0 hz    -8 412.0 hz
+
+To experienced musicians, this table clearly will seem wrong. A normal
+tuning should be 440! The reason to this is that ProTracker uses NTSC
+periods for playback.
+
+
+@{b}LENGTH (SAMPLE)@{ub}
+
+The Length gadgets are simply used for setting the length of the sample.
+A sample can be up to 64k, or $fffe long. You can add workspace behind
+the sample by increasing the length and letting go of the button.
+ProTracker will ask if you are sure, and if you are, allocate more
+memory for the sample.
+
+
+@{b}REPEAT@{ub}
+
+Here you set the start of the sampleloop.
+
+
+@{b}REPLEN@{ub}
+
+Here you set the length of the sampleloop.
+
+
+@{b}LOAD SAMPLE@{ub}
+
+Will simply try to load the current samplename. Use this when you've
+fucked up in the sample editor, and have destroyed a sample.
+
+
+@{b}KILL SAMPLE@{ub}
+
+Will remove the current sample from your module.
+
+
+@{b}SAMPLER@{ub}
+
+Will go to the @{"Sampler screen" link "Sampler - Main" 0}.
+@endnode
+
+@node "Main screen - Edit options" "Main screen - Edit options"
+@{b}QUANTIZE@{ub}
+
+Will move the notes you record to every n'th slot. Entering 00 will turn
+off the quantizing, and the notes you play will always be inserted at
+the patternposition you are at. Entering 01 will quantize the notes the
+the nearest slot according to the speed. i.e. if you play a note after
+the first half has been played, it will be quantized to the slot below.
+Entering a value like 8 will quantize to every 8th note, and so on. Got
+that?
+
+
+@{b}METROSAMP@{ub}
+
+[This option is not currently implemented, nor documented!]
+
+
+@{b}METRONOME@{ub}
+
+A metronome is a steady sound which helps you keep the speed when
+recording. (I'm not particulary good at explaining, try it out!)
+
+The first number is the speed of the metronome, and the second is the
+channel to play it on. The Sample used for metronomes is always sample
+$1F. Load your own favourite metronome sample. The metronome will always
+be played at C-3, but you can still change the volume and loop values.
+To turn off the metronome, just set the speed or channel to 0.
+
+
+@{b}MULTI@{ub}
+
+This table is used with the multi keyboard option. The four numbers
+represent what channel each channel will jump to next. 1-2, 2-3, 3-4 and
+so on.
+
+
+@{b}RECORD HOLD@{ub}
+
+When this is set to "on", record will not start until the first
+keypress.
+
+
+@{b}SAMPLE@{ub}
+
+This selects wether the edit buttons should affect all samples, or the
+current samples only.
+
+
+@{b}RECORD@{ub}
+
+This selects wether the record function should record a pattern, or the
+entire song.
+
+
+@{b}PLAYNOTE@{ub}
+
+When set to "multi", ProTracker will jump to another channel after you
+play a note on the keyboard. This makes it possible to play two or more
+notes at the same time (very useful with midi).
+
+
+@{b}EDIT@{ub}
+
+This selects wether ProTracker should go right when inserting notes, or
+down to the next step.
+@endnode
+
+@node "Main screen - Sample edit" "Main screen - Sample edit"
+To the left of the title bar is a box which states what should be
+affected by the copy, exchange and delete gadgets. (Current track, whole
+pattern, real samples.)
+
+To the right of the title bar is a box which states the mixingmode.
+"half" will halve the volume when mixing and echoing to avoid clipping,
+while "clip" will not halve the volume and possibly clip the sample.
+
+
+@{b}DELETE@{ub}
+
+Will delete all notes with the current sample in current track or whole
+pattern.
+
+
+@{b}KILL@{ub}
+
+Will kill the current sample. That is, remove it from memory and reset
+all sample settings. It will not be deleted from the track or pattern.
+
+
+@{b}EXCHANGE@{ub}
+
+Will exchange the samplenumber shown in the "from" gadget with the
+samplenumber in the "to" gadget and vice versa.
+
+
+@{b}COPY@{ub}
+
+Will move the samplenumber shown in the "from" gadget to the sample-
+number in the "to" gadget.
+
+
+@{b}MIX@{ub}
+
+Will mix one sample with another. ProTracker asks you which two samples
+to be mixed, and where to put the result.
+
+Holding the right button and pressing mix will mix the current sample
+with itself. You can offset the sample by setting a position in the
+"pos" gadget If you set "mod" to a non-zero value, the sample will also
+be modulated.
+
+@{"Here" link "Samples/mixed.8svx/main" 0} is an example of the mixing function.
+
+
+@{b}ECHO@{ub}
+
+Will create a echo effect on the current sample. Use "pos" to set the
+delay time of the echo. If you want more room to echo in, just turn up
+the length of the sample.
+
+@{"Here" link "Samples/PIANO_echo.8SVX/main" 0} is an example of echo usage.
+
+
+@{b}BOOST@{ub}
+
+Will turn up the treble of the sample. Use this on hi-hats and snares!
+If the @{"sampler screen" link "Sampler - Main" 0} is open and a range is selected, this will only
+affect the selected range.
+
+You can find a sample boosted several times @{"here" link "Samples/PIANO_boost.8SVX/main" 0}.
+
+
+@{b}FILTER@{ub}
+
+Will Delta-filter the sample. Use this on noisy basses. If the @{"sampler" link "Sampler - Main" 0}
+screen is open and a range is selected, this will only affect the
+selected range.
+
+To get an impression of the filter command, press @{"here" link "Samples/PIANO_filter.8SVX/main" 0}.
+
+
+@{b}X-FADE@{ub}
+
+Will crossfade the sample (mix with itself, backwards). Handy for
+looping samples that are hard to loop.
+
+@{"Here" link "Samples/PIANO_xfade.8SVX/main" 0} is a cross-faded sample.
+
+
+@{b}BACKWD (Backwards)@{ub}
+
+Will turn the sample backwards!
+
+@{"Here" link "Samples/SEQ_backw.8SVX/main" 0} is a test of this feature.
+
+
+@{b}UPSAMPLE@{ub}
+
+Will remove every second byte of the sample, halving the length and
+shifting the pitch one octave up.
+
+@{"Here" link "Samples/SEQ_ups.8SVX/main" 0} is an upsample example.
+
+
+@{b}DOWNSAMPLE@{ub}
+
+Will double every byte of the sample, doubling the length, and shifting
+the pitch one octave down.
+
+There is no demo of downsampling, but it's more or less the opposite of
+upsampling.
+
+
+@{b}POS@{ub}
+
+This is just an offset in the sample, used for a lot of things.This one
+has a numbergadget as well. Holding the right mousebutton while pressing
+the numbergadget will zero the value.
+
+
+@{b}MOD@{ub}
+
+This is used for modulation. Press "mod" to modulate the current sample.
+Holding the right button while pressing the numbergadget will zero the
+value.
+
+@{"Here" link "Samples/PIANO_mod.8SVX/main" 0} is a test of modulation.
+
+
+@{b}CUTBEG(INNING)@{ub}
+
+Will chop the number of bytes set in the "pos" gadget off the beginning
+of the sample.
+
+
+@{b}FU (Fade Up)@{ub}
+
+Will fade the volume from 0 to 100%. Use "pos" to select where in the
+sample to fade up to. If the @{"sampler screen" link "Sampler - Main" 0} is open and a range is
+selected, this will only affect the selected range.
+
+There's no demo of fade up, but it's the same as using the volume
+setting 0 and 100 in the @{"volume requester" link "Sampler - Volume requester" 0} of the sampler.
+
+
+@{b}FD (Fade Down)@{ub}
+
+Will fade the volume from 100 to 0%. Use "pos" to select where in the
+sample to fade down from. If the @{"sampler screen" link "Sampler - Main" 0} is open and a range is
+selected, this will only affect the selected range.
+
+There's no demo of fade down, but it's the same as using the volume
+setting 100 and 0 in the @{"volume requester" link "Sampler - Volume requester" 0} of the sampler.
+
+
+@{b}VOL@{ub}
+
+With this you can change the "real" volume of the sample. Just set a
+percentage and press "vol". vol has a numbergadget. Holding the right
+button while pressing it will set the value to 100%. If the sampler
+screen is open and a range is selected, this will only affect the
+selected range.
+
+You may also set "POS" by clicking on the sample and setting the
+cursor-line.
+@endnode
+
+@node "Main screen - Chord editor" "Main screen - Chord editor"
+@{b}FROM SAMPLE@{ub}
+
+Selects which sample to mix the chords from. Clicking on it sets the
+current sample.
+
+
+@{b}TO SAMPLE@{ub}
+
+Selects which sample to put the chord into. Clicking on it sets the
+current sample.
+
+
+@{b}NOTES@{ub}
+
+Sets how many notes your chord contains.
+
+
+@{b}ADJUST@{ub}
+
+[Sorry, not enough info for documentation...]
+
+
+@{b}MAKE CHORD@{ub}
+
+Does the work.
+
+
+@{b}NOTE 1 - NOTE 7@{ub}
+
+The notes to use in the chord. Click in gadgets to edit.
+
+
+@{"Here" link "Samples/PIANO_chord.8SVX/main" 0} is an example of a Cmaj7 chord . This was accomplished using the
+notes C-3, D#3, G-3 and A#3.
+@endnode
+
+@node "Main screen - Filter editor" "Main screen - Filter editor"
+[No documentation exists on the filter editor, but I couldn't get it to
+do anything!]
+@endnode
+
+@node "Main screen - Edit gadgets" "Main screen - Edit gadgets"
+@{b}TRACK/PATT/CMDS/BLOCK@{ub}
+
+Selects what to be affected by the edit gadgets. (Refered to as range.)
+
+
+@{b}INSERT@{ub}
+
+Inserts the buffer at current position.
+
+
+@{b}CUT@{ub}
+
+Deletes the range and moves it to the buffer.
+
+
+@{b}DELETE@{ub}
+
+Deletes the current step and moves all preceding one step up. (Not
+block)
+
+
+@{b}COPY@{ub}
+
+Copies the range to the buffer.
+
+
+@{b}CLEAR@{ub}
+
+Deletes the range. (Not block)
+
+
+@{b}PASTE@{ub}
+
+Pastes the buffer out to current position.
+
+
+@{b}FLIP@{ub}
+
+Turns the range backwards.
+
+
+@{b}EXCHANGE@{ub}
+
+Exchange range with buffer.
+
+
+@{b}OCTAVE UP@{ub}
+
+Transposes range one octave up.
+
+
+@{b}OCTAVE DOWN@{ub}
+
+Transposes range one octave down.
+
+
+@{b}NOTE UP@{ub}
+
+Transposes range one note up.
+
+
+@{b}NOTE DOWN@{ub}
+
+Transposes range one note down.
+
+
+@{b}SCROLL UP@{ub}
+
+Scrolls range one step up.
+
+
+@{b}SCROLL DOWN@{ub}
+
+Scrolls range one step down.
+
+
+@{b}ROTATE UP@{ub}
+
+Same as scroll, but inserts note scrolled out at top at bottom step.
+
+
+@{b}ROTATE DOWN@{ub}
+
+Same as scroll, but inserts note scrolled out at bottom at top step.
+@endnode
+
+@node "Setup screen - Miscellaneous" "Setup screen - Miscellaneous"
+@{b}MAIN MENU@{ub}
+
+Will exit the setup screen, and return to the @{"main screen" link "Main screen - Various" 0}.
+
+
+@{b}LOAD CONFIG@{ub}
+
+Will load the selected config file.
+
+
+@{b}SAVE CONFIG@{ub}
+
+Will save the selected config file.
+
+
+@{b}CFG@{ub}
+
+Selects the current configuration to use.
+
+
+@{b}RESET ALL@{ub}
+
+Will reset to the original ProTracker configuration.
+
+
+@{b}THE COLOR PALETTE@{ub}
+
+The color palette is simple to use. Just select a color, and use the R,
+G and B sliders to set the color. You may also edit the colors for the
+VU-meters by pressing anywhere within the VU-cols and edit.
+
+
+@{b}COPY@{ub}
+
+Copies a color. Select the color to copy, select "copy", select
+destination color.
+
+
+@{b}SPREAD@{ub}
+
+For use with the VU-meter colors. Press at start color, select "spread",
+and select destination color to make ProTracker calculate a nice fade
+between the two colors.
+
+
+@{b}ARROWS (UP AND DOWN)@{ub}
+
+Rotates the colors for the VU-meter.
+
+
+@{b}SWAP@{ub}
+
+Swaps two colors. Use as copy.
+
+
+@{b}CANCEL@{ub}
+
+Will set the last saved colors.
+
+
+@{b}UNDO@{ub}
+
+[Does not work, sorry!]
+
+
+@{b}DEF1 - DEF6@{ub}
+
+[Does not work, sorry!]
+
+
+@{b}TEMPO@{ub}
+
+This is where you set your default CIA timing tempo. Range: 32-255.
+
+
+@{b}SPEED@{ub}
+
+This is where you set your default Vblank timing speed. Range: 01-FF.
+
+
+@{b}TIMING@{ub}
+
+We included this so that American users also could enjoy ProTracker, and
+wouldn't have to use sonix or any other terrible music program...
+
+You can choose between CIA or Vblank timing. Vblank is the timing-method
+soundtrackers have been using since the dawn of time, while CIA is a
+much better and @{"accurate timing" link "CIA tempo calculation" 0} with the tempo measured in beats per
+minute. Using Vblank on NTSC amigas will cause the song to play 20%
+faster. With CIA, there's no difference.
+
+
+@{b}SOFTINT@{ub}
+
+[No documentation exists, but audible problems have occured when using
+"on".]
+
+
+@{b}SCREEN@{ub}
+
+This enables you to move the screen to fit your overscan settings.
+
+
+@{b}TUNENOTE@{ub}
+
+Selects which note to use for the tuning tone in the sample editor.
+
+
+@{b}TUNE VOL@{ub}
+
+Selects the volume for the tuning tone.
+
+
+@{b}RECOVER SONG@{ub}
+
+[Not implemented]
+
+
+@{b}CLEAR@{ub}
+
+Will clear the splits. (See below)
+
+
+@{b}SPLIT@{ub}
+
+You can set 4 splits on the keyboard, each with it's own sample,
+splitpoint and transpose. Just type in a sample number and select the
+key to split at by pressing the appropriate one. The transpose note for
+each split is the first note in that split-range. Notes below the first
+split will be played with the current sample. Split is great for
+recording drums, or for playing untuned samples in tune (use together
+with finetune).
+
+
+@{b}ACCIDENTAL@{ub}
+
+Simple enough, accidental allows you to select sharp (#) or flat (b)
+notes. This will not be saved with the song!
+
+
+@{b}PRINT SONG@{ub}
+
+Will print the song to the path shown below the "Print Song" gadget. The
+print path can be 31 chars long. (To make it actually appear on your
+printer, use "PRT:")
+
+
+@{b}PP EFF@{ub}
+
+Selects which crunchmode to use when crunching with powerpacker library.
+The name of the modes explain it all.
+
+
+@{b}VUMETER@{ub}
+
+Selects which VU-meter mode to use. "Fake" is the normal VU-meter used
+in all Trackers from the beginning of time, but "real" gives a much
+better impression of the actual volume of the channel.
+@endnode
+
+@node "Setup screen - Flags" "Setup screen - Flags"
+@{b}SPLIT@{ub}
+
+Toggles between normal and split keyboard.
+
+
+@{b}TRANS(POSE)DEL(ETE) ON/OFF@{ub}
+
+When on, notes transposed out of range will be deleted.
+
+
+@{b}SOLIDSCOPE@{ub}
+
+When on, the quadrascopes will be rendered in a somewhat fancier way.
+
+
+@{b}BLANKZERO@{ub}
+
+When off, ProTracker will show the patterndata with zeroes where no
+changes take place. When set to on, these places will be rendered blank.
+(Well, sort of, anyway!)
+
+
+@{b}SHOWDEC(IMAL)@{ub}
+
+When on, memory sizes will be shown in decimal.
+
+
+@{b}FILTER@{ub}
+
+Toggles the low-pass filter of the Amiga. (Not available on all Amigas)
+
+
+@{b}NTSC@{ub}
+
+When on, ProTracker will only be visible 200 lines at a time, and scroll
+in order to be able to display the entire screen. This is only useful
+for users using a NTSC based video system.
+
+
+@{b}LACED@{ub}
+
+When on, ProTracker will use the interlace (flickering) mode of the
+Amiga in order to make all genlocks a little bit happier. 8)
+
+
+@{b}UNDYN IFF@{ub}
+
+Will automatically convert IFF @{"DYN samples" link "What is DYN samples?" 0} to normal 8-bit samples when
+loading samples.
+
+
+@{b}UNDYN MOD@{ub}
+
+[Not implemented.]
+
+
+@{b}OVERRIDE@{ub}
+
+When on, ProTracker will ignore any paths or disknames when loading a
+song. All the samples will be loaded from the current sample path.
+
+
+@{b}NOSAMPLES@{ub}
+
+When on, ProTracker won't load the samples when loading a song or
+module.
+
+
+@{b}SHOW DIRS@{ub}
+
+When on, directories will be shown in the @{"disk operations screen" link "Disk operations" 0}.
+
+
+@{b}LOAD LOOP@{ub}
+
+When on, ProTracker will load loops from IFF-samples.
+
+
+@{b}AUTODIR ON/OFF@{ub}
+
+When on, ProTracker reads the current directory path automatically when
+the @{"disk operation screen" link "Disk operations" 0} is opened.
+
+
+@{b}AUTOEXIT ON/OFF@{ub}
+
+When on, ProTracker will automatically exit from the @{"disk operations" link "Disk operations" 0}
+when loading a song, module, track or pattern.
+
+
+@{b}MULTICACHE@{ub}
+
+[No documentation available at time of writing.]
+
+
+@{b}CUTTOBUFF@{ub}
+
+If enabled, all cut operations will copy to the paste-buffer.
+
+
+@{b}CUTTOLOOP@{ub}
+
+[Not implemented]
+
+
+@{b}UPS>28kHz@{ub}
+
+Will automatically upsample Maestro samples sampled at frequencies above
+28  KHz.
+@endnode
+
+@node "Disk operations" "Disk operations"
+The disk operations screen has a directory window at the right edge of
+the screen, were you can select which files to load.
+
+
+@{b}MAIN MENU@{ub}
+
+Will exit disk operations and return to the @{"main screen" link "Main screen - Various" 0}.
+
+
+@{b}PACK@{ub}
+
+Selects wether modules and samples should be packed using powerpacker
+library.
+
+
+@{b}SAMPFORM@{ub}
+
+Selects wether samples are to be saved as IFF 8SVX or as RAW 8-bit
+data.
+
+
+@{b}SAVE ICON@{ub}
+
+[Not implemented]
+
+
+@{b}HIDE .INFO@{ub}
+
+Selects wether ProTracker should hide .info-files or not. (Icon files
+used by the Workbench.)
+
+
+@{b}RESET PATHS@{ub}
+
+Resets the paths to the internal paths for loading.
+
+
+@{b}FORMAT DISK@{ub}
+
+Formats the disk specified by the path gadget. Should be as easy to use
+as the format command on your Workbench-disk. If you don't know which
+options to use, just click on "format" and wait...
+
+
+@{b}RELABEL DISK@{ub}
+
+Changes the name of a disk. (DF0:?)
+
+
+@{b}MASK@{ub}
+
+Specifies which files are to be shown in the filerequester.
+
+
+@{b}PATH@{ub}
+
+This shows the current path. The paths for each file-type is saved in
+the config file on the setup screen.
+
+
+@{b}FILE@{ub}
+
+This shows the current filename.
+
+
+@{b}MAKEDIR@{ub}
+
+Creates a directory.
+
+
+@{b}RENAME FILE@{ub}
+
+Renames a file.
+
+
+@{b}DELETE FILE@{ub}
+
+Deletes a file.
+
+
+Here follows a lot of "mode"-like gadgets. Clicking in the small box to
+the left of these gadgets (or the big gadget next to the file-name
+gadget) uses the path and mask selected for the filetype and enables
+loading of the selected format. Clicking direct in the mode-gadget
+selects saving.
+
+When loading a module it may sometimes happen that a requester pops ups
+with the text "15 instrument module?". This happens when ProTracker
+can't successfully identify the module. If you answer yes, ProTracker
+will attempt to load the module as 15 instrument, which is an ancient
+format used in SoundTracker. More commonly, the module will be a
+StarTrekker module which is loaded by selecting no.
+
+
+@{b}SAVE EXE@{ub}
+
+[Not implemented]
+
+
+@{b}SAVE MODULE@{ub}
+
+Saves the current module.
+
+
+@{b}SAVE SONG@{ub}
+
+Saves the current module as a song. The sampledata for the instrument is
+not saved, so ProTracker will have to re-read these when reading the
+song back to memory. This way of storing modules is considered obsolete,
+and only loading of such files is recommended.
+
+
+@{b}SAVE INSTR@{ub}
+
+[Not implemented]
+
+
+@{b}SAVE SAMPLE@{ub}
+
+Saves the current sample.
+
+
+@{b}SAVE PATT@{ub}
+
+[Not implemented]
+
+
+@{b}READ DIR@{ub}
+
+Re-reads the selected path.
+
+
+@{b}PARENT@{ub}
+
+Skips to the parent directory of your current path.
+
+
+@{b}FREE@{ub}
+
+Shows amount of bytes free in the selected path.
+
+
+All other gadgets on the disk operation screen is devices and assigns on
+your system and may be pressed in order to make ProTracker make the
+device/assign the current path. Pressing right button in any of these
+switches through several pages.
+@endnode
+
+@node "Sampler - Main" "Sampler - Main"
+The sampler screen consists of a sample-display, a scroll bar to move
+around in the sample, and a lot of gadgets.
+
+
+@{b}EXIT@{ub}
+
+Will close the sampler screen and return the bottom part of the screen
+to pattern edit.
+
+
+@{b}STOP@{ub}
+
+Stops the current sample from playing.
+
+
+@{b}WAVEFORM@{ub}
+
+Will play the entire sample.
+
+
+@{b}DISPLAY@{ub}
+
+Will play the visible part of the sample.
+
+
+@{b}RANGE@{ub}
+
+Will play the selected range of the sample.
+
+
+@{b}CUT@{ub}
+
+Will cut the selected range of the sample.
+
+
+@{b}COPY@{ub}
+
+Will copy the selected range of the sample to the copy-buffer.
+
+
+@{b}PASTE@{ub}
+
+Will paste the selected the copy-buffer to the current position of the
+cursor.
+
+
+@{b}SHOW RANGE@{ub}
+
+Will zoom in to the selected range of the sample.
+
+
+@{b}SHOW ALL@{ub}
+
+Will show the entire sample.
+
+
+@{b}BEG@{ub}
+
+Will put the cursorline at the beginning of the sample.
+
+
+@{b}END@{ub}
+
+Will put the cursorline at the end of the sample.
+
+
+@{b}SWAPBUF@{ub}
+
+Swaps copybuffer with sampledata.
+
+
+@{b}VOLUME@{ub}
+
+Opens the @{"volume requester" link "Sampler - Volume requester" 0}.
+
+
+@{b}TUNETONE@{ub}
+
+Will create a steady sinus tone which you can tune your samples with.
+
+
+@{b}ZOOM OUT@{ub}
+
+Will zoom out a bit.
+
+
+@{b}RANGE ALL@{ub}
+
+Select the entire sample as range.
+
+
+@{b}SAMPLE@{ub}
+
+Will first enter the monitor screen. Now click right button to sample,
+left to exit. The rate used will be the one specified in the box to the
+immediate right of the "sample" gadget.
+
+
+@{b}RESAMPLE@{ub}
+
+Transposes the sample itself. (Changing the pitch) Instructions:
+    1. Turn on the tuning tone.
+    2. Use the keyboard to find what note it is. Use finetune if
+       needed.
+    3. Enter the note in the "Note:" box to the right.
+    4. Press resample! Resample also takes finetune into account.
+
+
+@{b}DISP@{ub}
+
+The number of bytes being shown on screen.
+
+
+@{b}POS@{ub}
+
+The current postition of the cursor.
+
+
+@{b}RANG@{ub}
+
+The length of the selected range.
+
+
+@{b}INVERT@{ub}
+
+Turns the sample upside-down. (Flips it around the x-axis!) This is not
+particulary useful, so I won't provide you with any examples of this. In
+fact, you are not able to hear the difference.
+
+
+@{b}MAXIMIZE@{ub}
+
+Up/down-shift the sample in order to make the best possible effects on a
+normalize function (see below), and performs it. This will cause maximum
+volume without distortion, though the bias of the sample may be
+altered.
+
+
+@{b}NORMALIZE@{ub}
+
+Adjusts the volume of the sample to the highest possible without
+distortion.
+
+
+@{b}NORMALDC@{ub}
+
+Balances the sample in Y-direction. (Bias adjustment) Some samples with
+faulty bias may have clicks in the end after this function. This click
+may be removed by selecting the end of the sample and use the volume
+requester with a %100 - %0 setting.
+
+
+@{b}BACKWARDS@{ub}
+
+Turns the sample backwards. @{"Here" link "Samples/SEQ_backw.8SVX/main" 0}'s a sample of what it sounds like.
+
+
+@{b}BOOST@{ub}
+
+Will turn up the treble of the sample. Use this on hi-hats and snares!
+If a range is selected, this will only affect the selected range. Press
+@{"here" link "Samples/PIANO_boost.8SVX/main" 0} to listen to an example.
+
+
+@{b}INTERPOL@{ub}
+
+Will Delta-filter the sample. Use this on noisy basses. If the sampler a
+range is selected, this will only affect the selected range. This is
+also the same as the filter-button in the edit options/sampler screen.
+@{"Here" link "Samples/PIANO_filter.8SVX/main" 0} is an example.
+
+
+@{b}UPSAMPLE@{ub}
+
+Will remove every second byte of the sample, halving the length and
+shifting the pitch one octave up. @{"Here" link "Samples/SEQ_ups.8SVX/main" 0}'s an upsample example.
+
+
+@{b}DOWNSAMPLE@{ub}
+
+Will double every byte of the sample, doubling the length, and shifting
+the pitch one octave down. There's no example of the downsample
+function, but it's shortly explained the opposite of upsampling.
+@endnode
+
+@node "Sampler - Volume requester" "Sampler - Volume requester"
+The volume requester works on the current range.
+
+Set the "from" and "to" volume percentages by using the sliders, or just
+type in any number you please (from 0 to 200) in the percentage boxes to
+the right.
+
+
+@{b}RAMP@{ub}
+
+Will ramp (calculate) the volume!
+
+
+@{b}NORMALIZE@{ub}
+
+Will find the highest volume settings possible (without clipping).
+
+
+@{b}\ @{ub}
+
+Will set the percentages 100%-0%
+
+
+@{b}/@{ub}
+
+Will set the percentages 0%-100%
+
+
+@{b}-@{ub}
+
+Will set the percentages 100%-100%
+
+
+@{b}CANCEL@{ub}
+
+Will exit the volume requester.
+
+
+@{"Here" link "Samples/PIANO_vol.8SVX/main" 0} is an example of what you can do to a piano-sample using the 0-100
+setting.
+@endnode
+
+@node "MENU - Nice to know" "Nice to know"
+This chapter explains some things about ProTracker which I weren't sure
+of where to put.
+
+        @{"Pointer colors" link "Pointer colors" 0}
+        @{"Keyboard shortcuts" link "Keyboard" 0}
+        @{"Effect commands" link "Effect commands" 0}
+        @{"Requesters and I/O" link "Requesters and IO" 0}
+        @{"Standard paths" link "Standard paths" 0}
+        @{"Keyboard percussion" link "Keyboard percussion" 0}
+        @{"What is DYN-samples" link "What is DYN samples?" 0}
+@endnode
+
+@node "Pointer colors" "Pointer colors"
+ProTracker uses the color of the pointer to tell you what's happening.
+These colors are:
+
+    Gray    - Nothing's happening.
+    Yellow  - Playing song / pattern.
+    Green   - Disk action.
+    Blue    - Edit / record.
+    Magenta - Waiting for input (text, number or something else).
+    Cyan    - Select entry or delete.
+    Red     - Something went wrong.
+@endnode
+
+@node "Keyboard" "Keyboard"
+@{b}KEYBOARD@{ub}
+
+The keymap on ProTracker is a standard US keymap. Remember to always use
+the left shift and alt, as the right ones are used for play / pattern
+play.
+
+    High notekeys:  2 3   5 6 7   9 0   =
+                   Q W E R T Y U I O P [ ]
+
+    Low notekeys:    S D   G H J   L ;
+                    Z X C V B N M , . /
+
+    F1 - Choose low octave (C-1 to G-3)
+    F2 - Choose high octave (C-2 to B-3)
+
+    F3 - Cut   (sample)
+    F4 - Copy  (sample)
+    F5 - Paste (sample)
+
+    shift+F3 - Cut track to buffer
+    shift+F4 - Copy track to buffer
+    shift+F5 - Paste track-buffer to track
+
+    alt+F3 - Cut whole pattern to buffer
+    alt+F4 - Copy whole pattern to buffer
+    alt+F5 - Paste patt-buffer to pattern
+
+    ctrl+F3 - Cut commands to buffer
+    ctrl+F4 - Copy commands to buffer
+    ctrl+F5 - Paste cmd-buffer to track
+
+    F6 - Go to patternposition 0
+    F7 - Go to patternposition 16
+    F8 - Go to patternposition 32
+    F9 - Go to patternposition 48
+    F10- Go to patternposition 63
+
+    shift+F6-F10 - Store current patternposition on selected F-key
+    alt+F6-F10   - Play pattern from the stored patternposition
+    ctrl+F6-F10  - Record from the stored patternposition
+
+    Esc - Exit a lots of things.
+
+    shift+Return    - Insert blank note at cursorpos
+                      and move the rest down.
+    shift+Backspace - Delete note above cursorpos and move the rest up.
+
+    alt+Return    - As above, but with all 4 tracks
+    alt+Backspace - As above, but with all 4 tracks
+
+    ctrl+Return    - Push cmds one down
+    ctrl+Backspace - Drag cmds one up
+
+    ctrl+0-9 - Select how many steps ProTracker will jump down each
+time
+               you insert a note (only in edit-mode)
+
+    alt+cursor right   - patternnumber up
+    alt+cursor left    - patternnumber down
+    shift+cursor right - song-position up
+    shift+cursor left  - song-position down
+
+    ctrl+cursor left   - samplenumber up
+    ctrl+cursor right  - samplenumber down
+
+    Space - Toggle between stop/edit-mode
+
+    < (beside Z) - Stop all sound
+    right Amiga  - Play Pattern
+    right Alt    - Play Song
+    right Shift  - Record
+    Caps Lock    - Toggle Keyrepeat on/off
+
+    Del       - Delete note under cursor
+    alt+Del   - Delete command only
+    shift+Del - Delete note and command
+
+    On Numeric pad:
+
+    0 - Select Sample $0
+    1st row    - Select Sample $1-$4
+    2nd row    - Select Sample $5-$8
+    3rd row    - Select Sample $9-$c
+    4th row    - Select Sample $d-$f
+    Just Enter - Select Sample $10
+
+    Holding Enter + the other keys, will select sample $11-$1F
+    (Not on A1200, that is!) :(
+
+    Period (.) - Kill current sample
+
+    Left Amiga (Plus keys below) - Transposing
+
+    Sample/Track            Sample/Pattern
+    ----------------------------------
+    1 - Note Up             2 - Note Up
+    Q - Note Down           W - Note Down
+    A - Octave Up           S - Octave Up
+    Z - Octave Down         X - Octave Down
+
+    All/Track           All/Pattern
+    -------------------------------
+    3 - Note Up             4 - Note Up
+    E - Note Down           R - Note Down
+    D - Octave Up           F - Octave Up
+    C - Octave Down         V - Octave Down
+
+    Tab      - Move cursor to next track
+    Shft+Tab - Move cursor to prev track
+
+    ctrl+A - Toggle channel on/off (+shift = solo channel)
+    ctrl+B - Mark block
+    ctrl+C - Copy block to buffer
+    ctrl+D - Delete block, drag notes up
+    ctrl+E - expand track
+    ctrl+F - toggle filter on/off
+    ctrl+G - Boost all samples
+    ctrl+H - Transpose block up
+    ctrl+I - Insert block, push notes down
+    ctrl+J - Join-paste block
+    ctrl+K - Kill to end of track (+shift = to start of track)
+    ctrl+L - Transpose block down
+    ctrl+M - Toggle multikeyboard on/off
+    ctrl+N - Re-mark last block
+    ctrl+O - Contract track
+    ctrl+P - Paste block
+    ctrl+Q - Unmute all channels
+    ctrl+R - Restore F6-F10 positions
+    ctrl+S - Toggle split keyboard on/off
+    ctrl+T - swap tracks
+    ctrl+U - undo last change
+    ctrl+V - Filter all samples
+    ctrl+W - Polyphonize block
+    ctrl+X - Cut block to buffer
+    ctrl+Y - Backwards block
+    ctrl+Z - Restore Effects
+
+    shft+0-9 - Store current command on selected key
+    alt+0-9  - Insert command in current track
+
+    alt+"\" - Copy command above cursor to current patternposition.
+    alt+"=" - Copy command above cursor to current patternposition
+              and add one to the value.
+    alt+"-" - Copy command above cursor to current patternposition
+              and subtract one from the value.
+
+    alt+A - Monitor/Start sampling
+    alt+B - Boost sample
+    alt+C - Toggle channel 3
+    alt+D - Go to @{"disk operations" link "Disk operations" 0} screen
+    alt+F - Filter sample
+    alt+I - Toggle AutoinsertEffect on/off
+    alt+K - Delete current sample/track
+    alt+M - Toggle metronome on/off
+    alt+Q - Quit ProTracker
+    alt+R - Resample
+    alt+S - Go to @{"sampler" link "Sampler - Main" 0} screen
+    alt+T - Tuning tone
+    alt+V - Toggle channel 4
+    alt+X - Toggle channel 2
+    alt+Y - Save all samples
+    alt+Z - Toggle channel 1
+
+    alt+shift+M - Set metrochannel to current channel
+
+    \                  - Set @{"keyboard percussion" link "Keyboard percussion" 0} mode
+    Alt+any keypad key - tune percussion note
+
+    Return    - Step one note forward
+
+    Backspace - Step one note backward
+
+    LeftAmiga+N - ScreenToBack
+    LeftAmiga+M - ScreenToFront
+
+    When inserting, pasting or join-pasting, hold down shift to keep
+    the cursor from jumping to the end of the block. e.g. shft+ctrl+P
+@endnode
+
+@node "Effect commands" "Effect commands"
+@{b}EFFECT COMMANDS@{ub}
+
+Effect commands on ProTracker should be compatible with all other
+trackers.
+
+    0 - @{"None/arpeggio" link "Arpeggio effect command" 0}           8 - [Not used]
+    1 - @{"Slide pitch up" link "Slide up effect command" 0}          9 - @{"Sample offset" link "Sample offset effect command" 0}
+    2 - @{"Slide pitch down" link "Slide down effect command" 0}        A - @{"Slide volume" link "Volume slide effect command" 0}
+    3 - @{"Toneportamento" link "Toneportamento effect command" 0}          B - @{"Jump to position" link "Position jump effect command" 0}
+    4 - @{"Vibrato" link "Vibrato effect command" 0}                 C - @{"Set volume" link "Set volume effect command" 0}
+    5 - @{"3 + A" link "Toneportamento and volumeslide effect command" 0}                   D - @{"Break pattern" link "Pattern break effect command" 0}
+    6 - @{"4 + A" link "Vibrato and volumeslide effect command" 0}                   E - Miscellaneous commands (See below)
+    7 - @{"Tremolo" link "Tremolo effect command" 0}                 F - @{"Set speed" link "Adjust tempo effect command" 0}
+
+
+
+@{b}MISCELLANEOUS COMMANDS@{ub}
+
+The E command has been altered to contain more commands than one.
+
+    E0 - @{"Set low-pass filter" link "Set filter miscellaneous effect command" 0}    E8 - [Not used]
+    E1 - @{"Fineslide pitch up" link "Fineslide up miscellaneous effect command" 0}     E9 - @{"Retrig note" link "Retrig note miscellaneous effect command" 0}
+    E2 - @{"Fineslide pitch down" link "Fineslide down miscellaneous effect command" 0}   EA - @{"Fineslide volume up" link "Fine volumslide up miscellaneous effect command" 0}
+    E3 - @{"Glissando control" link "Glissando control miscellaneous effect command" 0}      EB - @{"Fineslide volume down" link "Fine volumslide down miscellaneous effect command" 0}
+    E4 - @{"Vibrato control" link "Vibrato control miscellaneous effect command" 0}        EC - @{"Cut note" link "Cut note miscellaneous effect command" 0}
+    E5 - @{"Set finetune" link "Set finetune miscellaneous effect command" 0}           ED - @{"Delay note" link "Delay note miscellaneous effect command" 0}
+    E6 - @{"Pattern loop" link "Pattern loop miscellaneous effect command" 0}           EE - @{"Delay pattern" link "Delay pattern miscellaneous effect command" 0}
+    E7 - @{"Tremolo control" link "Tremolo control miscellaneous effect command" 0}        EF - @{"Invert loop" link "Invert loop miscellaneous effect command" 0}
+@endnode
+
+@node "Arpeggio effect command" "Arpeggio effect command"
+@{b}Cmd 0. Arpeggio [Range:$0-$F/$0-$F]@{ub}
+
+Usage: $0 + 1st halfnote add
+          + 2nd halfnote add
+
+Arpeggio is used to simulate chords. This is done by rapidly changing
+the pitch between 3(or 2) different notes. It sounds very noisy and
+grainy on most samples, but ok on monotone ones.
+
+Example: C-300047  C-major chord: (C+E+G  or C+4+7 halfnotes)
+         C-300037  C-minor chord: (C+D#+G or C+3+7 halfnotes)
+@endnode
+
+@node "Slide up effect command" "Slide up effect command"
+@{b}Cmd 1. Portamento up [Speed:$00-$FF]@{ub}
+
+Usage: $1 + portamento speed
+
+Portamento up will simply slide the sample pitch up. You can NOT slide
+higher than B-3! (Period 113)
+
+Example: C-300103  1 is the command, 3 is the portamentospeed.
+
+NOTE: The portamento will be called as many times as the speed of the
+song. This means that you'll sometimes have trouble sliding accuratly.
+If you change the speed without changing the sliderates, it will sound
+bad...
+@endnode
+
+@node "Slide down effect command" "Slide down effect command"
+@{b}Cmd 2. Portamento down [Speed:$00-FF]@{ub}
+
+Usage: $2 + portamento speed
+
+Just like @{"command 1" link "Slide up effect command" 0}, except that this one slides the pitch down instead.
+(Adds to the period).
+
+You can NOT slide lower than C-1! (Period 856)
+
+Example: C-300203, where 2 is the command, 3 is the portamentospeed.
+@endnode
+
+@node "Toneportamento effect command" "Toneportamento effect command"
+@{b}Cmd 3. Tone-portamento [Speed:$00-$FF]@{ub}
+
+Usage: Dest-note + $3 + slidespeed
+
+This command will automatically slide from the old note to the new. You
+don't have to worry about which direction to slide, you need only set
+the slide speed. To keep on sliding, just select the command $3 + 00.
+
+Example: A-200000  First play a note.
+         C-300305  C-3 is the note to slide to, 3 the command,
+                   and 5 the speed.
+@endnode
+
+@node "Vibrato effect command" "Vibrato effect command"
+@{b}Cmd 4. Vibrato [Rate:$0-$F,Dpth:$0-$F]@{ub}
+
+Usage: $4 + vibratorate + vibratodepth
+
+Example: C-300481  4 is the command, 8 is the speed of the vibrato,
+                   and 1 is the depth of the vibrato.
+
+To keep on vibrating, just select the command $4 + 00. To change the
+vibrato, you can alter the rate, depth or both. Use command @{"E4x" link "Vibrato control miscellaneous effect command" 0} to
+change the vibrato-waveform.
+@endnode
+
+@node "Toneportamento and volumeslide effect command" "Toneportamento and volumeslide effect command"
+@{b}Cmd 5. ToneP + Volsl [Spd:$0-$F/$0-$F]@{ub}
+
+Usage: $5 + upspeed + downspeed
+
+This command will continue the current @{"toneportamento" link "Toneportamento effect command" 0} and
+@{"slide the volume" link "Volume slide effect command" 0} at the same time. Compatible with Noisetracker 2.0.
+
+Example: C-300503  3 is the speed to turn the volume down.
+         C-300540  4 is the speed to slide it up.
+@endnode
+
+@node "Vibrato and volumeslide effect command" "Vibrato and volumeslide effect command"
+@{b}Cmd 6. Vibra + Volsl [Spd:$0-$F/$0-$F]@{ub}
+
+Usage: $6 + upspeed + downspeed
+
+This command will continue the current @{"vibrato" link "Vibrato effect command" 0} and @{"slide the volume" link "Volume slide effect command" 0} at
+the same time. Compatible with Noisetracker 2.0.
+
+Example: C-300605  5 is the speed to turn the volume down.
+         C-300640  4 is the speed to slide it up.
+@endnode
+
+@node "Tremolo effect command" "Tremolo effect command"
+@{b}Cmd 7. Tremolo [Rate:$0-$F,Dpth:$0-$F]@{ub}
+
+Usage: $7 + tremolorate + tremolodepth
+
+Tremolo vibrates the volume.
+
+Example: C-300794  7 is the command, 9 is the speed of the tremolo,
+                   and 4 is the depth of the tremolo.
+
+To keep on tremoling, just select the command $7 + 00. To change the
+tremolo, you can alter the rate, depth or both. Use command @{"E7-" link "Tremolo control miscellaneous effect command" 0} to
+change the tremolo-waveform.
+@endnode
+
+@node "Sample offset effect command" "Sample offset effect command"
+@{b}Cmd 9. Set SampleOffset [Offs:$00-$FF]@{ub}
+
+Usage: $9 + Sampleoffset
+
+This command will play from a chosen position in the sample, and not
+from the beginning. The two numbers equal the two first numbers in the
+length of the sample. Handy for speech samples.
+
+Example: C-300923  Play sample from offset $2300.
+@endnode
+
+@node "Volume slide effect command" "Volume slide effect command"
+@{b}Cmd A. Volumeslide [Speed:$0-$F/$0-$F]@{ub}
+
+Usage: $A + upspeed + downspeed
+
+Example: C-300A05  5 is the speed to turn the volume down.
+         C-300A40  4 is the speed to slide it up.
+
+NOTE: The slide will be called as many times as the @{"speed of the song" link "Adjust tempo effect command" 0}.
+The slower the song, the more the volume will be changed on each note.
+@endnode
+
+@node "Position jump effect command" "Position jump effect command"
+@{b}Cmd B. Position-jump [Pos:$00-$7F]@{ub}
+
+Usage: $B + position to continue at
+
+Example: C-300B01  B is the command, 1 is the position to
+                   restart the song at.
+
+This command will also perform a pattern-break (see 2 pages below).
+
+You can use this command instead of restart as on Noisetracker, but you
+must enter the position in hex!
+@endnode
+
+@node "Set volume effect command" "Set volume effect command"
+@{b}Cmd C. Set volume [Volume:$00-$40]@{ub}
+
+Usage: $C + new volume
+
+Well, this old familiar command will set the current volume to your own
+selected. The highest volume is $40. All volumes are represented in hex.
+(Programmers do it in hex, you know!)
+
+Example: C-300C10  C is the command, 10 is the volume (16 decimal).
+@endnode
+
+@node "Pattern break effect command" "Pattern break effect command"
+@{b}Cmd D. Pattern-break [Pattern-pos:00-63, decimal]@{ub}
+
+Usage: $D + pattern-position
+
+This command just jumps to the next song-position, and continues play
+from the patternposition you specify.
+
+Example: C-300D00  Jump to the next song-position and continue play
+from
+                   patternposition 00.
+     Or: C-300D32  Jump to the next song-position and continue play
+from
+                   patternposition 32 instead.
+@endnode
+
+@node "Adjust tempo effect command" "Adjust tempo effect command"
+@{b}Cmd F. Set speed [Speed:$00-$FF]@{ub}
+
+Usage: $F + speed
+
+This command will set the speed of the song.
+
+blank: Range 01-FF - Normal timing
+  CIA: Range 01-1F - Set vblank speeds
+                     with CIA timing.
+  CIA: Range 20-FF - Set BPM speeds,
+                     range 32-255.
+ Both: Range 00    - STOP song.
+@endnode
+
+@node "Set filter miscellaneous effect command" "Set filter miscellaneous effect command"
+@{b}Cmd E0. Set filter [Range:$0-$1]@{ub}
+
+Usage: $E0 + filter-status
+
+This command changes the status of the low-pass filter of your Amiga.
+This filter is not present in the A1000 and some very old A500s and
+A200s, but most computers are equipped with it. (If you've got one of
+these, please leave this switch alone, since flipping it constantly
+garbles the sound.)
+
+Example: C-300E01  disconnects filter (turns power LED off)
+         C-300E00  connects filter (turns power LED on)
+@endnode
+
+@node "Fineslide up miscellaneous effect command" "Fineslide up miscellaneous effect command"
+@{b}Cmd E1. Fineslide up [Range:$0-$F]@{ub}
+
+Usage: $E1 + value
+
+This command works just like the @{"normal portamento up" link "Slide up effect command" 0}, except that it
+only slides up once. It does not continue sliding during the length of
+the note.
+
+Example: C-300E11  Slide up 1 at the beginning of the note.
+
+(Great for creating chorus effects)
+@endnode
+
+@node "Fineslide down miscellaneous effect command" "Fineslide down miscellaneous effect command"
+@{b}Cmd E2. Fineslide down [Range:$0-$F]@{ub}
+
+Usage: $E2 + value
+
+This command works just like the @{"normal portamento down" link "Slide down effect command" 0}, except that it
+only slides down once. It does not continue sliding during the length of
+the note.
+
+Example: C-300E26  Slide up 6 at the beginning of the note.
+@endnode
+
+@node "Glissando control miscellaneous effect command" "Glissando control miscellaneous effect command"
+@{b}Cmd E3. Glissando Ctrl [Range:$0-$1]@{ub}
+
+Usage: $E3 + Glissando-Status
+
+Glissando must be used with the @{"tone-portamento" link "Toneportamento effect command" 0} command. When glissando
+is activated, @{"toneportamento" link "Toneportamento effect command" 0} will slide a halfnote at a time, instead of
+a straight slide.
+
+Example: C-300E31  Turn Glissando on.
+         C-300E30  Turn Glissando off.
+@endnode
+
+@node "Vibrato control miscellaneous effect command" "Vibrato control miscellaneous effect command"
+@{b}Cmd E4. Set vibrato waveform [Range:$0-$3]@{ub}" link "Vibrato effect
+command" 0} waveform [Range:$0-$3]
+
+Usage: $E4 + @{"vibrato" link "Vibrato effect command" 0}-waveform
+
+Example: C-300E40  Set sine(default)
+              E44  Don't retrig WF
+         C-300E41  Set Ramp Down
+              E45  Don't retrig WF
+         C-300E42  Set Squarewave
+              E46  Don't retrig WF
+         C-300E43  Set Random
+              E47  Don't retrig WF
+@endnode
+
+@node "Set finetune miscellaneous effect command" "Set finetune miscellaneous effect command"
+@{b}Cmd E5. Set finetune [Range:$0-$F]@{ub}
+
+Usage: $E5 + finetune-value
+
+Example: C-300E51  Set finetune to 1.
+
+Use these tables to figure out the finetune-value.
+
+    Finetune: +7 +6 +5 +4 +3 +2 +1  0
+       Value:  7  6  5  4  3  2  1  0
+
+    Finetune: -1 -2 -3 -4 -5 -6 -7 -8
+       Value:  F  E  D  C  B  A  9  8
+@endnode
+
+@node "Pattern loop miscellaneous effect command" "Pattern loop miscellaneous effect command"
+@{b}Cmd E6. PatternLoop [Loops:$0-$F]@{ub}
+
+Usage: $E6 + number of loops
+
+This command will loop a part of a pattern.
+
+Example: C-300E60  Set loopstart.
+         C-300E63  Jump to loop 3 times before playing on.
+@endnode
+
+@node "Tremolo control miscellaneous effect command" "Tremolo control miscellaneous effect command"
+@{b}Cmd E7. Set tremolo waveform [Range:$0-$3]@{ub}" link "Tremolo effect
+command" 0} waveform [Range:$0-$3]
+
+Usage: $E7 + @{"tremolo" link "Tremolo effect command" 0}-waveform
+
+Example: C-300E70  Set sine(default)
+              E74  Don't retrig WF
+         C-300E71  Set Ramp Down
+              E75  Don't retrig WF
+         C-300E72  Set Squarewave
+              E76  Don't retrig WF
+         C-300E73  Set Random
+              E77  Don't retrig WF
+@endnode
+
+@node "Retrig note miscellaneous effect command" "Retrig note miscellaneous effect command"
+@{b}Cmd E9. Retrig note [Value:$0-$F]@{ub}
+
+Usage: $E9 + Tick to Retrig note at.
+
+This command will retrig the same note before playing the next. Where to
+retrig depends on the speed of the song. If you retrig with 1 in speed 6
+that note will be trigged 6 times in one note slot. Retrig on hi-hats!
+
+Example: C-300F06  Set speed to 6.
+         C-300E93  Retrig at tick 3 out of 6.
+@endnode
+
+@node "Fine volumslide up miscellaneous effect command" "Fine volumslide up miscellaneous effect command"
+@{b}Cmd EA. FineVolsl up [Range:$0-$F]@{ub}
+
+Usage: $EA + value
+
+This command works just like the @{"normal volumeslide" link "Volume slide effect command" 0} up, except that it
+only slides up once. It does not continue sliding during the length of
+the note.
+
+Example: C-300EA3  Slide volume up 1 at the beginning of the note.
+@endnode
+
+@node "Fine volumslide down miscellaneous effect command" "Fine volumslide down miscellaneous effect command"
+@{b}Cmd EB. FineVolsl down [Range:$0-$F]@{ub}
+
+Usage: $EB + value
+
+This command works just like the @{"normal volumeslide" link "Volume slide effect command" 0} down, except that it
+only slides down once. It does not continue sliding during the length of
+the note.
+
+Example: C-300EB6  Slide volume down 6 at the beginning of the note.
+@endnode
+
+@node "Cut note miscellaneous effect command" "Cut note miscellaneous effect command"
+@{b}Cmd EC. Cut note [Value:$0-$F]@{ub}
+
+Usage: $EC + Tick to cut note at.
+
+This command will cut the note at the selected tick, creating extremely
+short notes.
+
+Example: C-300F06  Set speed to 6.
+         C-300EC3  Cut at tick 3 out of 6.
+
+Note that the note is not really cut, the volume is just turned down.
+@endnode
+
+@node "Delay note miscellaneous effect command" "Delay note miscellaneous effect command"
+@{b}Cmd ED. NoteDelay [Value:$0-$F]@{ub}
+
+Usage: $ED + ticks to delay note.
+
+This command will delay the note to the selected tick.
+
+Example: C-300F06  Set speed to 6.
+         C-300ED3  Play note at tick 3 out of 6.
+
+If you use ED0, the note will be delayed a little anyway. You can play
+the same note on two channels, delay one, and get a nice flanging
+effect.
+@endnode
+
+@node "Delay pattern miscellaneous effect command" "Delay pattern miscellaneous effect command"
+@{b}Cmd EE. PatternDelay [Notes:$0-$F]@{ub}
+
+Usage: $EE + notes to delay pattern.
+
+This command will delay the pattern the selected numbers of notes.
+
+Example: C-300EE8  Delay pattern 8 notes before playing on.
+
+All other effects are still active when the pattern is being delayed.
+@endnode
+
+@node "Invert loop miscellaneous effect command" "Invert loop miscellaneous effect command"
+@{b}Cmd EF. Invert Loop [Speed:$0-$F]@{ub}
+
+Usage: $EF + Invertspeed
+
+This command will need a short loop ($10,20,40,80 etc. bytes) to work.
+It will invert the loop byte by byte. Sounds better than funkrepeat...
+
+Example: C-300EF8 Set invspeed to 8.
+
+To turn off the inverting, set invspeed to 0, or press ctrl + Z.
+
+This effect will trash the sample.
+@endnode
+
+@node "Requesters and IO" "Requesters and I/O"
+@{b}ARE YOU SURE? REQUESTER@{ub}
+
+In addition to the gadgets, you can use "Y" or Return for Yes, and "N"
+or ESC for No.
+
+
+
+@{b}THE TEXT-INPUT ROUTINE@{ub}
+
+Now this is really simple. Clicking on a textline will enable you to
+edit it. Some text lines are longer than they seem, so use the arrowkeys
+to scroll back and forth in the text. The text input mode is just like
+an ordinary text editor. You can use backspace, delete, space and such.
+In text-input mode you can also use the numeric pad for entering
+numbers. Pressing the right mousebutton will clear the textline and exit
+the editing. Use ESC or return to just exit.
+
+
+
+@{b}THE NUMBERGADGETS@{ub}
+
+Click on them and type in the value (Hex or Dec). ESC or return aborts.
+
+
+
+@{b}ARROWGADGETS@{ub}
+
+Pressing both the left and right button on the arrow-gadgets will speed
+them up a bit. All numbergadgets except Finetune and Sample allows you
+to click in the gadget and type in the desired value. Holding the right
+mousebutton while pressing them will zero the value.
+@endnode
+
+@node "Standard paths" "Standard paths"
+@{b}STANDARD PATHS@{ub}
+
+ProTracker has several standard-paths which it uses when searching for
+things. Some of these may be configured, while others can't. These are:
+
+        Config-file             "S:"
+        Powerpacker-library     "LIBS:"
+        Executable modules*     "ST-00:Executable/"
+        Modules                 "ST-00:Modules/"
+        Songs                   "ST-00:Songs/"
+        Instruments*            "ST-00:Instruments/"
+        Samples                 "ST-01:"
+        Patterns*               "ST-00:Patterns/"
+
+*=Not implemented yet.
+@endnode
+
+@node "Keyboard percussion" "Keyboard percussion"
+@{b}KEYBOARD PERCUSSION@{ub}
+
+Use backspace '\' to toggle modes. One or more dots will appear to the
+right of the freemem display.
+
+    No dots : Normal keypad.
+      1 dot : Drumpad.
+     2 dots : Drumpad - Edit/Rec possible.
+
+Use Alt + keypad key to set the note for the sample.
+
+With 'drumpad' selected, selecting a sample using the keypad will also
+play the sample. This is nice when browsing through the samples of
+modules.
+@endnode
+
+@node "What is DYN samples?" "What is DYN samples?"
+@{b}WHAT IS DYN SAMPLES?@{ub}
+
+DYN samples is a new (and revolutionary) way of playing 16-bit samples
+with a 8 - 14 bit replay quality. Your Amiga achieves this by @{"cheating" link "DYN Samples" 0} a
+lot, and this sure does take cpu time. No official replay exist to play
+module utilising modules with these samples, so use for own pleasure
+only. Maestro 16-bit mono IFF samples are currently the only supported.
+:(
+
+The big drawbacks using DYN-samples is that click and ticks may occur.
+Also, playing DYN samples at low volumes may cause distortion.
+@endnode
+
+@node "MENU - How to create music" "How to create music using PT"
+I know. The information in this chapter may not be complete nor easy to
+understand, but it's atleast far better than any earlier attempt to
+explain how to use ProTracker in general. Suggestions are welcome!
+
+        @{"What is a module?" link "What is a module?" 0}
+        @{"Patterns" link "Patterns" 0}
+        @{"What should patterns contain?" link "What should patterns contain?" 0}
+        @{"Position-table" link "Position table" 0}
+        @{"Samples" link "Samples" 0}
+@endnode
+
+@node "What is a module?" "What is a module?"
+@{b}History@{ub}
+
+ProTracker's musicfiles are normally called modules. The reason for this
+is that way back, in the days of SoundTracker v1.0, Karsten Obarski (the
+author) thought that the best way to save music was as songs with only
+references to the instrument's names to make it possible to reload them
+each time the song was reloaded into SoundTracker.
+
+The module format was implemented in SoundTracker v1.0 allright, but it
+was only intended to be used when programmers wanted to replay the
+modules in their productions and not as temporary storage, as it is
+being used today. Because of this, SoundTracker couldn't load modules
+before version v2.2!
+
+The module-format used today is created by Mahoney and Kaktus which made
+NoiseTracker in July - August 1989, another tracker-clone. The only big
+defference they made to the format was that they increased the number of
+samples from 15 to 31.
+
+
+@{b}What's in a module?@{ub}
+
+A module basically contains this info:
+
+  * Module name
+  * Samples (name, length, finetune, volume, repeat, replen and
+    the actual audio data)
+  * Which pattern to play at each position of your module.
+  * Pattern data
+
+The ProTracker v2.3 also outputs files called "mod!modname" which
+contains names for each pattern in the module. This will be featured in
+ProTracker v3.x when the new IFF format is implemented.
+
+A totally empty module (no samples and one pattern) occupies 2128 bytes
+of disk space, while the (theoretical) largest module one would be able
+to create would occupy 4326460 bytes! (Even more if @{"DYN samples" link "What is DYN samples?" 0} were
+used!)
+@endnode
+
+@node "Patterns" "Patterns"
+What is patterns?
+
+Any piece of music written with ProTracker is built up from patterns.
+Each pattern is built up from four tracks, one for each of the Amiga's
+audiochannels. A module may contain up to 64 patterns.
+
+A pattern is 64 steps long. The magnified line is always the one you
+edit. If you need shorter patterns, use the
+@{"patternbreak effect command" link "Pattern break effect command" 0}.
+
+A track is built up of steps like this:
+
+ C-3 01 C20
+ (1) (2)(3)
+
+(1) - The first two characters describes the note to play. The "-" may
+be replaced by "#" or "b" to describe a flat or a sharp note, depending
+on you settings in the @{"setup-screen." link "Setup screen - Miscellaneous" 0} The third character is the octave
+to play the note in. ProTracker supports 3 octaves (1 through 3).
+
+(2) This is the sample-number to play. Valid numbers are hexadecimal 00
+through 1F. Sample 0 doesn't really exists but will play the last used
+sample for that channel without resetting the volume.
+
+(3) This is the @{"effect-command" link "Effect commands" 0} to play.
+
+To sum it up: The C-3 is the note being played. 01 is the samplenumber,
+and the three last digits are the effect command, in this case, set
+volume to $20 (@{"C-Command" link "Set volume effect command" 0}, 20-Value).
+
+
+@{b}Effect tips@{ub}
+
+You can set the volume to the volume of a specific instrument without
+actually trigging the sample.
+
+e.g. "---01000" will set the volume for sample 1 without playing a
+note.
+
+Try setting the volume and @{"sliding the volume" link "Volume slide effect command" 0} down at the same time:
+        C-301A08        <--- (If no sample is playing, no sound will be
+        ---01A08              heard at all...)
+        ---01A08
+
+This will create a strange arpeggiato effect.
+@endnode
+
+@node "What should patterns contain?" "What should patterns contain?"
+@{b}THE NOTES@{ub}
+
+There are 12 different notes in all. The reason there are more than 12
+keys on a piano is to make you able to play different octaves. In
+ProTracker, octaves are denoted as numbers after each note. For
+instance, C-1 is the note C in octave 1 while C-2 is the same note one
+octave higher. The best way to understand this is to start a
+music-program and play the different notes.
+
+These are the names of the notes:
+
+C C# D D# E F F# G G# A A# B
+
+Or shown in an alternate way:
+
+C Db D Eb E F Gb G Ab A Bb B
+
+Some countries may have other standards for writing notes, though this
+is the internation standard. For instance, in Norway the scale looks
+like this:
+
+C C# D D# E F F# G G# A B H
+
+On a piano keyboard, the notes are placed as follows:
+
+    C#  D#      F#  G#  A#      C#
+ |  ### ###  |  ### ### ###  |  ###
+ |  ### ###  |  ### ### ###  |  ###
+ |  ### ###  |  ### ### ###  |  ###
+ |  ### ###  |  ### ### ###  |  ###
+ |   |   |   |   |   |   |   |   |
+ |___|___|___|___|___|___|___|___|___
+   C   D   E   F   G   A   B   C  ...
+
+The ProTracker tries to emulate this by assigning a C to the keys Q and
+Z (one octave lower). Since the QWERTY keyboard is designed as it is, it
+looks pretty much as a piano claviature.
+
+
+@{b}CHORDS@{ub}
+
+Chords are several notes of the same instrument played at once. This is
+a simple, but effective explanation. There are several types of chords,
+but I'll try explaining the most used ones here.
+
+ C major : C, E and G
+ C minor : C, D#  and G
+ C sus2  : C, D and G
+ C sus4  : C, F and G
+ C7      : C, E, G and A#
+ Cminor7 : C, D#, G and A#
+
+If you want to play a F minor, you need to transpose all notes in C
+minor 5 notes up (Because the interval between C and F is five notes).
+This would result in F, G# and C.
+
+A normal C major tune could easily make use of the following chords: C
+major, D major, E major, E minor, F major, G major, A minor and H
+minor.
+
+In ProTracker, you are allowed to mix one sample into a chord. If you
+mix yourself a C sus2 chord, playing the resulting sample with note "D"
+would result in a D sus2 chord. Thus making it easy to re-use the same
+chord-sample for several chords. If your resulting chord seems a bit too
+low in pitch, you could transpose the lowest note one octave up.
+
+The most common way to use chords in songs are having long strings
+playing the chords continously on one channel. Another common variation
+is using piano. Ofcourse, there is no need to follow this chord scheme.
+Your chord doesn't need to have a name to sound cool, as long as you
+like it, it should be used. Besides, there are ways to name nearly all
+possible chord-combinations.
+
+
+@{b}BASS@{ub}
+
+Bass is mostly an instrument for adding "mood" to the chords. The most
+common (and easiest) way to use bass is to have it play on the base note
+of the chord (for instance C in a C major, G# in a G# minor7 and D in a
+D sus4).
+
+However, to create variation without too much fuss, you could vary with
+the other notes in the chord (D# in a C minor). Not everyone likes
+following the book, and you should therefore always try whatever your
+heart tells you to get that "special" feeling in your tune.
+
+To help create a "snappy" bass, it can be useful to cut (or decrease
+drastically) the volume at strategic places. For instance:
+
+    C-2 1  .
+     -  -  .
+     -  -  .
+     -  -  .
+    A#2 1  .
+     -  -  .
+    C-3 1  .
+     -  - C0C
+     -  -  .
+     -  -  .
+    G-2 1  .
+     -  - D00
+
+The above bass example fits nice to for instance a C major (note that
+the note A#2 is from C major 7, but still sounds ok.)
+
+In some cases, it may sound cool to even play a "melody" on the bass for
+adding extra variation to the song. Remember that bass is always a
+question about taste, and there are a great deal of different bass
+sounds to use in a tune. (Orchestral bass, slapbass, Electric bass,
+Acoustic bass, Synthbass, Sweep equ bass and so on...)
+
+
+@{b}DRUMS@{ub}
+
+Drums consists most often of several sounds: hihat (steady and in the
+background), bassdrum (steady), snare (creates most of the variation),
+tams (for creating a markant "break" every now and then) and cymbals for
+creating that extra touch.
+
+At our examples, the samples are given these numbers:
+
+ Bassdrum :     1
+ Closed Hihat : 2
+ Open Hihat :   3
+ Snare :        4
+ Tam :          5
+ Cymbal :       6
+
+    C-3 1  .   C-3 2  .   C-3 6  .
+     -  -  .    -  -  .    -  -  .
+     -  -  .   C-3 2  .    -  -  .
+     -  -  .    -  -  .    -  -  .
+    C-3 4  .   C-3 3  .    -  -  .
+     -  -  .    -  -  .    -  -  .
+    C-3 1  .   C-3 2  .   F-3 5  .
+     -  -  .    -  -  .    -  -  .
+    C-3 1  .   C-3 2  .   D-3 5  .
+     -  -  .    -  -  .    -  -  .
+    C-3 4 C20  C-3 2  .    -  -  .
+     -  -  .    -  -  .    -  -  .
+    C-3 4  .   C-3 3  .   D-3 5  .
+     -  -  .    -  -  .    -  -  .
+     -  -  .   C-3 2  .   C-3 5  .
+     -  - D00   -  -  .    -  -  .
+
+This example assumes that all samples sounds right at the note C-3 (ie.
+they are sampled in this note) and the volumes are set to 40.
+
+The first thing you probably notice is that a realistic drumbeat
+requires several channels. This is a well-known problem and hard to
+compensate. The easiest thing to do is probably to mix samples with Open
+Hihat & Snare and Bassdrum & Closed Hihat and then join the first two
+tracks into one. The Cymbal and the Tam still require an additional
+channel, but solving that problem is easiest to do for each song,
+depending on how much voices are in use. One solution could be to mix
+Bassdrum and Cymbal into one sample.
+
+Making realistic drums is perhaps the most difficult task of all when it
+comes to music. Most composers find it very boring to make a genuine
+drum beat troughout the entire song and falls back to making drums one
+pattern and copies it to every pattern after. This method doesn't always
+sound bad, but most of the time. A compromised solution to this problem
+is to make genuine breaks here and there to create a feeling of
+variation.
+
+
+@{b}MAIN LEAD@{ub}
+
+A main lead is without doubt "The" problem with computer music. The main
+lead is the element that prevents your song from being boring and is
+needed to keep the attention of the listener. You will quickly
+experience that making a main-lead is very demanding, because there is
+no song-text which creates variation for you.
+
+Perhaps the best way to make a mainlead is to listen to the rest of your
+song and hope the ideas come pouring down. Another, easier way is to
+experiment with a scale and hope to come up with something that brings
+you the inspiration needed. I will describe four scales here. You might
+transpose them to fit your need.
+
+ C major : C, D, E, F, G, A, B (Used for happy or moodless tunes)
+ C blues : C, D#, F, F#, G, A# (Used for blues and rock)
+ C pentatonic : C, D#, F, G, A# (Used for rock)
+ C minor : C, D, D#, F, G, G#, A# (Used for moody, atmospheric tunes)
+
+All true composers would insist that using a scale makes boring music,
+but most of the times it doesn't. However, if you feel comfortable with
+not using a scale, by all means, do so. Without doubt, your tune will
+sound "fresher" if you improvise all the way. This is all a question
+about taste and skills.
+@endnode
+
+@node "Position table" "Position table"
+@{b}What is the position-table?@{ub}
+
+ProTracker holds a table with information about which order to play the
+patterns. You may freely define the size of this table. This table may
+be up to 128 positions, and each position may contain any of your
+patterns.
+
+When ProTracker plays your module it first play position 0, then
+position 1 and so on until it reaches the end of your position-table.
+When this occurs, ProTracker jumps back to position 0. If you want
+ProTracker to jump to another position, you must use the position jump
+effect command at the end of the pattern at the last position.
+
+
+@{b}How to edit the position-table@{ub}
+
+The position-table is controlled using @{"the three gadgets" link "Main screen - Song section" 0} labeled "Pos",
+"Pattern" and "Length". The "Pos"-gadget states which position you are
+currently editing, while the "Pattern"-gadget states which pattern to
+play at that position and finally the "Length"-gadgets sets the length
+of your position-table.
+
+You must remember, though, that the length also implies position 0. This
+means that if your length is 2, position 0 and 1 will be played. The "I"
+and "D" gadgets are your friends and are used for inserting and deleting
+positions.
+@endnode
+
+@node "Samples" "Samples"
+@{b}What are samples?@{ub}
+
+Samples are sound, converted from analog signals to digital (numbers).
+When your Amiga plays these sounds it converts them back to analog
+signals and feeds them to your monitor or amplifier. In memory, samples
+are stored as a big bunch of numbers. The easiest way to think of
+samples is recorded sound.
+
+
+@{b}What decides the quality of samples?@{ub} (Hardware approach)
+
+The Amiga's sample-resolution of 8 bit means that it utilises 256 values
+(2^8) for describing the amplitude of the sound-wave. A CD-player with
+16 bits uses thus 65536 values and therefore gives a more accurate
+reproduction lof the original sound.
+
+Another thing which (heavily) influences the quality of a sample is how
+often the hardware (in this case, your Amiga) is capable of send out a
+new value. If you send out a zillion values each second, there's small
+changes you would miss a change in the sound-wave. Easy? Your Amiga has
+actually no absolute limits for how fast it is able to reproduce sound,
+but the easiest output method involves timing the sound output to the
+Amiga's display hardware. At normal resolutions this means a maximum of
+~28000 Hz. In comparison a CD player outputs at a rate of 44100 Hz.
+
+It is generally a common mistake to refer to the Amiga's maximum rate as
+28000 samples/second. In order for one hertz (Hz) to occur, you need a
+positive and a negative value. To put it another way, each hertz
+consists of two sample values. This means that in the Amiga's maximum
+sample rate a sample of 56000 bytes would replay in one second!
+
+The sample rate is not constant, as it is used to specify the note to
+play the sample with. 28000 Hz equals the A-3 note in ProTracker, while
+the A-2 is half the rate (14000 Hz).
+
+
+@{b}Where to get samples from@{ub}
+
+Sampling samples yourself is perhaps the easiest (and funniest) way to
+achieve samples. In order for this to work, you need to buy a sampler
+(generally very cheap, about £20 should get you a low-end one) and have
+a source to sample from (expensive). Sampling from CDs is difficult and
+often there are other instruments in the background, so obtaining all
+the samples you need from CDs is nearly impossible. The second
+alternative is buying a keyboard to sample from, but since most of these
+are pretty expensive (the price is usually proportional to the sound
+quality) I wouldn't advice anyone to buy a keyboard unless they're
+pretty sure they want to do music.
+
+Another (well-hated) way to get samples from is by stealing from other
+modules. It is generally a bad idea to load a module and use clear song
+in order to use the exact samples as another module. The better approach
+is to save samples from all modules and mix them together on a HD or
+create your own sampledisks. This way (if you catalogize them properly)
+you could easily find the sample you need when you need it.
+
+The third way to obtain samples is obtaining PD sample disks. Your could
+buy the AM/FM series sampledisks (from Bjørn A Lynne) or you could write
+to a PD company. (Most of these has a large variety of sample disks.)
+
+
+@{b}What decides the quality of samples?@{ub} (Software approach)
+
+When sampling, it's essential that your equipment is in perfect order.
+All connectors must be clean and your wires should be properly isolated.
+If you experience a lot of interference, you could try to disconnect all
+electrical appliances nearby.
+
+Sample from the auxillery output of your Stereo rather than from the
+headphones output. If your Stereo does not have an AUX output, try
+sampling directly from the CD- or Cassette player.
+
+The volume should be adjusted in a way that it just about fills the
+entire height in the sample editor in ProTracker in order to utilise the
+full sample-resolution.
+
+When selecting sample rates, you should keep in mind that higher
+sampling rates yields better quality but effectively eats up a lot of
+memory. I myself samples most things at C-3 (16000 Hz) except drums,
+which I sample at G-3 or A-3 (28000 Hz).
+
+It doesn't matter (well, mostly) which sampling software you use, but I
+prefer to use ProTracker since it's editing functions are faster than
+any other I've seen.
+@endnode
+
+@node "MENU - Miscellaneous" "Miscellaneous"
+Not much to say, these are... erm.. miscellaneous things!
+
+        @{"Chronicles and anecdotes" link "MENU -  Chronicles" 0}
+        @{"Known bugs" link "Known bugs" 0}
+        @{"Things we'll never implement" link "Things we'll never implement" 0}
+        @{"Things we will implement" link "Things we will implement" 0}
+        @{"Frequently asked questions" link "Frequently asked questions" 0}
+        @{"Thanks and acknowledgements" link "Thanks and acknowledgements" 0}
+        @{"Contacting the authors" link "Contacting the authors" 0}
+        @{"Musical dictionary" link "Musical dictionary" 0}
+@endnode
+
+@node "MENU -  Chronicles" "Chronicles and anecdotes"
+This chapter contains some historical and background information. Not
+all  of this may be proper to put into a documentation, but I hope it's
+interesting for someone.
+
+        @{"ProTracker development and progress" link "Development and progress" 0}
+        @{"ProTracker-relevant clones" link "Other tracker-clones" 0}
+        @{"ProTracker version history" link "Version history" 0}
+@endnode
+
+@node "Development and progress" "Development and progress"
+@{b}SOUNDTRACKER - THE BEGINNING OF A NEW ERA@{ub}
+
+Way back (dunno, the year) Karsten Obarski was tired of the monotonous
+music in all games and demos and came up with the idea of using samples
+for instruments in music. The music used at the time consisted either of
+synthetic instruments or sampleloops. There were two mainreasons for
+this. Firstly, people still wanted to support the first A1000 models
+which came with 256KB RAM and secondly sampleloops were easier to make
+(mostly grabbed from records).
+
+Karsten Obarski's program, SoundTracker v1.0 didn't look much like
+todays trackers, it had no sampleeditor, the patterns didn't scroll when
+playing and one couldn't load modules (storage of music was based on
+songs). The module/song-format was easy and fairly effective and is
+still used in today's Trackers (though it has been expanded from 15 to
+31 instruments).
+
+The SoundTracker became immediately extremely popular and everyone
+started using it. The program was far easier to use than other programs
+available at the time and various "crackers" started improving on the
+program.
+
+
+@{b}SOUNDTRACKER - THE CHAOS AND THE FALL@{ub}
+
+As several other groups started making their own versions of
+SoundTracker, Karsten Obarski gave it up and didn't release more version
+than v1.0. Groups such as The New Masters, D.O.C. and Spreadpoint seemed
+to fight for doing the best improvements and this "race" caused a
+significant improvement of SoundTracker. But after a while the groups
+got tired of the work and couldn't compete with a new tracker-clone by
+Mahoney and Kaktus of Northstar called NoiseTracker.
+
+
+@{b}PROTRACKER ENTERS THE STAGE@{ub}
+
+Just before SoundTracker died, a small and (fairly) unknown norwegian
+group called Amiga Freelancers started disassembling SoundTracker v2.4
+in an attempt to improve it. NoiseTracker gained a lot of users before
+ProTracker acctually got released. However, ProTracker contained so many
+features that weren't in SoundTracker, that Mahoney and Kaktus gave up.
+
+ProTracker shortly became the standard and noone even thought of using
+other trackers.
+
+
+@{b}AMIGA FREELANCERS GIVE UP@{ub}
+
+I late 1991, Amiga Freelancers got tired of updating the ProTracker and
+decided to hand out the source to the public. At this time they had
+recently released @{"v1.2" link "V1.2" 0} and @{"v2.0" link "V2.0" 0} (v2.0 was a semi-commercial version, but
+the only differences from v1.2 was the opening-graphics). After a while,
+they still released @{"v1.3A and v1.3B" link "V1.3B" 0} with some bugfixes, but the sources
+for these were never released.
+
+At this time, a lot of quick hacks was released by several groups in an
+attempt to win fame and fortune, but the only groups that did noticable
+improvements was Noxious and Cryptoburners.
+
+
+@{b}NOXIOUS TAKES OVER - FOR A WHILE@{ub}
+
+Noxious releases their first version (@{"v2.1A" link "V2.1A" 0}) in the early 1992 but stops
+after @{"v2.3a" link "V2.3A" 0} in January 1993 probably as a result of Cryptoburners new
+ProTracker, @{"v3.0" link "V3.00 BETA" 0}. In my humble opinion Noxious did pretty much for
+ProTracker and a lot of people still uses v2.3a because they can't get
+used to the new look introduced by Cryptoburners in v3.0.
+
+
+@{b}CRYPTOBURNERS - RADICAL CHANGES@{ub}
+
+Cryptoburners changed the resolution of the ProTracker from  Low-Res to
+Hi-Res, a change that has been discussed widely by ProTracker users.
+They altered the positions of a lot of gadgets and some people still
+haven't get used to it. Other changes by Cryptoburners included new
+@{"disk-operations screen" link "Disk operations" 0} and some more @{"edit-gadgets" link "Main screen - Edit gadgets" 0}.
+
+
+@{b}MAW - 14 BIT SOUND@{ub}
+
+After ProTracker @{"v3.10" link "V3.10 BETA" 0}, Cryptoburners handed the source over to Maw who
+was supposed to implement @{"DYN sound" link "What is DYN samples?" 0} (up to 14 bit sound resolution) in
+ProTracker. According to Maw himself, no versions after v3.10 was
+released as these were supposed to be beta-versions sent to different
+people. Maw never fully completed the DYN implementation and has given
+up the project and is now working on a new music-program he intend to
+call ProTracker4. This program has more than 4 voices, synthetic sound
+and works with 16-bit samples. Maw refuses to release his work on
+ProTracker and his work is therefore lost forever. However, a lot of
+people look at this as a nice thing anyway, since it is nearly
+impossible to play 14-bit sound in an action-paced game and the
+implementation of the DYN system mostly caused bugs.
+
+
+@{b}CRYPTOBURNERS AGAIN - WHAT HAPPENED TO THEM?@{ub}
+
+As far as I know, Cryptoburners has stopped developing the ProTracker
+and is currently working for FunCom productions, a manufacturer of video
+games. If they still has the v3.10 source it would be the best point to
+continue the ProTracker from, but the author haven't been able to reach
+them yet.
+@endnode
+
+@node "Other tracker-clones" "Other tracker-clones"
+All programs are listed in estimated time of arrival. 8)
+
+
+@{b}SoundTracker v1.0@{ub}
+
+This is the mother of all tracker-clones and was made a looong time ago
+(around the release of A500 methinks). The author is Karsten Obarski and
+the program was (in my opinion) far from easy to use. After releasing
+this, other groups released a lot of improvements on this program and
+Karsten Obarski sort of gave up improving the program himself.
+
+
+@{b}SoundTracker v1.1 - v2.3@{ub}
+
+These versions were different improvements over SoundTracker v1.0.
+Unfortunately, I have no information on who made the different versions
+(please write if you do). I do however, know that Dr. Mabuse of DOC and
+T.I.P of The New Masters released most of these versions.
+
+
+@{b}Games Music Creator@{ub}
+
+This music program looks a lot like the v2.x-soundtrackers and contains
+a lot of the same features. However it seems recoded and a bit
+unfinished. The author is Andreas Tadic.
+
+
+@{b}SoundTracker Pro II@{ub}
+
+This tracker has a totally different look from the other tracker-clones.
+It looks like it's supposed to have more features, but is far from
+finished. Unfortunately, there is no text in the program that states who
+made this program.
+
+
+
+@{b}NoiseTracker v1.0 - v2.1@{ub}
+
+NoiseTracker made by Mahoney and Kaktus of Northstar was the first
+tracker to implement 31 instruments and a configuration-screen! This
+tracker became immediately very popular, and was probably the king of
+the scene until ProTracker came along. The NoiseTracker was based on
+SoundTracker v2.3
+
+
+@{b}SoundTracker v2.4 - v2.5@{ub}
+
+These were SoundTrackers which adopted the new features of NoiseTracker,
+including 31 instruments. According to my knowledge, both these versions
+were made by MnemoTroN of Spreadpoint.
+
+
+@{b}ProTracker@{ub}
+
+This is about the place where ProTracker first did it's appearance.
+Beacuse of the many changes from SoundTracker (which it was based on),
+there were numerous bugs in the first versions.
+
+
+@{b}NoiseTracker v1.3D@{ub}
+
+I haven't the foggiest about who made this version of NoiseTracker, but
+as far as I know, it wasn't Mahoney and Kaktus. This version utilised a
+special "packed" moduleformat.
+
+
+@{b}SoundTracker v2.6@{ub}
+
+This SoundTracker implemented something no other tracker has ever used,
+one-channel patterns. The idea is that for each position you have to
+specify one pattern for each channel. This idea saves some memory, but
+is harder to edit and did therefore not "win" the audience. This tracker
+was also made by MnemoTroN.
+
+
+@{b}StarTrekker v1.0 - v1.3@{ub}
+
+This tracker was the first to utilise more than 4 voices! It could play
+a maximum of eight voices and included synthetic sounds. (AM and FM
+sounds!) Unfortunately, this tracker died silently. StarTrekker was
+based on NoiseTracker v2.0 and was made by Björn Wesen (aka Exolon of
+Fairlight).
+
+
+@{b}IceTracker v1.0 - v1.1@{ub}
+
+This tracker was based on SoundTracker v2.6 and was made by Isepic. It
+consisted of several improvements and add-ons.
+
+
+@{b}MaxTracker v1.0@{ub}
+
+This tracker was originally based on ProTracker v1.2, and included the
+possibility to store samples in fast memory. The readme-file that  was
+distributed with this tracker stated that it could play samples of any
+length, but couldn't get it to load nor sample samples over 64 KB. The
+author is Sylvain Marchand.
+@endnode
+
+@node "Version history" "Version history"
+@{b}VERSION HISTORY@{ub}
+
+The version histories are listed by versionnumber, not by releasedate.
+
+There is a version around marked V3.18 BETA with reworked setupscreen
+and the dir-selector-bug fixed. Since this version is a true
+beta-version (i.e: it is not supposed to be spread) it is not considered
+a release nor listed separately here.
+
+All versions of ProTracker is based on lower versions, except (ofcourse)
+the V0.89 BETA, which is based on SoundTracker v2.5 by MnemoTroN.
+
+If anyone has version-information for versions not listed here or
+versions which has no specific information listed, feel free to
+@{"send them" link "Contacting the authors" 0} in.
+
+Sources:
+    Source for ProTracker V1.2 and V2.0
+    Quick doc for PT V0.89 by Mad Martian
+    ProTracker V1.0A readme-file
+    ProTracker V1.0A readme-file
+    ProTracker V1.3B readme-file
+    ProTracker V2.3A readme-file
+    ProTracker V3.00ß readme-file
+    ProTracker V3.01 readme-file
+    ProTracker V3.10 readme-file
+    ProTracker V3.14B readme-file
+
+Version releasenotes:
+    @{"V0.89 BETA" link "V0.89 BETA" 0}          Amiga Freelancers
+    @{"V1.0A" link "V1.0A" 0}               Amiga Freelancers
+    @{"V1.0B" link "V1.0B" 0}               Amiga Freelancers
+    @{"V1.0C" link "V1.0C" 0}               Amiga Freelancers
+    @{"V1.1A" link "V1.1A" 0}               Amiga Freelancers
+    @{"V1.1B" link "V1.1B" 0}               Amiga Freelancers
+    @{"V1.2" link "V1.2" 0}                Amiga Freelancers
+    @{"V1.2C" link "V1.2C" 0}               Raul Sobon
+    @{"V1.2D" link "V1.2C" 0}               Raul Sobon
+    @{"V1.2E" link "V1.2C" 0}               Raul Sobon
+    @{"V1.2F" link "V1.2C" 0}               Raul Sobon
+    @{"V1.3A" link "V1.3B" 0}               Amiga Freelancers
+    @{"V1.3B" link "V1.3B" 0}               Amiga Freelancers
+    @{"V1.8" link "V1.8" 0}                SCL
+    @{"V2.0" link "V2.0" 0}                Amiga Freelancers
+    @{"V2.1A" link "V2.1A" 0}               Mushroom Studios / Noxious
+    @{"V2.2A" link "V2.2A" 0}               Mushroom Studios / Noxious
+    @{"V2.3A" link "V2.3A" 0}               Mushroom Studios / Noxious
+    @{"V3.00 BETA" link "V3.00 BETA" 0}          Cryptoburners
+    @{"V3.01" link "V3.01" 0}               Cryptoburners
+    @{"V3.10 BETA" link "V3.10 BETA" 0}          Cryptoburners
+    @{"V3.14B" link "V3.14B" 0}              Cryptoburners
+    @{"V3.15" link "V3.15" 0}               Cryptoburners
+@endnode
+
+@node "V0.89 BETA" "V0.89 BETA"
+@{b}V0.89 BETA (May 1990) - Exclusively for Crusaders@{ub}
+
+This is the first known release of ProTracker. It was based on
+SoundTracker V2.5 by MnemoTroN and made by The Amiga Freelancers.
+
+* Retrig note, note delay, pattern delay and funk repeat didn't work.
+
+* Finetune were introduced.
+
+* Online help. =)
+@endnode
+
+@node "V1.0A" "V1.0A"
+@{b}V1.0A (August 1990) - First public release@{ub}
+
+Many functions not operational in V0.89 were now implemented.
+@endnode
+
+@node "V1.0B" "V1.0B"
+@{b}V1.0B (September 1990) - Bugfix@{ub}
+
+* PatternLoop (It always jumped to the start of the pattern, not the
+loop)
+
+* FineTune AND Glissando-Control were in the same command! (E3)
+
+* Fade Up / Down caused shit and even a few gurus!
+
+* Delete Pos inserted pattern 77 (!) at position 127 in the song,
+causing it to be longer than 80k!
+
+* Filter All Samples was slow as hell because it tried to filter
+nonexistant samples.
+
+* If you selected sample 0 from the keypad, it always played the last
+sample played as sample 0!
+
+* A590 harddisk owners couldn't use the keyboard because of the way
+Mahoney & Kaktus set up the keyboard interrupt (their NT1.1 routine was
+used).
+
+* Entering the help screen when in the midi screen fucked up the
+display.
+
+* Escaping from Mix exited from the whole edit op.!
+
+* CutBeg no longer fucks up the Sample length and Pos.
+
+* The help file was FULL of bugs / misspellings.
+@endnode
+
+@node "V1.0C" "V1.0C"
+@{b}V1.0C (October 1990) - Bugfix@{ub}
+
+* Error in Finetune-table2 (note B-2)
+
+* Abort Load sometimes caused a guru!
+
+* Toneportamento (cmd 3) didn't work correctly with finetune.
+
+* PLST screen was one pixel off.
+
+* MIDI screen was removed.
+@endnode
+
+@node "V1.1A" "V1.1A"
+@{b}V1.1A (December 1990) - Party release with bugs@{ub}
+
+* Read input in a more system-friendly way.
+
+* Detached from CLI.
+
+* Loaded IFF samples correctly.
+
+* Used sprites to show loop in sampler.
+
+* Several directory paths in disk operations screen.
+
+* Protracker will now run if you have Kickstart 2.0 installed! (A500,
+A1000, A2000, A3000 etc...)
+
+* Keyboard buffer. Wow!!! Now you can play really fast, and PT won't
+miss a single key (...well, not as many as it used to before...).
+
+* The vertical blank interrupt no longer patches the vector itself, but
+uses the AddIntServer function.
+
+* The playroutine creates it's own CIA or VBLANK interrupt, and it will
+not be removed if a song is playing when you go to CLI/Workbench.
+
+* Improved "Out of memory" handling (hopefully no more gurus...).
+
+* Only the first 2 bytes of a sample will be zeroed (were the first 4).
+
+* Lots of new keyboard commands/shortcuts using the Alt key.
+
+* Vibrato depth changed to be compatible with NT2.0.
+
+* Funk Repeat changed to Invert Loop (may trash your samples though).
+
+* Play samples from the keypad (dot mode) when pressing backslash.
+
+* Quadrascope. Four channel oscilloscope that displays the samples in
+real- time, even when playing from keyboard. The good old spectrum
+analyzer is still there, just click on the scope to toggle.
+
+* Tempo gadget. Default is 125 BPM (normal vblank speed), but that can
+be changed if you select CIA timing on Setup2. Range is 32-255 BPM, and
+can also be changed with the 'F' effect command (speed/tempo).
+
+* Repeat and replen will be updated in the samples when you change them.
+You no longer have to press a key to hear the new loop.
+
+* Protracker should now be able to show up to 10/16 megs of freemem.
+
+* Error messages when PLST or Config not found.
+
+* Click to enter position, pattern and length with the keyboard.
+
+* Choose RAW or IFF when saving samples.
+
+* Samples can be saved with IFF-loops.
+
+* Change path without reading directory.
+
+* All 30 characters in filename/directory stored (was 24).
+
+* Shows directories, just click to add directory to path.
+
+* Parent directory gadget.
+
+* One preset and several default paths for modules/songs/samples.
+
+* PT will now read an "unlimited" number of directory entries (was
+200).
+
+* Two setup-screens.
+
+* Override: Load/save sample from samplepath even if there's a path in
+the samplename. ST-37:bigbadbass with override will be loaded from DF0:
+(or whatever) instead of ST-37:. You may want to put all your samples in
+one big directory on your harddisk...
+
+* NoSamples: Will load a song without asking for the samples.
+
+* BlankZero: This will show the samplenumbers in the pattern in the same
+way as Noisetracker 1.2 (Zeros are blanked out).
+
+* Show Dirs: If on, directories will be shown in Disk Op.
+
+* Show Publ: If on, PT will show all free Public memory, otherwise just
+free Chip memory.
+
+* CutToBuff: If on, the part of the sample cut away in the sample editor
+will be saved in the copybuffer.
+
+* Load Loop: Will load loops from an IFF file when loading a sample, or
+adding a path in the sampleeditor.
+
+* Slow Mode: Use this toggle if you have a 25 Mhz A3000 where everything
+is faster. Turning it on might help.
+
+* Set Default paths.
+
+* You can set the maximum number of presets (used to be 2500).
+
+* DMA wait. Use this on 25MHz Amigas (normally 300, use 900 on A3000).
+
+* Set tuning tone (note and volume).
+
+* Select CIA or VBlank timing.
+
+* Set default CIA tempo.
+
+* Spectrum Analyzer/VU-meter copper color editor!
+
+* Use Preset removed, inserted Delete Disk instead.
+
+* You can now save Finetune instead of Volume in the PLST.
+
+* ST-disk number changed to hex (ST-00 --> ST-FF)!
+
+* Adding samples with IFF-loops to the presetlist is possible.
+
+* Proper PLST allocation. Protracker will no longer allocate any memory
+if there's no PLST.
+
+* ST-disk number changed to HEX. This means you can have up to $FF, or
+255 ST-disks (used to be 99).
+
+* Sample Graphing like Audiomaster. With Show Range, Show All, Zoom Out,
+Range All, etc...
+
+* Play either Waveform, Display or Range.
+
+* Repeat points are shown, and can be dragged around.
+
+* Loop on/off toggle.
+
+* A line shows current position when playing back a sample.
+
+* A sampler just like on NT2.0.
+
+* Resample function w/tuning tone.
+
+* Cut, Copy and Paste functions.
+
+* Cursor to beginning/end.
+
+* Swap current sample with copybuffer.
+
+* Transpose All bug removed.
+
+* Move changed to Copy (use this to copy samples too).
+
+* Upsample changed a tiny bit (allocation).
+
+* Most functions will now work with marked ranges.
+@endnode
+
+@node "V1.1B" "V1.1B"
+@{b}V1.1B (August 1991) - Most known version. (Methinks =)@{ub}
+
+* Many major bugfixes.
+
+* Changed layout for quadrascope.
+
+* Load gadget no longer hangs the program when trying to load a file
+that doesn't exist.
+
+* Better filehandling with error messages.
+
+* Repeat and replen check installed (Rel. A hanged when replen
+accidentally got the value zero).
+
+* Repeat and replen were swapped when loading an IFF sample.
+
+* Only RepLen values in IFF samples were added in the preset-editor.
+
+* Tune memory wasn't always updated when editing samples.
+
+* Swap Buffer debugged.
+
+* The arpeggio sounded weird because the pitch wasn't set back at the
+right time.
+
+* Shift speeds up the scrolling in the PLST and preset-editor.
+@endnode
+
+@node "V1.2" "V1.2"
+@{b}V1.2 (July 1991?) - Kickstart V2.0 version@{ub}
+
+Information could not be obtained.
+@endnode
+
+@node "V1.2C" "V1.2C"
+@{b}V1.2C (July 1991?) - Parallel communication version@{ub}
+
+Made by Raul Sobon. He did also make V1.2D, V1.2E and V1.2F.
+
+* Made real 8 channels possible through parallel communication between
+two Amigas.
+@endnode
+
+@node "V1.3B" "V1.3B"
+@{b}V1.3B (Unknown release date)@{ub}
+
+V1.3A was also accidentally released, but contained many bugs.
+
+* Save module bugfix.
+
+* Not case sensitive on 'MOD.'
+
+* 'MOD.' bug when switching to and from modules dir.
+
+* Inputhandler bugs fixed.
+
+* Single Step forward and backward works properly.
+
+* The Sample function works with OS2.0
+
+* No hang when a R/W-error occurs in OS2.0
+
+* No crash when loading a non-module file.
+
+* MIDI In works as it should!!!
+
+* PT on Pseudo system screen (?)
+
+* [LEFT Amiga] M and [LEFT Amiga] N works within ProTracker.
+
+* Improved multitasking!
+
+* Screen Adjust (for A3000).
+
+* No slowmode necessary for turbo Amigas. Auto init of DMAWait.
+
+* System requesters ON/OFF function.
+
+* Finds volumes and diskdrives in filerequester.
+@endnode
+
+@node "V1.8" "V1.8"
+@{b}V1.8 (1994?) - Parallel communication version@{ub}
+
+Made by Bagitman of SCL.
+
+* Made real 8 channels possible through parallel communication between
+two Amigas.
+@endnode
+
+@node "V2.0" "V2.0"
+@{b}V2.0 (Unknown release date)@{ub}
+
+Mainly the same as V1.2. I don't think anyone knew the difference. =O
+@endnode
+
+@node "V2.1A" "V2.1A"
+@{b}V2.1A (Unknown release date)@{ub}
+
+Made by Mushroom Studios/Noxious. Contained many Bugs.
+
+* mod. prefix was shown in the file-list if it wasn't lowercase only.
+
+* ReturnfromCLI requester enhanced with quitgadget.
+
+* Gadgetpositions fixed properly.
+
+* Accidental and Diskspace bugs fixed.
+
+* Editskip has now got an indicator.
+
+* DISK OP., PLST and PRESET-ED screens have TOP/BOTTOM gadgets.
+
+* PLST screen has now got Up/Down arrows.
+
+* PT can load&save powerpacked samples/modules.
+
+* PT can load&save tracks/patterns.
+
+* Format disk bug has been fixed (I hope).
+
+* Volume,Repeat,Replen,Pos & Mod is now editable from the keyboard. Just
+click on the numbergadgets.
+
+* You can now choose an autoinserteffect of your own. (One of the ten
+effectmacros).
+
+* The bug that completely turned the sound off when stopping the
+recording has now been fixed.
+
+* You are now able to fastscroll the file- and presetlist to the next
+startcharacter.
+
+* The preset-ed routines have been corrected.To use your old PLST,
+simply delete preset #0.
+
+* The metronome has now got an accent on the first beat.
+
+* A metronome keyboard toggle has been included.
+
+* The metronomechannel can easily be changed to the current
+cursorposition.
+
+* Most of the numbergadgets can now be zero'ed.
+
+* Better patternrefresh when doing keyboard I/O.
+
+* PT now reads the dir after rename/save/delete if the Autodirtoggle is
+on.
+
+* You can solo a channel with the mouse by holding the right mousebutton
+while pressing 1,2,3 or 4.
+
+* You can pass an argument from workbench/shell/cli to automatically
+load a module when PT starts.
+
+* Powerpacker crunching/decrunching with powerpacker.library! PT will
+automaticly append/remove ".pp" to/from the filename.
+
+* You can save an Icon together with the module.
+@endnode
+
+@node "V2.2A" "V2.2A"
+@{b}V2.2A (Unknown release date)@{ub}
+
+* Fixed the chip-mem bug from PT2.1A. (It didn't work with chipmem
+only)
+
+* When Preset-ed screen was shown,you couldn't use the gadgets on the
+lower part of the main- or sample-screen.
+
+* When autoexitdirtoggle was off,PT didn't change the songname when you
+loaded a new song/module until you exit from disk op.
+
+* If you resampled a sample with big difference between the tunetone and
+the resampletone then the new length was incorrectly computed.
+
+* If you ran out of memory when allocating crunchbuffersize then ...
+software failure! This should work just fine now.
+
+* If you loaded a sample with a '.' in the samplename then PT set the
+length incorrectly in some cases.
+
+* Save module should work fine now.(another nasty bug is swept away!)
+
+* The Sampler works fine on ks2.0 (This version tests diskactivity
+before sampling, PT1.3 doesn't!) Source by Matrix/LSD.
+
+* The timer is updated when you play a song while jumping out to
+Workbench.
+
+* The Loopsprites are working fine with screenadjust.
+
+* Stepplay works fine now. Amiga+Backspace is gone though.
+
+* MIDI in functions are working now, I hope!
+
+* Inputhandler debugged a little.
+
+* ShowFreeDiskGadget debugged (again). Before it showed 2 sectors too
+much.
+
+* If you pressed the deletefile gadget and then pressed a directoryname
+in the list then the dir was added to the path but the directory wasn't
+opened. This is now fixed.
+
+* PrintSong now prints the patternlist with decimal values. It prints
+all patterns.(Older versions of PT missed to print the highest pattern)
+
+* I have implemented a chord maker.
+
+* I have implemented e Position-Editor.
+
+* On request, I have made ''multitasking'' like in PT1.3.
+
+* ProTracker has it's own screen. When the PT screen is in front of all
+other screens, PT will wake up.
+
+* The browse function is modified to act like PT1.3. It shows the
+current devices and disknames.
+
+* If you hold the right mousebutton while pressing the browsegadget a
+disklist will pop up showing all the device- and disknames from the
+browsegadget in the filenamewindow. Pressing a name will autoload that
+directory.
+
+* If you press LeftShift+any key 0-9 a-z while in DiskOp,  PLST or
+PresetEd, PT will move you to the position in the list with a name
+beginning with the corresponding character.
+
+* If you use MIDI I've added two new keys. A-2 and B-2 on the
+Synthkeyboard are used as SampleNumber Up/Down! I have also Transposed
+the MIDInotes input one octave down (because Dolphin has a small
+keyboard and couldn't access the upper octave,C#3 - B-3).
+
+* SaveExecutable option.
+
+* 9 new toggles.
+@endnode
+
+@node "V2.3A" "V2.3A"
+@{b}V2.3A (January 1993)@{ub}
+
+* Mountlist in PLST is fixed. Before it asked for disks in all drives
+even if you didn't have extradrives.
+
+* Helpfile fixed. In the betaversion the jumptable was corrupt.
+
+* Pointer color was green after succesful saving. This one is fixed
+now.
+
+* In the betaversion you couldn't exit POS-ed with ESC.
+
+* PT shouldn't quit with ESC. This is fixed now. Use Alt+Q (This one has
+been there all the time) or click in the top-left corner to quit.
+
+* There was a bug in the Entry jump routine (Shift+Desired character) in
+Disk.op, PLST and PresetED. If you had directories in the current path
+PT jumped to the first DIRECTORY starting with the desired character
+instead of searching for the first FILE beginning with that character.
+
+* Some minor bugs fixed as well.
+@endnode
+
+@node "V3.00 BETA" "V3.00 BETA"
+@{b}V3.00 BETA (January 1993) - Hires version@{ub}
+
+Made by Cryptoburners, and based upon V1.3, and does therefore not
+contain the features of V2.1A - V2.3A.
+
+* PowerPacker support. Powerpacker.library must be present in the
+"sys:libs/" directory. Version needed: 35.000 or higher. It is however
+recommended that you have at least 1MB to use this feature with large
+modules.
+
+* Protracker rearranged to HIRES 640x256x3.
+
+* Format now works with dfx. Remember to specify which drive to format
+in the "path" string-gadget.
+
+* Midi has been kicked out (temporarily?).
+
+* "SpectrumAnalyzer" has been kicked out.
+
+* Protracker now works on Kickstart 2.04 and higher (SCS/ECS).
+
+* Memory display now displays all memorytypes.
+
+* Improved input handler. PT will now live peacefully with Commodities.
+We hope.
+
+* Invented new fileformat based on Interchanged File Format (IFF)
+chunks. See docs elsewhere on this disk for a discussion of this
+format.
+
+* Hold record mode; waits for keypress before starting to record.
+
+* New filerequester.
+
+* Screen to back gadgets. You may also use Left Amiga + M/N.
+
+* Standalone playroutine supporting Finetune etc. Not fast though :(
+
+* Some speedups in the SampleEd. It was awfully slow at marking in
+HIRES!
+
+* Scroll bars added here and there (but not everywhere ;)
+
+* New pointer! The old one was simply too big for the new resolution..
+:)
+
+* Setupscreen revised and merged into one.
+
+* Date and time online at mainscreen.
+
+* Task interferance problems fixed (Improved multitasking). No busy
+waits.
+
+* The dragging routine in the sampler draws pixels instead of lines when
+dragging.
+
+* Major rearranging on mainscreen; editor centered and some new buttons
+for editing, such as cut/paste, up/down octave etc.
+
+* You may now click into the different tracks with the left mousebutton!
+:o
+
+* Audio.device channel allocation, to ensure that other programs doesn't
+mess with your tunes in a multitasking environment.
+
+* Chords editor with up to 7 notes. (Hi JanneS :)
+
+* PT now hopefully works on KS3.0 in AGA mode too (Hi Vishnu).
+
+* The sampler works again! ;)
+@endnode
+
+@node "V3.01" "V3.01"
+@{b}V3.01 (Unknown release date) - AM/FM release@{ub}
+
+* Reads the devices mounted in the system instead of hardcoded ones.
+
+* "Free" gadget fixed.
+
+* Sample read/write fixed.
+
+* Now gets the directory automagically when one is entered in the
+pathgadget.
+
+* Fixed bug in chord editor. Sometimes caused division by zero.
+
+* Added adjust to chord editor; boosts the volume of the resulting
+sample to fit the original sample.
+
+* Screen adjust gadget is now working. :)
+
+* Bug in runback fixed.
+
+* CIA allocation failures are now displayed.
+
+* Tools gadget removed.
+
+* Short keys for setup-items caused the switches to be displayed on the
+main screen. Not anymore :)
+
+* Drumpad likewise.
+
+* Several smaller bugs fixed.
+
+* Added a gadget on the dirscreen for fast browsing through the file
+type options.
+
+* New icon on the out-of-memory requesters :o
+
+* Some new gadgets are working!
+
+* Minor graphical changes
+
+* Decimal numbers on samplelength and loops
+@endnode
+
+@node "V3.10 BETA" "V3.10 BETA"
+@{b}V3.10 BETA (May 1993) - Amiga Format version@{ub}
+
+* A new improved 7-note chord editor, recalculates loops.
+
+* Full compatibility with all existing OS versions including OS3.0
+
+* Better multitasking capabilities.
+
+* New sample edit options, includes Invert, Maximize, NormalDC,
+Normalize.
+
+* Mouse controlled editing made possible.
+
+* Added real VU-meters.
+
+* New configurable options:
+        - Screen positioning.
+        - Lace on/off for genlock users.
+        - Multicached disk directories.
+@endnode
+
+@node "V3.14B" "V3.14B"
+@{b}V3.14B (Unknown release date) - DYN samples version@{ub}
+
+* For the first time in Amiga history: Improved sound quality! Actual 14
+bit sound dynamics using a new and revolutionary algorithm. No
+additional add-ons required, furthermore, no extra storage usage. Fully
+compatible with traditional 8-bit Amiga sounds.
+
+* Reads and converts Maestro MONO 16-bit samples.
+
+* Info requester when reading IFF samples.
+
+* The "BlankZero" now also blanks empty effect commands and the extended
+command byte.
+@endnode
+
+@node "V3.15" "V3.15"
+@{b}V3.15 (Unknown release date) - Bugfix version@{ub}
+@endnode
+
+@node "Known bugs" "Known bugs"
+If your copy of ProTracker shows some strange behaviour and you can't
+find it here, look in the @{"Frequently Asked Questions section" link "Frequently asked questions" 0}. It could
+be that it's not really a bug. If you can't find your case anywhere,
+please do @{"contact the authors" link "Contacting the authors" 0}.
+
+* On A1200/A600 it is not possible selecting (or atleast very difficult)
+to @{"select instrument" link "Keyboard" 0} $10-$1F using the keypad. This is our punishment
+for not using the system and may not be fixed for a while. 8(
+
+* ProTracker does not go on well with the debugging tool MungWall from
+Commodore. Temporary workaround is to quit MungWall before running
+ProTracker.
+
+* Very few screenblankers cooperate with ProTracker. If ProTracker locks
+up after 2-3 minutes, this could be it. Disable all screenblankers
+before running ProTracker. (SuperDark does work though!)
+
+* If you are using a hires-pointer on your Workbench, some gadgets, the
+pointer and the cursor will appear with half width.
+
+* On really fast machines (68030 30MHz or faster) some notes causes crap
+in the audiospeakers. This will (hopefully) soon be fixed.
+
+* When entering subdirectories in @{"disk operations," link "Disk operations" 0} some lines remain
+"selected". This is taken care of.
+
+* Earlier, you could change instrument-number without setting new notes,
+and chip-instruments (very short samples with loop) would automatically
+jump to the new sample. This no longer works after the implementation of
+@{"DYN samples" link "What is DYN samples?" 0}.
+
+* Playing the same note on two different channels may produce slightly
+different sound from time to time.
+
+* When editing the modulename from @{"disk-operations" link "Disk operations" 0}, the first character
+of the name of instrument 1 is set to a "_".
+
+* @{"Effect-command 9" link "Sample offset effect command" 0} (sample offset) doesn't give any sound if the desired
+offset is behind the end of the sample. Earlier, it did.
+
+* If ProTracker attempts to play a sample with 0 in @{"replen" link "Main screen - Sample section" 0} (this is the
+case of some older modules) it will lock up.
+
+* Memory fragmentation occurs when @{"starting PT" link "How to start ProTracker" 0} twice from Icon.
+
+* Samples succeeding 32Kb are not displayed fully in the @{"sample editor" link "Sampler - Main" 0}.
+
+* Keyrepeat sometimes don't stop in pattern editor. (Nasty!)
+
+* Saving samples sometimes chooses the wrong device to write to.
+
+* Turning off audio channels doesn't stop repeating instruments
+immediately.
+
+* Updating sample length when resampling/upsampling/downsampling.
+
+* At present time you must @{"launch PT" link "How to start ProTracker" 0} as a project icon from WorkBench,
+or from CLI. Tool icons will _hang_ your system!
+
+* Applications that do not allocate the timers properly, will cause the
+music to stop (eg. ProPlay). However, this is _not_ ProTrackers fault;
+PT allocates the used timers gently :) As you see this is not really a
+bug, but we just want kill potential "bug reports" in birth ;)
+
+* When a @{"DYN-sample" link "What is DYN samples?" 0} is played by keys while song is playing, it will
+sound distorted.
+
+* If starting a song, notes with @{"DYN-samples" link "What is DYN samples?" 0} in the first line are not
+always played correctly.
+
+* @{"Sample edit operations" link "Main screen - Sample edit" 0} on @{"DYN-samples" link "What is DYN samples?" 0} will not work, but crash the
+system (sooner or later).
+
+* Using volume on @{"DYN-samples" link "What is DYN samples?" 0} creates awful distorted sounds.
+
+* When loading a new module, ProTracker doesn't set the lo-pass filter
+to the default value.
+
+* When clicking on the destination-gadget in the chords-edit, PT seems
+to select a random sample-number. This is ofcourse wrong.
+
+* When mixing samples, PT does not calculate the arpeggio-values to put
+in the samplename correctly if these are too high.
+
+* Writing values directly to sample length/repeat/replen does not always
+work.
+
+* Increasing sample-length using the up arrow is okay, but decreasing
+does not seem to work as desired.
+
+* The playtime-clock is halted when the Workbench screen is up.
+
+* Setting the rate for samples using alt + keypad does not work when
+keyboard percussion is turned off.
+
+* Samplerates for samples aren't cleared when clearing module/loading a
+new module. This should be done.
+
+@endnode
+
+@node "Things we'll never implement" "Things we'll never implement"
+* Splitting up each track of a pattern into a seperate "pattern",
+independent of the others. After having talked to many musicians, we all
+agreed this is all in vain. Nobody seems to be going to use it, due to
+the serious timing problems that will arise. Use SIDMON instead, if
+you're really anxious to use this feature ;)
+
+* 8 channels Protracker. The Amiga is designed for 4 voices, if this
+feature is to be implemented, the CPU has to mix the channels realtime,
+and will use all CPU DMA on lowend Amigas. Forget it. Use StarTrekker if
+you want it.
+
+* ASDR editor for channel modulation aka envelopes. This will take up a
+huge amount of CPU capacity to play as well as it does very little for
+the sound. No, no, no!
+
+* A whole new range of DSP effects for your samples, including:
+  - Low, high, band and allpass filters (IIR filters).
+  - Comb filters.
+  - Shelving low and high filters.
+  - Multitap delay/feedback algorithms.
+  - Graphic eq.
+  - Noise reduction. This is partly because I don't know shit about how
+these things work and because of the 16-bit technology around the
+corner. If I get some sources (preferably assembly) I might concider it.
+FFTs are especially wanted!
+
+* Fastmem replay. Your modules can't be used for anything if they don't
+fit  into chipmem anyway. Live with it. Blame Amiga Technologies, not
+me.
+@endnode
+
+@node "Things we will implement" "Things we will implement"
+* Implementation of the new IFF fileformat :) which includes:
+  - Commands ranging from 0..0xFF (0..255). All commands that CAN run
+    in parallel will do. Lotsa other commands. Suggestions are welcome!
+  - 256 Positions.
+  - 256 Patterns.
+  - 256 Samples. (Higly wanted!)
+  - Implement octave 0!
+  - Maximum sample size raised from 64Kb to 128Kb. It's there, why not
+    use it?
+  - CIA/VBL flag saved with modules.
+  - Author information.
+  - Samplerate info for each sample.
+
+* Seek zero/loop in sampler.
+
+* Protracker.library for non-tech programmers wanting to use PT modules
+in their programs.
+
+* Separate position-editor.
+
+* Save module as executable.
+
+* Add icon to saved files.
+
+* Load samples/instruments/patterns from an existing module.
+
+* Freehand sample-editing.
+
+* Gain/Finished info when packing.
+
+* Hypertext on-line help.
+
+* Serial comm. to other protrackers. (Synchronize playing)
+
+* External metronome signal using a special joy=>jack adapter. Details
+are being worked at. (Audio without using any of the normal audio
+channels, nice for PortaStudio owners and such.)
+
+* Send (as well as receive) synchronization signals to/from professional
+audio equipment to allow accurate recordings from ProTracker.
+
+* Bugfree functionality. (This one has low priority!) =)
+
+* Read (and save?) QuadraComposer (EMOD) modules. While we're at it,
+we'll check for the possibilities of using a plug-in interface for
+loaders and savers.
+
+* Use a system-friendly screen for ProTracker. When this is done, you'll
+be able to use ANY screenmode for PT.
+
+* Selectable replay using audio-device. After all, new audio hardware is
+around the next corner!
+
+* Unlimited samplesize. I have already figured out a replay scheme to
+pull this one off, but other things have higher priority right now.
+(Still limited by chipmem size, though...)
+@endnode
+
+@node "Frequently asked questions" "Frequently asked questions"
+If you have any questions that's not listed here, @{"send them" link "Contacting the authors" 0} in.
+
+
+
+Q: @{"Keyboard shortcuts" link "Keyboard" 0} with more than one key involved doesn't work as
+expected. I have an A1200 or A600.
+
+A: This is a known bug, and it's not much to do about it.
+
+
+Q: When I run the program xxx before starting ProTracker, my Amiga
+crashes.
+
+A: Don't run xxx.
+
+
+Q: When I launch ProTracker it always locks up after x minutes.
+
+A: You have a screenblanker running. Quit it before launching
+ProTracker.
+
+
+Q: I use the resample-function in the @{"sampler" link "Sampler - Main" 0}, but the resulting sample
+is one or two octaves too high!
+
+A: Your @{"tunetone setting" link "Setup screen - Miscellaneous" 0} is not C-3. ProTracker takes the tunetone
+setting into account when resampling.
+
+
+Q: Some of my chipmodules sounded strange on my new ProTracker.
+
+A: Some chip-modules rely on ProTracker changing the sample when setting
+a new samplenumber for a channel without specifying a new note. This
+worked earlier, but doesn't any longer.
+
+
+Q: Sometimes instrument 1 gets the first character of it's named
+replaced with a "_". Why?
+
+A: This happens when editing the modulename from @{"disk operations" link "Disk operations" 0} and is
+a bug. Sorry.
+
+
+Q: I've got a module which my player regocnises as a ProTracker module,
+but ProTracker refuses to load it in (or crashes). Why?
+
+A1: The module utilises more than 64 patterns. These modules are created
+with ProTracker V2.1 - 2.3 by Noxious. It's not much to do about this
+until we've included support for these modules.
+
+A2: The module is severly damaged. Try to repair it using the
+TrackerTool command from DOS.
+
+A3: The module is packed with some bogus packer that ProTracker doesn't
+support. See the documentation for the player to find out which packer
+and get the packer to unpack the module.
+
+
+Q: I've got a module which makes the sample-display look phoney and
+distorts the length-display in the sample-editor. Why?
+
+A: Your module has samples longer than 65536 bytes. ProTracker does not
+support this at current.
+
+
+Q: I've got a module which gives a very high peeping sound at the end of
+some samples. Why?
+
+A: This module is either made on another platform (PC, Macintosh) or
+converted from some old module-formats. The trick is that ProTracker
+needs the 2 first bytes of each sample to be set to 0. This could either
+be done by zooming in, selecting the first 2 bytes and setting their
+volume to 0 or by cutting one byte at the end of the sample (this last
+action causes ProTracker to automatically reset the first two bytes).
+
+
+Q: I've got a module which makes ProTracker lock up when I attempt to
+play it. Why?
+
+A: Your module probably contains samples with @{"replen" link "Main screen - Sample section" 0} set to 0. Set all
+of these to 2 and your module should be fine.
+
+
+Q: I have a module which sounds like parts of it are being played in
+wrong speed. How can I listen to the module the way it was meant to?
+
+A: The module has been created with a CIA/VBlank setting that differs
+from yours. Go to the @{"setup screen" link "Setup screen - Miscellaneous" 0} and change your CIA/VBlank setting.
+@endnode
+
+@node "Thanks and acknowledgements" "Thanks and acknowledgements"
+The authors would like to thank and bring their acknowledgements out
+to:
+
+  Børge Nøst - debug help
+  Crossbones - bugreports and techchat
+  Guru / Sahara Surfers - techtalk and IRC online debugging
+  Hans Christian Skattør - ProTracker info
+  Lizard - bugreports
+  Ron Unhammer - suggestions
+  Stein Engelsgjerd - bugreports and suggestions
+  Tweeter - suggestions
+  Sveinar M Rasmussen - suggestions and betatesting
+
+And finally: all the guys at the IRC-channels #amiga, #amigascne and
+#coders as well as the people at usenet group comp.sys.amiga.audio!
+You've been to great help!
+
+I'm sure I've forgotten someone, but you all know who you are!
+@endnode
+
+@node "Contacting the authors" "Contacting the authors"
+Contact one of the authors if you have bugreports or any other
+suggestions.
+
+NOTE: There is no use contacting Cryptoburners for anything regarding
+ProTracker anymore since they have stopped developing it. I am therefore
+collecting all reports until someone continues the ProTracker or I can
+convince Cryptoburners to give me the source.
+
+DYN note: If (or rather when, as the situation is now) I get the
+ProTracker source, I will remove the DYN system for ProTracker, because
+the modules can't be used for much and it's very difficult to handle
+such sampled. However, Markus Weichselbaum would like to receive
+feedback on the DYN system, especially because he's developing a new
+musicprogram which also utilises 14 bit playback. Unfortunately, I do
+not have Markus' E-Mail address handy. So if you've got anything you'd
+like to say to him, E-Mail me and ask for his address and you will
+receive it promptly. I can promise the next version of the ProTracker
+support archive will feature his E-Mail address.
+
+The E-Mail address will only be valid until the summer 1996. After that,
+I'll only be able to reach via snail-mail for a year. (Atleast)
+
+E-Mail: (Preferably)
+    havardp@mail.stud.ingok.hitos.no
+
+IRC: (Nice alternative)
+    Nick: Howard_MD or Howard-MD
+    Channels: #amiga, #amigascne and #coders.
+
+Snailmail: (When all else fails...)
+    Håvard Pedersen
+    Kvartsveien 175
+    N-9022  KROKELVDALEN
+    Norway
+
+Phone: (Voice rate)
+    +(47) 77 63 13 34 (Håvard)
+@endnode
+
+@node "Musical dictionary" "Musical dictionary"
+@{b}DICTIONARY@{ub}
+
+This is a short dictionary which attempts to explain some words related
+to music or used in this documentation.
+
+
+ADSR: A system used for describing the volume envelope of a sample. The
+four letters is an abbreviation for the four words Attack, Decay,
+Sustain and Release. The ADSR system is shown below. As you can see,
+ADSR consists of four different phases which all participates in
+generating the sound as we hear it. Snappy sounds is for instance said
+to have a fast and high attack and short sustain. A good example of this
+is slap bass.
+              #
+            ## ##
+          ##     ##
+        ##         ##
+      ##             ##############
+    ##                             ##
+  ##                                 ##
+ #                                     #
+  Attack       Decay Sustain       Release
+
+Arpeggio: Playing a pattern of notes over and over again.
+
+Attack: See ADSR.
+
+Beat: The percussive rythm of a song.
+
+Brass: Wind instruments with brass mouthpieces. For instance horns and
+trumpets.
+
+Break: Making variation in the rythm of a song just before starting a
+new part of tune is called making a break. Most composers combine this
+with a coffee break to gather new inspiration.
+
+Chip: A often used description for music written with memory usage in
+mind. These tunes are called chip modules and the instruments are called
+chip instruments. These are often samples of 30-100 bytes length and
+small loops and the drums are often upsampled one or two times.
+
+Clavinet: A piano used in the baroque period with a light and tender
+sound. Also called Spinet or Harpsichord.
+
+Decay: See ADSR.
+
+Envelope: See volume envelope.
+
+Fretless bass: An electric bass with it's frets removed. While it
+requires more skill to play than an ordinary electric bass, it provides
+a much warmer sound than a normal electric bass.
+
+Funkbass: See slap bass.
+
+Groove: The rythm of a song. Not only the percussive rythm, but also
+bass, chords and melody.
+
+Percussion: Rythm instruments (drums).
+
+Recursive: See recursive.
+
+Reed: See woodwind.
+
+Release: See ADSR.
+
+Slam guitar: Slap bass played on a normal guitar.
+
+Slap bass: An (often) electric bass played by dragging a string out from
+the bassguitar body and release it to make it "slap" against the  body.
+This creates a sharp sound and is often used in funky tunes. It is also
+used on guitar in funk music.
+
+Strings: A collective expression for string instruments. Most often used
+for orchestral samples. (Violins, cellos etc...)
+
+Sustain: See ADSR.
+
+Sweep Eq: A special way of using so-called parametric equalizers to make
+a monotonous sound change it's timbre. Often used in techno music.
+
+Timbre: The sound of an instrument.
+
+Volume envelope: The volume changes in an instrument. ADSR one way of
+describing a volume envelope.
+
+Wind instruments: Instruments which create sound be having the player
+breath air into them. For instance flutes.
+
+Woodwind: Wind instruments with small pieces of wood in their
+mouthpieces which vibrates and generates the sound. These often have a
+softer sound than brass instruments. Also called reed.
+@endnode
+
+@node "MENU - For technical minded" "For the technical minded"
+This chapter describes support files and other things needed to know
+when writing applications that handles ProTracker files.
+
+
+        @{b}File formats@{ub}
+
+        @{"ProTracker song/module format" link "ProTracker song&module format" 0}
+        @{"ProTracker IFF song/module format" link "ProTracker IFF song&modules" 0}
+
+
+        @{b}Sources@{ub}
+
+        @{"Using the ProTracker play-routine" link "Using the PT playroutine" 0}
+        @{"Using the ProPruner play-routine" link "Using the PPR playroutine" 0}
+        @{"Using the AudioAlloc sound allocation routine" link "Using AudioAlloc" 0}
+        @{"Using the SoundFX sound-replay engine" link "Using SoundFX" 0}
+        @{"Using the PTCalcTime playtime calculator" link "Using PTCalcTime" 0}
+        @{"Other sources accompanying this archive" link "Other sources" 0}
+
+
+        @{b}Support software@{ub}
+
+        @{"The TrackerTool command" link "The TrackerTool command" 0}
+        @{"ProPacker v2.1 by Christian Estrup" link "ProPacker v2.1" 0}
+        @{"PPRStrip and PPRSampler" link "PPRStrip & PPRSampler" 0}
+        @{"Speedy Gonzales, the module ripper" link "Speedy Gonzales.guide/main" 0}
+
+
+        @{b}Miscellaneous@{ub}
+
+        @{"CIA tempo calculation" link "CIA tempo calculation" 0}
+        @{"DYN-Samples" link "DYN Samples" 0}
+@endnode
+
+@node "ProTracker song&module format" "ProTracker song&module format"
+@{b}PROTRACKER SONG/MODULE-FORMAT@{ub}
+
+ Offset Bytes   Description
+ ------ -----   -----------
+     0     20   Songname. Remember to put trailing null bytes at the
+                end... Please do also remember that a module may have
+                a 20-char name, which means that the string is not
+                zero-terminated.
+
+    20     30   Sample information for sample 1 (See below)
+
+    50     30   Sample information for sample 2
+
+    80     30   Sample information for sample 3
+     :      :
+     V      V
+   890     30   Sample information for sample 30
+
+   920     30   Sample information for sample 31
+
+   950      1   Songlength. Range is 1-128.
+
+   951      1   Well... this little byte here is set to 127, so that
+                old trackers will search through all patterns when
+                loading. Noisetracker uses this byte for restart, but
+                we don't.
+
+   952    128   Song positions 0-127. Each hold a number from 0-63 that
+                tells ProTracker what pattern to play at that position.
+
+  1080      4   Identifier data.
+
+                Pro/Noise/Sound-Tracker                 "M.K."
+                100 pattern ProTracker v2.x             "M!K!"
+                StarTrekker 4-voice                     "FLT4"
+                StarTrekker 8-voice (not compatible!)   "FLT8"
+                FastTracker 4-voice (maybe compatible)  "CHN4"
+                FastTracker 6-voice (not compatible!)   "CHN6"
+                FastTracker 8-voice (not compatible!)   "CHN8"
+                ProRunner processed (not compatible!)   "SNT."
+                Wanton packer (not compatible!)         "WN"+0+crap
+
+                I've read somewhere that NoiseTracker modules has the
+                ID "M&K!", but this is not correct.
+
+                If the identifier is not there, the text has maybe been
+                removed to make the module harder to rip.
+
+  1084    1024  Data for pattern 0. he number of patterns stored is
+     :       :  equal to the highest patternnumber in the song position
+     V       V  table (offset 952-1079).
+   ???     ???
+
+   ???     ???  If the file is a module, the sampledata follows right
+                after the patterndata. If not, this is the end. The
+                samples are located from 1 through 31. Use the
+                sampleinfo to find the start and end of each sample.
+
+                Each @{"DYN sample" link "DYN Samples" 0} is followed by a longword with length
+                of the DYN info, and then the DYN info itself. The
+                format of the DYN info is not publically available yet.
+
+
+
+@{b}SAMPLE INFORMATION@{ub}
+
+ Offset Bytes   Description
+ ------ -----   -----------
+     0     22   Samplename. Pad with null bytes. See notes on
+                modulename.
+
+    22      2   Samplelength. Stored as number of words. Multiply by
+                two to get real sample length in bytes.
+
+    24      1   Lower four bits are the finetune value, stored as a
+                signed four bit number. The upper nibble is set to a 1
+                if this sample is a @{"DYN sample" link "DYN Samples" 0}.
+                Value:  Finetune:
+                 0       0
+                 1      +1
+                 2      +2
+                 3      +3
+                 4      +4
+                 5      +5
+                 6      +6
+                 7      +7
+                 8      -8
+                 9      -7
+                 A      -6
+                 B      -5
+                 C      -4
+                 D      -3
+                 E      -2
+                 F      -1
+
+    25      1   Volume. Range is $00-$40, or 0-64 decimal.
+
+
+    26      2   Repeat point. Stored as number of words offset from
+                start of sample. Multiply by two to get offset in
+                bytes.
+
+    28      2   Repeat length. Stored as number of words in loop.
+                Multiply by two to get replen in bytes.
+
+
+
+@{b}PATTERN FORMAT@{ub}
+
+Each note is stored as 4 bytes, and all four notes at each position in
+the pattern are stored after each other.
+
+    00 -  chan1  chan2  chan3  chan4
+    01 -  chan1  chan2  chan3  chan4
+    02 -  chan1  chan2  chan3  chan4
+    etc.
+
+Info for each note:
+
+ BIT#  31  30  29  28  27  26  25  24     23  22  21  20  19  18  17 16
+ USE   S7  S6  S5  S4  P11 P10 P9  P8     P7  P6  P5  P4  P3  P2  P1 P0
+
+ BIT#  15  14  13  12  11  10  09  08     07  06  05  04  03  02  01 00
+ USE   S3  S2  S1  S0  E11 E10 E9  E8     E7  E6  E5  E4  E3  E2  E1 E0
+
+    S7-S0  - Samplenumber.
+    P11-P0 - Period of note.
+    E11-E0 - Effect command.
+
+Periodtable for Tuning 0, Normal
+    C-1 to B-1 : 856,808,762,720,678,640,604,570,538,508,480,453
+    C-2 to B-2 : 428,404,381,360,339,320,302,285,269,254,240,226
+    C-3 to B-3 : 214,202,190,180,170,160,151,143,135,127,120,113
+
+To determine what note to show, scan through the table until you find
+the same period as the one stored in byte 1-2. Use the index to look up
+in a notenames table. These periods are really for NTSC timing, but is
+used for both PAL/NTSC.
+
+
+
+This is the data stored in a normal module/song. A packed song starts
+with the four letters "PACK", and then comes the packed data.
+@endnode
+
+@node "ProTracker IFF song&modules" "ProTracker IFF song&modules"
+@{b}Introduction@{ub}
+
+The text below was intended to be the documentation on the fileformat
+used in ProTracker. However, we decided to wait with the actual
+implementation of the format until having released a couple of versions,
+because we'd like to hear some comments, suggestions etc. upon it first.
+So read it lightly, and feel free to post your opinion to one of the
+@{"authors" link "Contacting the authors" 0}. Note that since this is only a suggestion, don't start
+programming a revolutionary new piece of code based on this info yet; we
+may change the format :)... Here we go...
+
+Fields marked "*Reserved*" are reserved for future use and are
+guaranteed to cause hangup if messed with.
+
+
+@{b}General@{ub}
+
+With this release of Protracker we have decided to change the
+filestructure of the musicfiles produced with the program. We felt the
+old format was too obsolete, messy and out of date for us to use any
+further. So we invented this new format. The format is based upon
+Interchanged File Format (IFF) chunks, originally developed by
+Electronic Arts, but now in widely use on the Amiga. The format allows
+considerable flexibility and does not suffer too severly from changes
+and updates, and is therefore perfect for our use.
+
+
+@{b}The Format@{ub}
+
+We will in this section introduce and describe each chunk type appearing
+in a Protracker music file. Look in the next section for the sequencial
+description.
+
+** Contents of Chunk "VERS":
+
+  OFFSET  Length  Contents  Meaning
+  --------------------------------------------------
+   0       4      "VERS"    Chunk identifier.
+   4       4      ????????  Chunk length (in bytes).
+   8       2      ????????  Version number (word).
+  10       6      "PT3.00"  Version ID string.
+  --------------------------------------------------
+
+This chunk is used by Protracker to identify the producer of the module,
+and if necessary perform upgrade-conversion if the file was made with a
+pre- vious version of Protracker. There can be at maximum one "VERS"
+chunk in a Protracker music file. This chunk is not critical; it may be
+obmitted, but be aware of the possible incompatibility problems that may
+arise if it's left out.
+
+** Contents of Chunk "INFO":
+
+  OFFSET  Length  Contents  Meaning
+  -------------------------------------------------------
+   0       4      "INFO"    Chunk identifier.
+   4       4      ????????  Chunk length (in bytes).
+   8      32      [..??..]  Song name (string).
+  40       2      ????????  Number of instruments (word).
+  42       2      ????????  Number of positions (word).
+  44       2      ????????  Number of patterns (word).
+  46       2      ????????  Overall volume factor (word).
+  48       2      0006h     Default speed (#VB) (word).
+  50       2      ????????  Packed field. See below.
+  -------------------------------------------------------
+
+Protracker uses this chunk to set different internal variables, and to
+store vital information used in replay and processing of the file. The
+song name is a maximum 32 Chars long ASCII string. It need not be
+NULL-terminated. Number of instruments indicates the number of
+instruments used in the song, it may range from 0 to 65535. At present
+version number, however, there may be maximum 255 instruments in one
+song. Number of positions reflects the actual length of the song, that
+is; how many patterns that will be played during a complete cycle. This
+number may vary from 0 to 65535. Number of patterns, on the other side,
+reflects how many _different_ patterns that will be played during the
+song. This number is used to calculate the total length (in bytes) of
+the song. The Overall Volume factor is used to compute the final volume
+of all channels after the individual channel-volumes have been figured
+out. In this way it is easy to control the loudness of the music from
+the program/ song itself. Default speed is the number of VBlank frames
+between each pattern position change, and is as default set to 0006h.
+The packed field consists of these bits (right to left order):
+
+  Bit Meaning         0                      1                      Def
+  ---------------------------------------------------------------------
+   0  Filter flag.    Filter off.            Filter on.               0
+   1  Timing method.  VBlank.                CIA timing (BPM).        0
+   2  File type.      Module.                Song (no instruments).   0
+   3  Packstatus.     Packed patterns.       Raw patterns.            1
+   4  Length flag.    Equal pattern length.  Variable pattern length. 0
+   5  Voices flag.    4 voices.              8 voices.                0
+   6  Sample res.     8 bit.                 16 bit.                  0
+   7  *Reserved*                                                      x
+   8  *Reserved*                                                      x
+   9  *Reserved*                                                      x
+  10  *Reserved*                                                      x
+  11  *Reserved*                                                      x
+  12  *Reserved*                                                      x
+  13  *Reserved*                                                      x
+  14  *Reserved*                                                      x
+  15  *Reserved*                                                      x
+  ---------------------------------------------------------------------
+
+There can be at most one "INFO" chunk in a Protracker musicfile. This
+chunk is vital; it _must_ be present for the replay routine to function
+properly.
+
+** Contents of Chunk "INST":
+
+  OFFSET  Length  Contents  Meaning
+  ----------------------------------------------------------
+   0       4      "INST"    Chunk identifier.
+   4       4      ????????  Chunk length (in bytes).
+   8      32      [..??..]  Instrument name (string).
+  40       2      ????????  Length of instrument (word).
+  42       2      ????????  Instrument loop start (word).
+  44       2      ????????  Instrument loop length (word).
+  46       2      ????????  Instrument volume (word).
+  48       2      ????????  Instrument finetuning (integer).
+  ----------------------------------------------------------
+
+The "INST" chunk is used to store information about an instruments
+properties, such as length and volume. The instrument name is a maximum
+32 Chars long ASCII string. It need not be NULL-terminated. The Length
+field describes the length of the instrument (in words) and thus ranges
+from 0 to 128Kb (65535 words). Instrument Loop Start sets the offset
+from which to start playing after the first replay. This value may vary
+from 0 to the instrument length. Instrument Loop End sets the length of
+the loop to play after the first replay, relative to the loop start
+value. It may thus vary from 0 to [Ins_len-Loop_start]. Instrument
+volume indicates which volume to use in the replay of the sample, if the
+song doesn't say differently. This value varies between 0 and 40h.
+Instrument finetuning sets the sample-rate correction difference and
+varies from -7 to 7 (0fff9 to 0007h).
+
+There may be any number of "INST" chunks in a Protracker music file,
+limited to the number of instruments actually used in the song. This
+chunk is not vital; it may be left out if the song-only bit of the
+control word in the "INFO" chunk is set. Otherwise, it should result in
+an error.
+
+** Contents of Chunk "PPOS":
+
+  OFFSET  Length  Contents  Meaning
+  --------------------------------------------------
+   0        4     "PPOS"    Chunk identifier.
+   4        4     0ffh      Chunk length (in bytes).
+   8      256     [..??..]  Pattern position table.
+  --------------------------------------------------
+
+This chunk contains the table defining which pattern to play in a given
+song- position. Each entry in the table is a byte indicating which out
+of 256 possible patterns to play. There may be at maximum one "PPOS"
+chunk in a Protracker musicfile. This chunk is vital; it _must_ be
+present to play the song.
+
+** Contents of Chunk "PTRN":
+
+  OFFSET  Length  Contents  Meaning
+  --------------------------------------------------
+   0       4      "PTRN"    Chunk identifier.
+   4       4      ????????  Chunk length (in bytes).
+   8      32      [..??..]  Pattern name.
+  40       ?      [..??..]  Pattern data.
+  --------------------------------------------------
+
+This chunk is used in a module of variable pattern length. The chunk
+must thus appear as many times as there are patterns in the song. The
+chunk length divided by 8 ( >>3 ) will show the pattern length (default
+64). Pattern name is a 32 byte long ASCII string, describing the
+pattern, eg. "Intro part 3". It need not be NULL-terminated. This chunk
+is critical; it must be present in the file, or it will be regarded
+invalid. NOTE: This chunk is not in use in the present version (3.00B),
+and will be ignored if found.
+
+** Contents of Chunk "SMPL":
+
+  OFFSET  Length  Contents  Meaning
+  ----------------------------------------------------
+   0       4      "SMPL"    Chunk identifier.
+   4       4      ????????  Chunk length. (In bytes!)
+   8       ?      [..??..]  Raw sample data.
+  ----------------------------------------------------
+
+The "SMPL" chunk contains the raw sample data of an instrument. This
+chunk is not critical; if the song-only bit of the "INFO" chunk is set,
+it may be obmitted. If, however, the file is a module, then the number
+of "SMPL" chunks in the file must be equal to or greater than the number
+of instruments used in the song. If not, the file will be regarded
+incomplete.
+
+** Contents of Chunk "CMNT":
+
+  OFFSET  Length  Contents  Meaning
+  --------------------------------------------------
+   0       4      "CMNT"    Chunk identifier.
+   4       4      ????????  Chunk length (in bytes).
+   8       ?      [..??..]  Raw ASCII text.
+  --------------------------------------------------
+
+The "CMNT" chunk is used for a signature, comments, greetings, date of
+completion or whatever information the composer wishes to include with
+his or hers creation. This chunks is not critical; it may be left out
+and will typically be ignored by most applications.
+
+These are the chunks that may appear in a Protracker musicfile. If other
+chunks are encountered, they will be ignored. Any program dealing with
+this fileformat should perform tests to determine the validity of the
+file in consideration. Using the Protracker.library will guarantee
+correct handling of musicfiles, and we strongly encourage the use of
+this runtime shared library instead of hacking away on your own. Look
+elsewhere on this disk for the library documentation, the library can be
+found in the "LIBS/" directory.
+
+The sequential format ---------------------
+
+In this section we will describe how the various chunks are expected to
+be located within the file. These rules _must_ be followed or it will
+wreak havoc when tried manipulated with inside Protracker. Here comes
+the header in table form:
+
+  OFFSET  Length  Contents  Meaning
+  -----------------------------------------------------
+    0      4      "FORM"    Indicate start of IFF file.
+    4      4      ????????  File length.
+    8      4      "MODL"    IFF type identifier.
+  -----------------------------------------------------
+
+This header must be found in the start of the file, or it will be
+rejected as not being a Protracker musicfile. From offset 12 in the
+file, things may vary somewhat. The only rules are these: After a "INST"
+chunk a "SMPL" or a new "INST" chunk _must_ follow. This "SMPL" chunk
+will be regarded as the sample data of the instrument(s) preceding it.
+If after a "INST" chunk another "INST" chunk follows, and the
+module-flag in the "INFO" chunk is set, then all "INST" chunks following
+each other will share the same sampledata found in the first "SMPL"
+chunk after them. Also, all "INST" and "SMPL" chunks must be found in
+sequence. That is, when a "INST" chunk is found for the first time in a
+file, all other "INST" and "SMPL" chunks must follow. If this is not so,
+an error message should be given, and processing terminated. Note that
+in a song-only file, no "SMPL" chunks should be included. If any "SMPL"
+chunks are encountered in such a file, they should be ignored and a
+warning given. All other chunks used in a musicfile may be located
+anywhere in the file, usually in the beginning of it, but no assumptions
+of their locations should be taken. Note that all used chunks _must_ be
+found _before_ the "BODY" chunk, which is the last chunk to be found in
+the file. Searching for chunks should stop when encountering a "BODY"
+chunk. The "BODY" chunk is constructed like this:
+
+  OFFSET  Length  Contents  Meaning
+  --------------------------------------------------
+    0      4      "BODY"    Chunk identifier.
+    4      4      ????????  Chunk length (in bytes).
+    8      ?      [..??..]  Raw pattern data.
+  --------------------------------------------------
+
+
+@{b}Chunk summary@{ub}
+
+Now follows a list of the chunks that have meaning in a Protracker
+musicfile:
+
+ Chunk Function                                            Critical?
+ -------------------------------------------------------------------
+ VERS  Contains information about the producer of the file.       No
+ INFO  Contains vital information and standard settings.         Yes
+ INST  Information about instruments: length, volume etc.        Yes
+ SMPL  Raw sample data associated with one or more instruments.   No
+ PPOS  Position table. Information about patternsequence.        Yes
+ CMNT  Comments, greetings etc. in ASCII code.                    No
+ PTRN  Pattern data for modules with varying patternlengths.     Yes
+ BODY  Pattern data for modules with equal patternlengths (def). Yes
+ -------------------------------------------------------------------
+@endnode
+
+@node "Using the PT playroutine" "Using the PT playroutine"
+@{b}Normal usage@{ub}
+
+The replay relies on you @{u}not@{uu} turning on the audio DMA, as this is done
+when needed.
+
+In order to get the replay working properly it needs to initialize
+itself. To make this happen, call PT_Init with a pointer to your module
+in A0.
+
+When this is done, everything is ready to go. Simply call PT_Music 50
+times a second to achieve music. This call assumes exclusive access to
+an OCS/ECS/AGA-compatible audio hardware located at $DFF000. It is safe
+to call both PT_Init and PT_End if your PT_Music-calls are done in an
+interrupt and your interrrupt is still enabled.
+
+When you're finished, you may call PT_End to ensure that all pending
+sound is removed.
+
+If you intend to sync the module to some visual effect, this may be done
+with effect command 8. The last value can be read in
+PT_MainData+PTm_SyncVal.
+
+
+@{b}Mastervolume/balance@{ub}
+
+In order for the mastervolume features of the replay to be enabled you
+must insert "PT__MasterVol = 1" somewhere in your source before the
+replay. You should, however, note that enabling the mastervolume
+features heavily slows down the replay.
+
+In order to adjust the mastervolume, you may call PT_SetMasterVol with
+the volume (a word) for the left channel in D0 (range 0-64) and the
+volume for the right channel in D1. The change takes place immediately.
+
+
+@{b}Overstep@{ub}
+
+This is a strange word, which I generated myself when I couldn't find
+another word to describe this feature. The idea behind overstep is that
+the programmer should, in some way, be able to sense when the current
+module is finished in order to be able to load in another module or
+perform some other action based on this.
+
+In order to activate overstep, insert "PT__OverStep = 1" in your
+sourcecode. Overstep provides nearly no overhead.
+
+The byte PT_OverStep will be written with a 1 if a position jump
+occured, the module was halted, the end was reached or a fast forward
+hit the end. The value -1 may occur in this byte if a rewind was done in
+position 1.
+
+Please note that the replay itself never clears the byte PT_OverStep, so
+the programmer must do this himself when changes are sensed.
+
+
+@{b}Winding@{ub}
+
+In order for the winding functions to be enabled, insert "PT__WindFuncs
+= 1" in your source. You may now call the functions PT_Forward and
+PT_Rewind to skip forward and backward one pattern at a time. The module
+loops correctly both at beginning and end.
+
+Please beware that if there are any position jump commands at the end of
+the current pattern when you do a PT_Forward or a position jump command
+just occured when doing a PT_Rewind, the positions may not be played in
+a correct order. Working around this is way to much work, so settle with
+it.
+
+
+@{b}CIA timing@{ub}
+
+The replay does not do CIA timing itself, but has been extended with a
+small support forl the user to implement this. To enable the CIA-mode of
+the replay, insert "PT__CIA = 1" in your source.
+
+When CIA is enabled, the replay assumes the user to supply a function
+called CIA_SetBPM wich is to be called with the CIA tempo in D0 and does
+not trash any registers. This function is called inside PT_Init and each
+time the module attempts to change the CIA tempo.
+
+
+@{b}68020+ optimizations@{ub}
+
+To enable the 68020+ optimizations, insert "PT__68020 = 1" in your
+source. The replay now uses a few 68020+ only instructions to gain some
+speed. These optimizations aren't much for now, but may increase in the
+future.
+
+
+@{b}NoiseTracker compatibility@{ub}
+
+NoiseTracker is another tracker written by Mahoney and Kaktus which
+writes modules almost identical to the ones written by ProTracker. As of
+revision 2C, the ProTracker replay is capable of playing these modules
+with the extra 'quirks' of the NoiseTracker module-format. The
+NoiseTracker compatibility is on by default and may be disabled by
+inserting "PT__NTComp = 0" in your source.
+
+The NoiseTracker compatibility causes the replay to correctly play
+NoiseTracker vibrato and utilises the repeat-feature of NoiseTracker.
+This option uses nearly no (if any) extra CPU-time.
+@endnode
+
+@node "Using the PPR playroutine" "Using the PPR playroutine"
+@{b}BACKGROUND@{ub}
+
+The ProPruner playroutine is an attempt to make a replay that is
+significantly faster than the clean ProTracker replay. The ProPruner
+playroutine contains nearly all features that one can think of and is
+pretty fast. In order to achieve the extra speed, it needs the modules
+to be modified and saved in a special format. Currently, the ProPruner
+replay need @{"ProPacker v2.1" link "ProPacker v2.1" 0} modules and does some internal changes to
+these modules before playing them. The @{"ProPacker v2.1" link "ProPacker v2.1" 0} is made by
+Christian Estrup and is spread without his permission. For documentation
+on how to use the ProPacker, please read it's @{"separate chapter" link "ProPacker v2.1" 0}. The
+program @{"TrackerTool" link "The TrackerTool command" 0} will soon be able to output ProPruner modules
+directly, so you won't need to use the ProPacker and the modules won't
+need to be altered by the replay before playing.
+
+
+@{b}BASIC USE OF THE PROPRUNER PLAYROUTINE@{ub}
+
+The first thing to do when using the ProPruner CIA shell or Level 6
+timing is to fetch the vector base register and store in
+PPR_MainData+PPRM_VBR. The replay will then use it for compatibility on
+higher processors.
+
+In order to use the ProPruner playroutine, you have to initially call
+PPR_Init with A0 pointing to your module and A1 pointing to your
+samplefile if the use of a samplefile is enabled. When this is done, you
+call PPR_Music each vertical blank to achieve music. CIA timing is
+described separately later on. When you want to stop the music, call
+PPR_End. It is perfectly safe to call PPR_Init and PPR_End while your
+VBlank interrupt is still enabled.
+
+The function PPR_Init may also be used for restarting the module and all
+function trashes all registers except where else is stated. If
+noteplayers are disabled, the module must be in chip memory. If you use
+a separate samplefile, only the samplefile need to reside in chip
+memory.
+
+PPR_Init should not be called while a module is playing without first
+calling PPR_End.
+
+
+@{b}LEVEL 6 MODE@{ub}
+
+You may have ProPruner use the level 6 (CIA timers) interrupt for DMA
+waiting in order to save cycles when playing modules. Keep in mind,
+though, that neither the timers nor the interrupt vector is allocated
+from the system, so this feature should only be used when all hardware
+resources are available. When level 6 mode is in use, you cannot figure
+out the rasterline usage by timing the PPR_Music call since some of the
+actual work is done in an interrupt which occurs a while after the
+PPR_Music call. Level 6 timing is enabled by setting PPR_Level6 to 1.
+
+
+@{b}SEPARATE SAMPLEFILES@{ub}
+
+ProPruner supports separate samplefiles in order to save precious
+chip-memory and delta-processing. Delta-processing is currently only
+available when separate samplefiles are enabled. The samplefiles are
+extracted from modules using the @{"PPRStrip and the PPRSampler" link "PPRStrip & PPRSampler" 0} commands.
+To enable the usage of separate samplefiles, set PPR_SampleFile to 1.
+
+
+@{b}PREDOUBLING@{ub}
+
+This feature is hard to explain, but shortly it means that the module is
+preprocessed during init in order to achieve slightly faster replay.
+Since this processing may cause errors in some VERY large modules, it is
+possible to disable it. Predoubling is on as default and may be turned
+off by setting PPR_PreDouble to 0.
+
+
+@{b}MASTERVOLUME CONTROLS@{ub}
+
+ProPruner's mastervolume system is a combination of balance and
+mastervolume. The mastervolume provides a small speed overhead and
+should therefore be left off if unused. If mastervolume is enabled, call
+PPR_SetMasterVol with mastervolume for left side in D0 and mastervolume
+for right side in D1. The range is 0-64. To enable mastervolume, set
+PPR_MasterVol to 1.
+
+
+@{b}DELTA-PROCESSED SAMPLEFILES@{ub}
+
+Delta-processing is currently only supported for separate samplefiles.
+Delta-processing is an altering of the sample data in order to make them
+easier to compress. When delta-processing is enabled, the ProPruner
+playroutine will decode the sampledata back to their original form
+before starting the module. Delta-processing causes no changes to the
+final sound. With delta-processing enabled, the ProPruner replay will
+still handle module without delta-processing. To enable
+delta-processing, set PPR_Delta to 1.
+
+
+@{b}SELECTABLE FINETUNE@{ub}
+
+The finetune option consumes both rastertime and space in the replay, so
+it is therefore advised to disable finetune if the replay is used to
+replay module(s) without finetune. The packer will inform you of wether
+the module uses finetune or not. To disable finetune, set PPR_Finetune
+to 0.
+
+
+@{b}CIA TIMING USING THE PROPRUNER PLAYROUTINE@{ub}
+
+The ProPruner playroutine does not support CIA timing directly, but
+relies on the caller to provide the interrupt. If CIA timing is enabled,
+the user must himself allocate necessary resources and set up an CIA
+interrupt that calls PPR_Music. The playroutine will then call
+PPR_SetBPM with beats per minute in D0 each time the CIA tempo is
+supposed to change. The PPR_SetBPM function must be supplied by the
+caller and may only destroy D0 and D1. Please do also note that the
+Level6 function seldom works correctly when CIA mode is turned on. To
+enable the CIA mode, set PPR_CIA to 1.
+
+
+@{b}SELECTABLE 68020+ OPTIMIZATIONS@{ub}
+
+The ProPruner can be assembled using special 68020+ optimizations, which
+may result in a slight rastertime usage decrease. The optimizations is
+mostly noticeable when powerpattern is disabled, but is always (to some
+extent) usable. To enable 68020+ optimizations, set PPR_68020 to 1.
+
+
+@{b}PAUSE/CONTINUE FUNCTIONS@{ub}
+
+The ProPruner playroutine comes with selectable pause/continue
+functions. When these are enabled, PPR_Pause is used to pause the module
+and PPR_Continue is used for continuing the replay.
+
+
+@{b}REWIND AND FAST FORWARD FUNCTION@{ub}
+
+Another feature of the ProPruner playroutine is the possibility to skip
+one position forward/backward in the module. When this possibility is
+enabled, PPR_Forward will skip one position forward in the module and
+PPR_Rewind skips one position backwards. If the module is at the
+beginning, ProPruner will automatically wrap to the end of the module.
+These function may cause overstep events and may miss position jumps!
+
+
+@{b}THE POWERPATTERN OPTIMIZATION@{ub}
+
+The heart of ProPruner is the powerpattern feature. This is a way of
+storing the patterndata that differs slightly from both ProPacker (which
+ProPruner is based on) and ProTracker. PowerPattern should pose any
+problems but may be disabled by setting PPR_PowerPatt to 0.
+
+
+@{b}NOTEPLAYERS - WHAT?@{ub}
+
+If the noteplayer feature is enabled, ProPruner itself won't bang
+straight on the hardware to play the sound, but will use supplied
+functions and macros for achieving sound. The macros are:
+
+PPRN_InitReg (Channel) - Is called to enable the noteplayer to set up A5
+pointing to a data area needed by the other macros to perform correctly.
+The argument "Channel" is in the range 0-3, thus making the selected
+channel the "current" channel.
+
+PPRN_KillSound - Has the sole purpose of killing the sound of all
+channels. This macro may be called without having A5 pointing to
+anything of significance.
+
+PPRN_KillCh - Kill all sound on the current channel.
+
+PPRN_TrigWave (Wavestart, Wavelen) - Causes the noteplayer to
+immediately start playing the selected wave and loops back to the start
+of the wave when the wave is through playing. Wavelen is given in number
+of words.
+
+PPRN_SetWave (Wavestart, Wavelen) - Does nearly the same as
+PPRN_TrigWave except that the wave is not started until the current wave
+has reached it's end.
+
+PPRN_SetVolume (Volume) - Sets the volume (range 0-64) for the current
+channel.
+
+PPRN_SetRate (Rate) - Sets the samplerate for the current channel.
+
+PPRN_SetMVolL (Volume) - Sets mastervolume for the left side. Range is
+0-64. A5 is not initialized.
+
+PPRN_SetMVolR (Volume) - Sets mastervolume for the right side. Range is
+0-64. A5 is not initialized.
+
+PPRN_Filter (State) - Attempts to change the status of the lo-pass
+filter. The noteplayer doesn't need to support this action.
+
+At the beginning if PPR_Music, the function PPRN_MakeSound is called.
+This function may be used for mixing and trigging the actual sound
+output. To enable noteplayer, set PPR_NotePlayer to 1.
+
+The noteplayer feature has not been debugged at all, so don't be
+surprised if it doesn't work. I would, however, be glad to hear about it
+anyway.
+
+
+@{b}SELECTABLE NUMBERS OF CHANNELS TO PLAY@{ub}
+
+The ProPruner playroutine is able to play less than 4 channels in order
+to set the remaining channels free for soundeffects. This is especially
+useful in conjunction with the SoundFX soundeffect replay engine.
+Disabling channels effectively saves a huge amount of raster time and
+should therefore be used even when the last channels isn't in use when
+the module to replay has no notes on the last channels. To use this
+feature, simply set PPR_Channels to the number of channels to play.
+
+
+@{b}OBTAINING INFO FROM THE MODULE@{ub}
+
+The ProPruner playroutine supports a effectcommand not supported by
+other replay, effectcommand 8 to send events to the replay. When the
+module issues for instance effect command 847, the byte
+PPR_MainData+PPRM_Msg will contain the hexadecimal number 47. The
+programmer is free to read this value at any time and take actions upon
+it.
+
+
+@{b}OVERSTEP EVENTS@{ub}
+
+If the module has reached the end, the byte PPR_MainData+PPRM_RestFlag
+will be set to true (non-zero). The caller may then take proper actions,
+such as loading another module.
+@endnode
+
+@node "Using AudioAlloc" "Using AudioAlloc"
+@{b}GENERAL@{ub}
+
+This source allocates four channels from the audio device, in order to
+ensure that no other programs attempts to access these channels.
+However,  this does not guarantee easy sound replay. Most sources
+(including those in  the ProTracker support archive) accesses the
+hardware directly to produce  the actual sound, and this is subject to
+fail anytime. However, most of the  time, it doesn't.
+
+
+@{b}USAGE@{ub}
+
+Call AA_Alloc to try the allocation. If D0=0 upon return, the allocation
+failed. If D0 is non-zero, the allocation succceeded and the audio
+channels  are exclusively for you to use. However, you must remember to
+free the  audio channels when you no longer need them. This is done by
+calling  AA_Free.
+@endnode
+
+@node "Using SoundFX" "Using SoundFX"
+@{b}WHAT IS SOUNDFX?@{ub}
+
+SoundFX is a sound-effect engine that enables playing of 2 samples
+through one normal audio channel. The mixing is fairly fast and provides
+minimal overhead. Both samples must have the same samplerate and cannot
+be looped in current version. This is done to save CPU cycles when
+mixing.
+
+
+@{b}GENERAL USAGE@{ub}
+
+Call SFX_Init with the samplerate in D0. Minimum values are 123 for PAL
+and 124 for NTSC. When using the fastmode (described below) only rates
+of 226/228 or higher are supported.
+
+Call SFX_SetVolume with volume (0-64) in D0 for adjusting the
+mastervolume. This is not set to default values and should therefore be
+done after the SFX_Init call.
+
+Call SFX_StartSound with D0 stating which channel-partition to play on
+(0 or 1 for now), A0 pointing to the sampledata (should be in fastmem if
+possible) and A1 pointing to the end if the sampledata (samplepointer +
+samplesize). The sampledata should be halved to avoid distortion. In
+assembly this may be done by issuing a LSR.B #1 on all bytes.
+
+Call SFX_End when the engine is not in use anymore. After this call,
+SFX_Init must be called before further sound effects may be generated.
+
+While the sampledata does not need to reside in chip, the SoundFX engine
+itself has to because of some buffers.
+
+
+@{b}SETTING THE BUFFERSIZE@{ub}
+
+The buffersize tells SoundFX how many bytes to mix at a time. Changes to
+the sound (such as new samples) are only senced at the end of a buffer.
+Smaller buffers yields better response-times but provides more CPU
+overhead when starting the mixing while higher values does the opposite.
+The default setting of 1024 bytes should be sufficient. To change the
+buffersize set SFX__BuffSize to the number of bytes you wish the
+buffersize to be. Please note that the buffersize must be an even
+number.
+
+
+@{b}THE FASTMODE@{ub}
+
+The fastmode provides a somewhat faster mixingscheme, but has worse
+audio output than the normal mode. When fastmode is active you can only
+use half the frequence of normal notes (rate 226/228 or higher) as
+normal. This mixing mode may produce high-frequency tones which may both
+distort the sound and destroy loudspeakers! To get rid of this quirk,
+enable the audio filter. In fastmode, however, the sampledata does not
+need to be halved. To enable fastmode, set SFX__FastMode to 1.
+
+
+@{b}DIFFERENT OUTPUT MODES@{ub}
+
+The SoundFX engine at current supports two different output modes. To
+select one, set SFX__Mode to the number of your mode.
+
+(0) - Vertical blank. This mode is perhaps the most convenient one for
+games that destroys the OS and does not wish to set up audio interrupt
+themselves. The engine relies on the user to call SFX_VBLHandle each
+vertical blank. All registers will be trashed. In this mode, the user
+must choose both buffersize and the replay rate so that one buffer takes
+exactly on frame to play. For help on how to calculate this, refer to
+the Hardware Reference Manual from Addison Wesley. For the rate 224, the
+samplebuffer should be set to 636 bytes.
+
+(1) - OS Audio interrupts. (Default) This mode uses the operating system
+to set up an audio interrupt which handles everything. The sound replay
+is transparent to the caller and the buffersize may be freely chosen.
+@endnode
+
+@node "Using PTCalcTime" "Using PTCalcTime"
+@{b}WHAT IS PTCALCTIME?@{ub}
+
+PTCalcTime is a source that calculates the playtime of ProTracker
+modules.  This source operates internally with 1/25000ths of a second
+and should  therefore be very accurate.
+
+
+@{b}GENERAL USAGE@{ub}
+
+Call the function PTCalcTime with the registers set up as follows:
+
+D0 - The songpos to start the module from. Normally, this should be 0.
+
+D1 - 25000th of a second to pass between each interrupt. This should
+normally be set to 25000/50.
+
+D2 - Set to 1 if the timing is CIA based. Otherwise, set to 0.
+
+A0 - Points to the ProTracker module.
+
+A1 - Points to four longwords that are used for storing the playtime.
+The  first longword will contain hours, the next minutes, then seconds
+and  finally 1/100 seconds.
+
+The function returns shortly, but might use up to 2-3 seconds on really
+slow Amigas.
+@endnode
+
+@node "Other sources" "Other sources"
+@{b}CIASHELLS@{ub}
+
+There are two official CIA shells, CIAShell_HW (a hardware-banging CIA
+shell which doesn't attempt to access the OS at all) and CIAShell_OS
+(which  uses the OS for all access and should work on all Amigas, even
+the DRACO).  The usage of these are described in the chapter of each of
+the  playroutines.
+
+
+@{b}PTCUSTOMIZE@{ub}
+
+This isn't really a source, but a description on how to customize the
+ProTracker replay for your own needs, for instance another tracker or an
+upjazzed player which needs functions and information not normally
+obtained  from the replay. It's a combination of textfile and source.
+@endnode
+
+@node "The TrackerTool command" "The TrackerTool command"
+@{b}What is TrackerTool?@{ub}
+
+TrackerTool is a small DOS-command designed for performing certain tasks
+on modules, which is clearly beyond the scope of ProTracker itself. This
+tasks mainly involve repairing and converting modules. (Current output
+modes are only normal ProTracker modules, though.)
+
+
+@{b}Why use TrackerTool?@{ub}
+
+If you've tried QuadraComposer, you may have found out that QC is not
+able to identify Noise/Pro-Tracker modules properly if their size is
+wrong. To make this problem even worse, some tools save 4 bytes extra on
+modules because of a bug in earlier replay-routines. In order to fix
+these modules you either load them one by one into ProTracker (if
+they're not too damaged for ProTracker to recognize them!) and save them
+back to disk or you could use TrackerTool.
+
+
+@{b}How to use TrackerTool?@{ub}
+
+The template for TrackerTool is:
+
+TrackerTool SOURCE=FROM/A,ALL/S,VERBOSE/S,UPDATE=UD/S,WRITE=TO
+
+SOURCE may be a file (ex: "mod.jugux"), a directory (ex: "modules/") or
+a wildcard (ex: "mod.eat#?").
+
+ALL specifies that subdirectories is entered recursively.
+
+VERBOSE will cause TrackerTool to print a lot of useless information
+about what it actually does. If TrackerTool shows strange behaviour,
+enable VERBOSE in order to find out what actually goes wrong.
+
+UPDATE specifies that the original module(s) are to be overwritten with
+the repaired module(s).
+
+WRITE specifies a path to write the repaired module(s) to.
+
+For repairing all modules on you device XST-00: you would write:
+
+TrackerTool XST-00: ALL UPDATE
+
+Or repairing all modules in the current directory starting with an "a"
+and write the repaired modules to RAM: you would write:
+
+TrackerTool mod.a#? WRITE RAM:
+
+
+@{b}Anything more to tell me?@{ub}
+
+Since the main reason for using TrackerTool (at current) is repairing
+possibly damaged modules, TrackerTool does no attempt to identify the
+specified file(s). Because of this, you must NEVER run TrackerTool on
+any files that are not 31-instrument tracker modules. This includes text
+files, IFF pictures and 15 INSTRUMENT TRACKER MODULES! If you attempt
+this, your Amiga might crash with a horrible wail and if used in
+conjunction with the UPDATE keyword, you will probably lose your files.
+
+TrackerTool does, however, support up to 256 patterns, DYN samples and
+128 Kb long samples without problems.
+@endnode
+
+@node "ProPacker v2.1" "ProPacker v2.1"
+@{b}READ FIRST!@{ub}
+
+ProPacker is needed to generate the modules for the ProPruner
+playroutine. The ProPacker v2.1 is written by Christian Estrup and is
+spread without his permission. What follows here are the original docs,
+only slightly adjusted to fit the guidelines for this AmigaGuide
+document. Some parts of the doc concerning the replay has been cut out.
+Do also note that the ProPacker does not support being started from the
+Workbench, but must be started from CLI/Shell.
+
+
+@{b}PREFACE@{ub}
+
+Pro-Packer 2.1 is Freely Distributable. This means, that the program may
+be freely distributed (!), as long as the replayer and this docfile are
+included. NO money WHATSOEVER may be made from selling Pro-Packer 2.1.
+Public Domain companies and their likes, who want to sell this program,
+have to get a special, written permission from me. You will find my
+address at the bottom of this doc-file.
+
+
+@{b}INTRODUCTION@{ub}
+
+Pro-Packer 2.1 enables you to pack your ProTracker-modules (and
+compatibles). It comes with a replayer, which is able to play the packed
+modules a lot faster than the original PT-replay-routine.
+
+
+@{b}THE PACKER@{ub}
+
+Using the packer is fairly easy. To load a module, just click in the
+load gadget (surprise). You will then see the familiar (?) req.library
+file-requester. (This means, of course, that you need req.library to run
+the packer!)
+
+When you've selected a module, it will automatically be packed. When
+packing is finished, the packer will show you the length of the packed
+module. The packer will also tell you, whether or not the module uses
+finetune (see 'The Replayer' about this).
+
+To save the packed module, just click in the save gadget (easy, isn't
+it?), and you'll see the file-requester again. Select a filename, and
+you're done...
+
+
+@{b}COPYRIGHTS@{ub}
+
+req.library is (C) 1989 by Bruce Dawson and Colin Fox.
+@endnode
+
+@node "PPRStrip & PPRSampler" "PPRStrip & PPRSampler"
+@{b}WHAT ARE THESE?@{ub}
+
+PPRStrip and PPRSampler are commands used for handling the generation of
+separate samplefiles for use with the @{"ProPruner" link "Using the PPR playroutine" 0} replay routine. These
+commands was originally thrown together for personal use, but should
+nevertheless be bugfree as they have been thoroughly tested. Both these
+commands needs OS 3.0+ to work.
+
+
+@{b}PPRSTRIP@{ub}
+
+PPRStrip is used to strip the sampledata from ProPacker v2.1 modules.
+The only argument supported is the filename, so the original module will
+be overwritten.
+
+
+@{b}PPRSAMPLER@{ub}
+
+PPRSampler is used for generating a samplefile from a ProTracker module.
+The command supports three arguments:
+
+SOURCEFILE - The complete path and filename of a @{u}ProTracker@{uu} module. This
+file will only be read and not changed in any way.
+
+DESTINATIONFILE - The filename of the samplefile to generate.
+
+DELTA - This is a keyword which, if present, causes PPRSampler to
+delta-process the sampledata. Look in the documentation of the @{"ProPruner" link "Using the PPR playroutine" 0}
+playroutine for information on delta-processing.
+@endnode
+
+@node "CIA tempo calculation" "CIA tempo calculation"
+@{b}CIA TEMPO ISSUES@{ub}
+
+    Fcolor                        = 4.43361825 MHz
+                                    (PAL color carrier frequency)
+    CPU Clock   = Fcolor * 1.6    = 7.0937892  MHz
+    CIA Clock   = Cpu Clock / 10  = 709.37892  kHz
+    50 Hz Timer = CIA Clock / 50  = 14187.5784
+    Tempo num.  = 50 Hz Timer*125 = 1773447
+
+For NTSC: CPU Clock = 7.1590905 MHz --> Tempo num. = 1789773
+
+To calculate tempo we use the formula: TimerValue = 1773447 / Tempo The
+timer is only a word, so the available tempo range is 28-255 (++). Tempo
+125 will give a normal 50 Hz timer (VBlank).
+
+A normal ProTracker VBlank song tempo can be calculated as follows: We
+want to know the tempo in BPM (Beats Per Minute), or rather quarter-
+notes per minute. Four notes makes up a quarternote. First find
+interrupts per minute:
+
+        60 seconds * 50 per second = 3000
+
+    Divide by interrupts per quarter note = 4 notes * speed
+    This gives: Tempo = 3000/(4*speed)
+    simplified: Tempo = 750/speed
+
+For a normal song in speed 6 this formula gives: 750/6 = 125 BPM
+@endnode
+
+@node "DYN Samples" "DYN Samples"
+@{b}PREFACE@{ub}
+
+Markus Weichselbaum has asked me to remove the earlier description of
+DYN  samples because he claimed it was beta information and contained
+bugs. He  promised to write a new information text for this AmigaGuide,
+but I've  taken the liberty to write my own temporary description.
+
+
+@{b}THE PROBLEM@{ub}
+
+If you try playing a sample with a low signal, you'll notice it always
+contains some sort of noise. The problem is that when the signal is at a
+low level, it isn't able to make use of all the bits in the sample
+signal.  Low level samples does in some cases only use bit 2-0. This
+problem seldom  arises because it's easier to sample at higher peaks and
+later adjust the  volume setting for the sample.
+
+However, if you have a sample that starts with high volume, but later on
+descends into a low, continous tone, you'll be (again) experiencing the
+"distortion" that occurs. One way to avoid this is sampling the sample
+with  the volume turned way up, but this again creates distortion in the
+early  stages of the sample.
+
+
+@{b}THE DYN SOLUTION@{ub}
+
+The DYN technology splits the sample up in several parts, depending on
+the volume changes of the sample. This make it possible to play the
+start with  full volume, utilising the entire range of the Amiga sample
+playback  system, while playing quiet parts with a higher signal and
+lower volume  setting. You don't have to sample the signal several times
+with different  input volume, because the DYN system uses a 16-bit
+sample to generate it's  DYN sample. All in all, this makes a sample
+with 8-14 bit resolution,  because the resolution isn't constant but
+changes during sample playback.
+
+
+@{b}THE HI-FI SOLUTION@{ub}
+
+There is a solution to the problem that gives better results than the
+DYN system, but is more expensive in the aspect that it requires 2 audio
+channels for each sample to replay. The advantages is that the quality
+is  much more often on the 14 bit side of the range than the 8 bit since
+the calculations are done on a per-byte basis. This system is used for
+most S3M/FastTracker1&2-players (PC moduleformats with more than 4
+voices) available on the Amiga today.
+
+This system needs to calculate to separate samples based on the input 16
+bit sample. One buffer is played with full volume, while the other
+buffer is played on the @{u}same@{uu} side as the first, but with volume set to
+1. This makes the Amiga output the first channel + the second channel,
+resulting in a signal with 8-14 bit quality, depending on the incoming
+signal. I will not attempt to describe how to calculate the two buffers,
+since it's beyond the scope of this chapter.
+@endnode
+
+@node "How to use this guide" "How to use this guide"
+This chapter explains briefly how to overcome some of the problems that
+might arise when using this documentation.
+
+
+@{b}I DON'T UNDERSTAND SOMETHING@{ub}
+
+You have several options here.
+
+1) Press the index button and find the subject you ponder about. Jump to
+it and read what's there.
+
+2) Go to the @{"musical dictionary" link "Musical dictionary" 0} and seach for your subject there.
+
+3) @{"Load ProTracker" link "How to start ProTracker" 0} and experiment. That's probably the easiest way to
+find out of things.
+
+4) @{"Contact me" link "Contacting the authors" 0} and ask.
+
+5) Give up music and buy DeLuxe Paint.
+
+
+@{b}I CAN'T FIND SOMETHING@{ub}
+
+Press the index button and search for it. You will be presented with two
+separate lists, both ordered alphabetically.
+
+
+@{b}HOW TO LISTEN TO THE AUDIO EXAMPLES@{ub}
+
+The audio examples can only be listened to on a OS 2.0+ system with the
+8SVX datatypes and AmigaGuide v39 or higher installed.
+
+To listen to the examples, first press the button labeled "here" or
+something. The window will then show a small gadget representing the
+sample. Press this gadget to listen to the sample. When you're done
+listening to the sample, you must press "RETRACE", "CONTENTS" or "INDEX"
+to return to the ProTracker documentation. If you close the window, the
+entire documentation will be closed.
+@endnode
+
+@node HeddleyAutoIndex "Index"
+@remark Index auto-generated by Heddley
+Index of database Default
+
+Documents
+
+@{"Adjust tempo effect command" link "Adjust tempo effect command"}
+@{"Arpeggio effect command" link "Arpeggio effect command"}
+@{"Chronicles and anecdotes" link "MENU -  Chronicles"}
+@{"CIA tempo calculation" link "CIA tempo calculation"}
+@{"Contacting the authors" link "Contacting the authors"}
+@{"Cut note miscellaneous effect command" link "Cut note miscellaneous effect command"}
+@{"Delay note miscellaneous effect command" link "Delay note miscellaneous effect command"}
+@{"Delay pattern miscellaneous effect command" link "Delay pattern miscellaneous effect command"}
+@{"Development and progress" link "Development and progress"}
+@{"Disk operations" link "Disk operations"}
+@{"DYN Samples" link "DYN Samples"}
+@{"Effect commands" link "Effect commands"}
+@{"Fine volumslide down miscellaneous effect command" link "Fine volumslide down miscellaneous effect command"}
+@{"Fine volumslide up miscellaneous effect command" link "Fine volumslide up miscellaneous effect command"}
+@{"Fineslide down miscellaneous effect command" link "Fineslide down miscellaneous effect command"}
+@{"Fineslide up miscellaneous effect command" link "Fineslide up miscellaneous effect command"}
+@{"For the technical minded" link "MENU - For technical minded"}
+@{"Frequently asked questions" link "Frequently asked questions"}
+@{"Gadgets" link "MENU - Gadgets"}
+@{"Glissando control miscellaneous effect command" link "Glissando control miscellaneous effect command"}
+@{"How to create music using PT" link "MENU - How to create music"}
+@{"How to start ProTracker" link "How to start ProTracker"}
+@{"How to use this guide" link "How to use this guide"}
+@{"Introduction" link "MENU - Introduction"}
+@{"Invert loop miscellaneous effect command" link "Invert loop miscellaneous effect command"}
+@{"Keyboard" link "Keyboard"}
+@{"Keyboard percussion" link "Keyboard percussion"}
+@{"Known bugs" link "Known bugs"}
+@{"Legal mush" link "Legal mush"}
+@{"Main screen - Chord editor" link "Main screen - Chord editor"}
+@{"Main screen - Edit gadgets" link "Main screen - Edit gadgets"}
+@{"Main screen - Edit options" link "Main screen - Edit options"}
+@{"Main screen - Filter editor" link "Main screen - Filter editor"}
+@{"Main screen - Sample edit" link "Main screen - Sample edit"}
+@{"Main screen - Sample section" link "Main screen - Sample section"}
+@{"Main screen - Song section" link "Main screen - Song section"}
+@{"Main screen - Various" link "Main screen - Various"}
+@{"Miscellaneous" link "MENU - Miscellaneous"}
+@{"Musical dictionary" link "Musical dictionary"}
+@{"Nice to know" link "MENU - Nice to know"}
+@{"Other sources" link "Other sources"}
+@{"Other tracker-clones" link "Other tracker-clones"}
+@{"Pattern break effect command" link "Pattern break effect command"}
+@{"Pattern loop miscellaneous effect command" link "Pattern loop miscellaneous effect command"}
+@{"Patterns" link "Patterns"}
+@{"Pointer colors" link "Pointer colors"}
+@{"Position jump effect command" link "Position jump effect command"}
+@{"Position table" link "Position table"}
+@{"PPRStrip & PPRSampler" link "PPRStrip & PPRSampler"}
+@{"ProPacker v2.1" link "ProPacker v2.1"}
+@{"ProTracker documentation" link "MAIN"}
+@{"ProTracker IFF song&modules" link "ProTracker IFF song&modules"}
+@{"ProTracker song&module format" link "ProTracker song&module format"}
+@{"Requesters and I/O" link "Requesters and IO"}
+@{"Retrig note miscellaneous effect command" link "Retrig note miscellaneous effect command"}
+@{"Sample offset effect command" link "Sample offset effect command"}
+@{"Sampler - Main" link "Sampler - Main"}
+@{"Sampler - Volume requester" link "Sampler - Volume requester"}
+@{"Samples" link "Samples"}
+@{"Set filter miscellaneous effect command" link "Set filter miscellaneous effect command"}
+@{"Set finetune miscellaneous effect command" link "Set finetune miscellaneous effect command"}
+@{"Set volume effect command" link "Set volume effect command"}
+@{"Setup screen - Flags" link "Setup screen - Flags"}
+@{"Setup screen - Miscellaneous" link "Setup screen - Miscellaneous"}
+@{"Slide down effect command" link "Slide down effect command"}
+@{"Slide up effect command" link "Slide up effect command"}
+@{"Standard paths" link "Standard paths"}
+@{"Thanks and acknowledgements" link "Thanks and acknowledgements"}
+@{"The TrackerTool command" link "The TrackerTool command"}
+@{"Things we will implement" link "Things we will implement"}
+@{"Things we'll never implement" link "Things we'll never implement"}
+@{"Toneportamento and volumeslide effect command" link "Toneportamento and volumeslide effect command"}
+@{"Toneportamento effect command" link "Toneportamento effect command"}
+@{"Tremolo control miscellaneous effect command" link "Tremolo control miscellaneous effect command"}
+@{"Tremolo effect command" link "Tremolo effect command"}
+@{"Using AudioAlloc" link "Using AudioAlloc"}
+@{"Using PTCalcTime" link "Using PTCalcTime"}
+@{"Using SoundFX" link "Using SoundFX"}
+@{"Using the PPR playroutine" link "Using the PPR playroutine"}
+@{"Using the PT playroutine" link "Using the PT playroutine"}
+@{"V0.89 BETA" link "V0.89 BETA"}
+@{"V1.0A" link "V1.0A"}
+@{"V1.0B" link "V1.0B"}
+@{"V1.0C" link "V1.0C"}
+@{"V1.1A" link "V1.1A"}
+@{"V1.1B" link "V1.1B"}
+@{"V1.2" link "V1.2"}
+@{"V1.2C" link "V1.2C"}
+@{"V1.3B" link "V1.3B"}
+@{"V1.8" link "V1.8"}
+@{"V2.0" link "V2.0"}
+@{"V2.1A" link "V2.1A"}
+@{"V2.2A" link "V2.2A"}
+@{"V2.3A" link "V2.3A"}
+@{"V3.00 BETA" link "V3.00 BETA"}
+@{"V3.01" link "V3.01"}
+@{"V3.10 BETA" link "V3.10 BETA"}
+@{"V3.14B" link "V3.14B"}
+@{"V3.15" link "V3.15"}
+@{"Version history" link "Version history"}
+@{"Vibrato and volumeslide effect command" link "Vibrato and volumeslide effect command"}
+@{"Vibrato control miscellaneous effect command" link "Vibrato control miscellaneous effect command"}
+@{"Vibrato effect command" link "Vibrato effect command"}
+@{"Volume slide effect command" link "Volume slide effect command"}
+@{"What is a module?" link "What is a module?"}
+@{"What is DYN samples?" link "What is DYN samples?"}
+@{"What is ProTracker?" link "What is ProTracker?"}
+@{"What should patterns contain?" link "What should patterns contain?"}
+
+Buttons
+
+@{"3 + A" link "Toneportamento and volumeslide effect command" 0}
+@{"4 + A" link "Vibrato and volumeslide effect command" 0}
+@{"accurate timing" link "CIA tempo calculation" 0}
+@{"authors" link "Contacting the authors" 0}
+@{"Break pattern" link "Pattern break effect command" 0}
+@{"C-Command" link "Set volume effect command" 0}
+@{"cheating" link "DYN Samples" 0}
+@{"Chord editor" link "Main screen - Chord editor" 0}
+@{"Chronicles and anecdotes" link "MENU -  Chronicles" 0}
+@{"CIA tempo calculation" link "CIA tempo calculation" 0}
+@{"command 1" link "Slide up effect command" 0}
+@{"Contact me" link "Contacting the authors" 0}
+@{"contact the authors" link "Contacting the authors" 0}
+@{"Contacting the authors" link "Contacting the authors" 0}
+@{"Cut note" link "Cut note miscellaneous effect command" 0}
+@{"Delay note" link "Delay note miscellaneous effect command" 0}
+@{"Delay pattern" link "Delay pattern miscellaneous effect command" 0}
+@{"Disk operation screen" link "Disk operations" 0}
+@{"Disk operations" link "Disk operations" 0}
+@{"disk operations screen" link "Disk operations" 0}
+@{"disk operations," link "Disk operations" 0}
+@{"disk-operations" link "Disk operations" 0}
+@{"disk-operations screen" link "Disk operations" 0}
+@{"DYN sample" link "DYN Samples" 0}
+@{"DYN samples" link "What is DYN samples?" 0}
+@{"DYN sound" link "What is DYN samples?" 0}
+@{"DYN technical chapter" link "DYN Samples" 0}
+@{"DYN-sample" link "What is DYN samples?" 0}
+@{"DYN-samples" link "What is DYN samples?" 0}
+@{"DYN-Samples" link "DYN Samples" 0}
+@{"E4x" link "Vibrato control miscellaneous effect command" 0}
+@{"E7-" link "Tremolo control miscellaneous effect command" 0}
+@{"Edit gadgets" link "Main screen - Edit gadgets" 0}
+@{"Edit options" link "Main screen - Edit options" 0}
+@{"edit-gadgets" link "Main screen - Edit gadgets" 0}
+@{"Effect commands" link "Effect commands" 0}
+@{"effect-command" link "Effect commands" 0}
+@{"Effect-command 9" link "Sample offset effect command" 0}
+@{"F command" link "Adjust tempo effect command" 0}
+@{"Filter editor" link "Main screen - Filter editor" 0}
+@{"Fineslide pitch down" link "Fineslide down miscellaneous effect command" 0}
+@{"Fineslide pitch up" link "Fineslide up miscellaneous effect command" 0}
+@{"Fineslide volume down" link "Fine volumslide down miscellaneous effect command" 0}
+@{"Fineslide volume up" link "Fine volumslide up miscellaneous effect command" 0}
+@{"Flags" link "Setup screen - Flags" 0}
+@{"For the technical minded" link "MENU - For technical minded" 0}
+@{"Frequently asked questions" link "Frequently asked questions" 0}
+@{"Frequently Asked Questions section" link "Frequently asked questions" 0}
+@{"Gadgets" link "MENU - Gadgets" 0}
+@{"Glissando control" link "Glissando control miscellaneous effect command" 0}
+@{"Here" link "Samples/mixed.8svx/main" 0}
+@{"Here" link "Samples/PIANO_echo.8SVX/main" 0}
+@{"here" link "Samples/PIANO_boost.8SVX/main" 0}
+@{"here" link "Samples/PIANO_filter.8SVX/main" 0}
+@{"Here" link "Samples/PIANO_xfade.8SVX/main" 0}
+@{"Here" link "Samples/SEQ_backw.8SVX/main" 0}
+@{"Here" link "Samples/SEQ_ups.8SVX/main" 0}
+@{"Here" link "Samples/PIANO_mod.8SVX/main" 0}
+@{"Here" link "Samples/PIANO_chord.8SVX/main" 0}
+@{"Here" link "Samples/PIANO_vol.8SVX/main" 0}
+@{"How to create music using ProTracker" link "MENU - How to create music" 0}
+@{"How to start ProTracker" link "How to start ProTracker" 0}
+@{"How to use this documentation" link "How to use this guide" 0}
+@{"inform us" link "Contacting the authors" 0}
+@{"Introduction" link "MENU - Introduction" 0}
+@{"Invert loop" link "Invert loop miscellaneous effect command" 0}
+@{"Jump to position" link "Position jump effect command" 0}
+@{"Keyboard percussion" link "Keyboard percussion" 0}
+@{"Keyboard shortcuts" link "Keyboard" 0}
+@{"Known bugs" link "Known bugs" 0}
+@{"launch PT" link "How to start ProTracker" 0}
+@{"Legal mush" link "Legal mush" 0}
+@{"Load ProTracker" link "How to start ProTracker" 0}
+@{"Main" link "Sampler - Main" 0}
+@{"main screen" link "Main screen - Various" 0}
+@{"Miscellaneous" link "MENU - Miscellaneous" 0}
+@{"Miscellaneous" link "Setup screen - Miscellaneous" 0}
+@{"Musical dictionary" link "Musical dictionary" 0}
+@{"Nice to know" link "MENU - Nice to know" 0}
+@{"None/arpeggio" link "Arpeggio effect command" 0}
+@{"normal portamento down" link "Slide down effect command" 0}
+@{"normal portamento up" link "Slide up effect command" 0}
+@{"normal volumeslide" link "Volume slide effect command" 0}
+@{"Other sources accompanying this archive" link "Other sources" 0}
+@{"Pattern loop" link "Pattern loop miscellaneous effect command" 0}
+@{"patternbreak effect command" link "Pattern break effect command" 0}
+@{"Patterns" link "Patterns" 0}
+@{"piano" link "Samples/Piano.8svx/main" 0}
+@{"Pointer colors" link "Pointer colors" 0}
+@{"Position-table" link "Position table" 0}
+@{"PPRStrip and PPRSampler" link "PPRStrip & PPRSampler" 0}
+@{"PPRStrip and the PPRSampler" link "PPRStrip & PPRSampler" 0}
+@{"ProPacker v2.1" link "ProPacker v2.1" 0}
+@{"ProPacker v2.1 by Christian Estrup" link "ProPacker v2.1" 0}
+@{"ProPruner" link "Using the PPR playroutine" 0}
+@{"ProTracker development and progress" link "Development and progress" 0}
+@{"ProTracker IFF song/module format" link "ProTracker IFF song&modules" 0}
+@{"ProTracker song/module format" link "ProTracker song&module format" 0}
+@{"ProTracker version history" link "Version history" 0}
+@{"ProTracker-relevant clones" link "Other tracker-clones" 0}
+@{"replen" link "Main screen - Sample section" 0}
+@{"Requesters and I/O" link "Requesters and IO" 0}
+@{"Retrig note" link "Retrig note miscellaneous effect command" 0}
+@{"Sample edit" link "Main screen - Sample edit" 0}
+@{"Sample edit operations" link "Main screen - Sample edit" 0}
+@{"sample editor" link "Sampler - Main" 0}
+@{"Sample offset" link "Sample offset effect command" 0}
+@{"Sample section" link "Main screen - Sample section" 0}
+@{"sampler" link "Sampler - Main" 0}
+@{"Sampler screen" link "Sampler - Main" 0}
+@{"Samples" link "Samples" 0}
+@{"select instrument" link "Keyboard" 0}
+@{"send them" link "Contacting the authors" 0}
+@{"separate chapter" link "ProPacker v2.1" 0}
+@{"sequence" link "Samples/Seq.8svx/main" 0}
+@{"Set finetune" link "Set finetune miscellaneous effect command" 0}
+@{"Set low-pass filter" link "Set filter miscellaneous effect command" 0}
+@{"Set speed" link "Adjust tempo effect command" 0}
+@{"Set volume" link "Set volume effect command" 0}
+@{"Setup Screen" link "Setup screen - Miscellaneous" 0}
+@{"setup-screen." link "Setup screen - Miscellaneous" 0}
+@{"Slide pitch down" link "Slide down effect command" 0}
+@{"Slide pitch up" link "Slide up effect command" 0}
+@{"slide the volume" link "Volume slide effect command" 0}
+@{"Slide volume" link "Volume slide effect command" 0}
+@{"sliding the volume" link "Volume slide effect command" 0}
+@{"Song section" link "Main screen - Song section" 0}
+@{"speed of the song" link "Adjust tempo effect command" 0}
+@{"Speedy Gonzales, the module ripper" link "Speedy Gonzales.guide/main" 0}
+@{"Standard paths" link "Standard paths" 0}
+@{"starting PT" link "How to start ProTracker" 0}
+@{"Thanks and acknowledgements" link "Thanks and acknowledgements" 0}
+@{"the three gadgets" link "Main screen - Song section" 0}
+@{"The TrackerTool command" link "The TrackerTool command" 0}
+@{"Things we will implement" link "Things we will implement" 0}
+@{"Things we'll never implement" link "Things we'll never implement" 0}
+@{"tone-portamento" link "Toneportamento effect command" 0}
+@{"Toneportamento" link "Toneportamento effect command" 0}
+@{"TrackerTool" link "The TrackerTool command" 0}
+@{"Tremolo" link "Tremolo effect command" 0}
+@{"Tremolo control" link "Tremolo control miscellaneous effect command" 0}
+@{"tunetone setting" link "Setup screen - Miscellaneous" 0}
+@{"Using the AudioAlloc sound allocation routine" link "Using AudioAlloc" 0}
+@{"Using the ProPruner play-routine" link "Using the PPR playroutine" 0}
+@{"Using the ProTracker play-routine" link "Using the PT playroutine" 0}
+@{"Using the PTCalcTime playtime calculator" link "Using PTCalcTime" 0}
+@{"Using the SoundFX sound-replay engine" link "Using SoundFX" 0}
+@{"V0.89 BETA" link "V0.89 BETA" 0}
+@{"V1.0A" link "V1.0A" 0}
+@{"V1.0B" link "V1.0B" 0}
+@{"V1.0C" link "V1.0C" 0}
+@{"V1.1A" link "V1.1A" 0}
+@{"V1.1B" link "V1.1B" 0}
+@{"v1.2" link "V1.2" 0}
+@{"V1.2C" link "V1.2C" 0}
+@{"V1.2D" link "V1.2C" 0}
+@{"V1.2E" link "V1.2C" 0}
+@{"V1.2F" link "V1.2C" 0}
+@{"V1.3A" link "V1.3B" 0}
+@{"v1.3A and v1.3B" link "V1.3B" 0}
+@{"V1.3B" link "V1.3B" 0}
+@{"V1.8" link "V1.8" 0}
+@{"v2.0" link "V2.0" 0}
+@{"v2.1A" link "V2.1A" 0}
+@{"V2.2A" link "V2.2A" 0}
+@{"v2.3a" link "V2.3A" 0}
+@{"v3.0" link "V3.00 BETA" 0}
+@{"V3.00 BETA" link "V3.00 BETA" 0}
+@{"V3.01" link "V3.01" 0}
+@{"v3.10" link "V3.10 BETA" 0}
+@{"V3.10 BETA" link "V3.10 BETA" 0}
+@{"V3.14B" link "V3.14B" 0}
+@{"V3.15" link "V3.15" 0}
+@{"Various" link "Main screen - Various" 0}
+@{"version history" link "Version history" 0}
+@{"Vibrato" link "Vibrato effect command" 0}
+@{"Vibrato control" link "Vibrato control miscellaneous effect command" 0}
+@{"Volume requester" link "Sampler - Volume requester" 0}
+@{"What is a module?" link "What is a module?" 0}
+@{"What is DYN-samples" link "What is DYN samples?" 0}
+@{"What is ProTracker?" link "What is ProTracker?" 0}
+@{"What should patterns contain?" link "What should patterns contain?" 0}
+@endnode

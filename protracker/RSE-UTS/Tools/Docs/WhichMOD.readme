@@ -1,0 +1,27 @@
+WhichMOD V.1.5
+
+Did you always want to know what kind of Amiga tracker modules are in your
+modules collection ? Old Soundtracker, Protracker or Startrekker ?
+Or do you just want an overview which kind of effect commands are used in
+a module ?
+
+Then "WhichMOD" is the right tool for it. It scans the module, prints the
+main characteristics and adds a comment text to the file which format it
+is.
+
+"WhichMOD" detects old 15 instrument modules as well as standard modules
+with 31 instruments. Amiga tracker modules with 6 or 8 channels are also
+detected.
+
+The following Amiga tracker types are supported:
+
+- Ultimate Soundtracker
+- (old) Soundtracker with 15 instruments
+- Soundtracker with 31 instruments
+- Noisetracker
+- Startrekker with 4 or 8 channels
+- Protracker with 64 or 100 patterns or 4, 6 or 8 channels
+
+For a pre-detection it is very useful in conjunction with the converters
+"UST2PT", "OST2PT", "ST2PT" or "NT2PT", also part of this package. If they
+are not, then this is not the original archive we released.
